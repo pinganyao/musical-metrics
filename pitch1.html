@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pitch I</title>
+    <link rel="stylesheet" href="game.css" />
+    <script src="https://unpkg.com/tone@latest/build/Tone.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <a href="index.html" class="logo-link">
+                        <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+                        <h1 class="logo">MUSICAL METRICS</h1>
+                    </a>
+                </div>
+                <nav class="nav">
+                    <a href="dashboard.html" class="nav-link">DASHBOARD</a>
+                    <a href="about.html" class="nav-link">ABOUT</a>
+                </nav>
+                
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <i data-lucide="menu" class="hamburger-icon"></i>
+                </button>
+                
+                <!-- Mobile Menu -->
+                <div class="mobile-menu" id="mobile-menu">
+                    <div class="mobile-menu-links">
+                        <a href="dashboard.html" class="mobile-menu-link">DASHBOARD</a>
+                        <a href="about.html" class="mobile-menu-link">ABOUT</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <h1>Pitch I</h1>
+        <p class="subtitle">Test your pitch detection skills!</p>
+
+        <div class="rules">
+            <p>Listen to a reference note.</p>
+            <p>Then, listen to the same note played slightly out of tune.</p>
+            <p>Enter how many cents the note is sharp (+) or flat (-) compared to the reference.</p>
+            <div class="game-center-container">
+                <button id="continueBtn" class="control-button">Continue</button>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <div class="level-display">Round <span id="levelNum">1</span></div>
+            <div class="round-counter">Round <span id="roundNum">1</span> of 5</div>
+            
+            <div class="note-display" id="noteDisplay" class="hidden"></div>
+            
+            <div class="input-container" style="display: none; flex-direction: column; gap: 20px; justify-content: center; align-items: center; padding: 20px; margin: 20px auto; max-width: 600px;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: center;">
+                        <button id="playReferenceBtn" class="control-button control-button-block play-reference-btn">Play Reference</button>
+                        <button id="playTestBtn" class="control-button control-button-block play-test-btn">Play Test Note</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="text" id="centsInput" placeholder="Enter cents" class="game-input">
+                        <span class="cents-label">cents</span>
+                    </div>
+                    <button id="submitBtn" class="control-button control-button-block">Submit</button>
+                </div>
+                <div id="errorMessage" class="error-message"></div>
+            </div>
+        </div>
+
+        <div class="game-over">
+            <div class="final-score">Final Score: <span id="finalScore">0</span>/100</div>
+            <div class="game-center-align-large-gap">
+                <button id="playAgainBtn" class="control-button">Play Again</button>
+                <button id="homeBtn" class="control-button">Return to home</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img" />
+                    <span class="footer-brand">Musical Metrics</span>
+                </div>
+                <div class="footer-info">
+                    <div class="footer-links">
+                        <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+                            <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo" />
+                            <span class="amtf-text">Athens Music Technology Forum</span>
+                        </a>
+                    </div>
+                    <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Tone.js audio system
+        let currentReferencePlayer = null;
+        let currentTestPlayer = null;
+        let pitchShiftEffect = null;
+
+        // Game state for pitch recognition
+        let level = 1;
+        let maxLevels = 5;
+        let roundScores = []; // Store individual round scores
+        let currentNote = null;
+        let currentAudioFile = null;
+        let actualCentsDeviation = null;
+        let gameActive = false;
+        let gameOver = false;
+
+        // Load audio files - Notes from C3 to C4 (13 notes total) + B2 for downward pitch shifts
+        const noteNames = ['C3', 'C#3', 'D3', 'D#3', 'E3', 'F3', 'F#3', 'G3', 'G#3', 'A3', 'A#3', 'B3', 'C4'];
+        const audioFiles = {
+            'B2': 'sounds/B2.mp3',      // Added for downward pitch shifts from C3
+            'C3': 'sounds/C3.mp3',
+            'C#3': 'sounds/C%233.mp3',
+            'D3': 'sounds/D3.mp3',
+            'D#3': 'sounds/D%233.mp3',
+            'E3': 'sounds/E3.mp3',
+            'F3': 'sounds/F3.mp3',
+            'F#3': 'sounds/F%233.mp3',
+            'G3': 'sounds/G3.mp3',
+            'G#3': 'sounds/G%233.mp3',
+            'A3': 'sounds/A3.mp3',
+            'A#3': 'sounds/A%233.mp3',
+            'B3': 'sounds/B3.mp3',
+            'C4': 'sounds/C4.mp3'
+        };
+
+        // Create mapping for note substitution (for downward pitch shifts)
+        const noteSubstitutionMap = {
+            'C3': { lowerNote: 'B2', centsOffset: 100 },      // C3 -> B2 + 100 cents
+            'C#3': { lowerNote: 'C3', centsOffset: 100 },     // C#3 -> C3 + 100 cents
+            'D3': { lowerNote: 'C#3', centsOffset: 100 },     // D3 -> C#3 + 100 cents
+            'D#3': { lowerNote: 'D3', centsOffset: 100 },     // D#3 -> D3 + 100 cents
+            'E3': { lowerNote: 'D#3', centsOffset: 100 },     // E3 -> D#3 + 100 cents
+            'F3': { lowerNote: 'E3', centsOffset: 100 },      // F3 -> E3 + 100 cents
+            'F#3': { lowerNote: 'F3', centsOffset: 100 },     // F#3 -> F3 + 100 cents
+            'G3': { lowerNote: 'F#3', centsOffset: 100 },     // G3 -> F#3 + 100 cents
+            'G#3': { lowerNote: 'G3', centsOffset: 100 },     // G#3 -> G3 + 100 cents
+            'A3': { lowerNote: 'G#3', centsOffset: 100 },     // A3 -> G#3 + 100 cents
+            'A#3': { lowerNote: 'A3', centsOffset: 100 },     // A#3 -> A3 + 100 cents
+            'B3': { lowerNote: 'A#3', centsOffset: 100 },     // B3 -> A#3 + 100 cents
+            'C4': { lowerNote: 'B3', centsOffset: 100 }       // C4 -> B3 + 100 cents
+        };
+
+        // Initialize Tone.js
+        function initTone() {
+            // Create pitch shift effect with optimized settings for better quality
+            pitchShiftEffect = new Tone.PitchShift({
+                pitch: 0,
+                windowSize: 0.1,      // Smaller window for better quality
+                overlap: 0.5,         // Higher overlap for smoother sound
+                delayTime: 0.01       // Lower delay for less artifacts
+            });
+            pitchShiftEffect.toDestination();
+            
+            console.log('Tone.js initialized with optimized pitch shift settings');
+            console.log('PitchShift effect:', pitchShiftEffect);
+        }
+
+        // DOM elements
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const centsInput = document.getElementById('centsInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const rulesDiv = document.querySelector('.rules');
+        const levelDisplay = document.querySelector('.level-display');
+        const gameOverDiv = document.querySelector('.game-over');
+        const inputContainer = document.querySelector('.input-container');
+        const roundCounter = document.querySelector('.round-counter');
+        const noteDisplay = document.getElementById('noteDisplay');
+        const playReferenceBtn = document.getElementById('playReferenceBtn');
+        const playTestBtn = document.getElementById('playTestBtn');
+        const homeBtn = document.getElementById('homeBtn');
+
+        // Play audio file with optional pitch shifting using Tone.js
+        function playAudioFile(noteName, centsShift = 0) {
+            // Check if Tone.js is initialized
+            if (Tone.context.state !== 'running') {
+                console.error('Tone.js not initialized yet');
+                return null;
+            }
+            
+            // Stop any currently playing audio
+            if (currentReferencePlayer) {
+                currentReferencePlayer.stop();
+                currentReferencePlayer.dispose();
+                currentReferencePlayer = null;
+            }
+            if (currentTestPlayer) {
+                currentTestPlayer.stop();
+                currentTestPlayer.dispose();
+                currentTestPlayer = null;
+            }
+            
+            const audioUrl = audioFiles[noteName];
+            if (!audioUrl) {
+                console.error('Audio file not found for note:', noteName);
+                return null;
+            }
+            
+            console.log(`Playing ${noteName} with ${centsShift} cents shift`);
+            
+            if (centsShift === 0) {
+                // Play reference note at normal pitch
+                currentReferencePlayer = new Tone.Player({
+                    url: audioUrl,
+                    autostart: true,
+                    volume: -6, // Slightly lower volume for better balance
+                    onload: () => {
+                        console.log(`Reference note ${noteName} loaded and playing`);
+                    },
+                    onerror: (error) => {
+                        console.error('Error loading reference note:', error);
+                    }
+                });
+                currentReferencePlayer.toDestination();
+                return currentReferencePlayer;
+            } else {
+                let actualNoteName = noteName;
+                let actualCentsShift = centsShift;
+                let audioUrl = audioFiles[noteName];
+                
+                // For downward shifts, use note substitution instead of pitch shifting down
+                if (centsShift < 0) {
+                    const substitution = noteSubstitutionMap[noteName];
+                    if (substitution) {
+                        // Use the lower note and shift it up by (100 + centsShift) cents
+                        actualNoteName = substitution.lowerNote;
+                        actualCentsShift = substitution.centsOffset + centsShift; // 100 + (-20) = 80 cents
+                        audioUrl = audioFiles[actualNoteName];
+                        
+                        console.log(`Substituting ${noteName} with ${actualNoteName} and shifting up by ${actualCentsShift} cents`);
+                        console.log(`This creates the effect of ${noteName} shifted down by ${Math.abs(centsShift)} cents`);
+                    } else {
+                        console.error('No substitution available for note:', noteName);
+                        return null;
+                    }
+                } else {
+                    // For upward shifts, use the original note
+                    console.log(`Using original note ${noteName} shifted up by ${centsShift} cents`);
+                }
+                
+                if (!audioUrl) {
+                    console.error('Audio file not found for note:', actualNoteName);
+                    return null;
+                }
+                
+                // Limit upward shift range
+                const limitedCentsShift = Math.max(0, Math.min(50, actualCentsShift));
+                if (limitedCentsShift !== actualCentsShift) {
+                    console.log(`Limited upward shift from ${actualCentsShift} to ${limitedCentsShift} cents`);
+                }
+                
+                // Convert cents to semitones for Tone.js
+                const semitones = limitedCentsShift / 100;
+                console.log(`Setting pitch shift to ${semitones} semitones (${limitedCentsShift} cents)`);
+                
+                // Create a new pitch shift effect with standard parameters for upward shifts
+                const pitchShiftParams = {
+                    pitch: semitones,
+                    windowSize: 0.1,
+                    overlap: 0.5,
+                    delayTime: 0.01
+                };
+                
+                const playerPitchShift = new Tone.PitchShift(pitchShiftParams);
+                playerPitchShift.toDestination();
+                
+                // Play test note with pitch shifting
+                currentTestPlayer = new Tone.Player({
+                    url: audioUrl,
+                    autostart: true,
+                    volume: -6, // Slightly lower volume for better balance
+                    onload: () => {
+                        console.log(`Test note ${actualNoteName} loaded with ${limitedCentsShift} cents shift`);
+                        console.log(`Effective pitch: ${noteName} ${centsShift > 0 ? '+' : ''}${centsShift} cents`);
+                    },
+                    onerror: (error) => {
+                        console.error('Error loading test note:', error);
+                    }
+                });
+                
+                // Connect player through the pitch shift effect
+                currentTestPlayer.connect(playerPitchShift);
+                console.log('Test player connected to pitch shift effect');
+                
+                // Store reference to dispose later
+                currentTestPlayer._pitchShift = playerPitchShift;
+                
+                return currentTestPlayer;
+            }
+        }
+
+        // Convert cents to frequency multiplier
+        function centsToFrequencyMultiplier(cents) {
+            return Math.pow(2, cents / 1200);
+        }
+
+        function startRound() {
+            inputContainer.style.display = 'none';
+            levelDisplay.style.display = 'block';
+            document.getElementById('levelNum').textContent = level;
+            document.getElementById('roundNum').textContent = level;
+            
+            // Clear the note display to prevent previous round text from showing
+            noteDisplay.textContent = '';
+            noteDisplay.style.display = 'none';
+            noteDisplay.classList.remove('show', 'playing');
+            
+            setTimeout(() => {
+                levelDisplay.style.display = 'none';
+                roundCounter.style.display = 'block';
+                
+                // Choose random note from C3 to C4
+                currentNote = noteNames[Math.floor(Math.random() * noteNames.length)];
+                
+                // Generate random cents deviation with wider range now that we have better quality
+                // -50 to -1 for downward shifts (using note substitution), +1 to +50 for upward shifts
+                const isDownward = Math.random() < 0.5;
+                if (isDownward) {
+                    actualCentsDeviation = Math.floor(Math.random() * 50) - 50; // -50 to -1
+                } else {
+                    actualCentsDeviation = Math.floor(Math.random() * 50) + 1; // +1 to +50
+                }
+                
+                // Display the reference note card
+                noteDisplay.textContent = `Reference Note: ${currentNote}`;
+                noteDisplay.style.display = 'block';
+                
+                console.log(`Round ${level}: ${currentNote}`);
+                console.log(`Test note will be ${actualCentsDeviation} cents from reference`);
+                
+                // Show the note display
+                setTimeout(() => {
+                    noteDisplay.classList.add('show');
+                }, 100);
+                
+                // Play reference note automatically with visual indication
+                setTimeout(() => {
+                    noteDisplay.classList.add('playing');
+                    currentReferencePlayer = playAudioFile(currentNote, 0);
+                    
+                    // Remove playing indication after audio duration (approximately 2 seconds)
+                    setTimeout(() => {
+                        noteDisplay.classList.remove('playing');
+                    }, 2000);
+                }, 500);
+                
+                // Show input container after reference note animation completes
+                setTimeout(() => {
+                    console.log('Showing input container');
+                    inputContainer.style.display = 'flex';
+                    console.log('Input container display:', inputContainer.style.display);
+                    centsInput.focus();
+                }, 2000); // Wait for reference note to play and slide-in animation
+                
+            }, 2000);
+        }
+
+        function validateInput(input) {
+            const value = input.trim();
+            if (value === '') {
+                return false;
+            }
+            
+            // Check if it's a valid integer
+            const num = parseInt(value, 10);
+            if (isNaN(num) || num.toString() !== value) {
+                return false;
+            }
+            
+            // Check if it's within reasonable range (-50 to +50 cents)
+            if (num < -50 || num > 50) {
+                return false;
+            }
+            
+            return true;
+        }
+
+        function checkAnswer() {
+            const userInput = centsInput.value.trim();
+            
+            if (!validateInput(userInput)) {
+                errorMessage.textContent = 'Please enter a valid integer between -50 and 50';
+                errorMessage.style.display = 'block';
+                centsInput.focus();
+                return;
+            }
+            
+            // Stop any playing audio
+            if (currentReferencePlayer) {
+                currentReferencePlayer.stop();
+                currentReferencePlayer.dispose();
+                currentReferencePlayer = null;
+            }
+            if (currentTestPlayer) {
+                currentTestPlayer.stop();
+                if (currentTestPlayer._pitchShift) {
+                    currentTestPlayer._pitchShift.dispose();
+                }
+                currentTestPlayer.dispose();
+                currentTestPlayer = null;
+            }
+            
+            const userCents = parseInt(userInput, 10);
+            const difference = Math.abs(actualCentsDeviation - userCents);
+            const roundScore = Math.max(0, 100 - difference);
+            
+            roundScores.push(roundScore);
+            
+            console.log(`Actual: ${actualCentsDeviation} cents, Guessed: ${userCents} cents, Score: ${roundScore}`);
+            
+            // Clear input and error message
+            centsInput.value = '';
+            errorMessage.style.display = 'none';
+            
+            // Move to next level
+            level++;
+            
+            // Check if we've completed all 5 rounds
+            if (level > maxLevels) {
+                gameActive = false;
+                gameOver = true;
+                
+                // Calculate final score
+                const averageScore = roundScores.reduce((sum, score) => sum + score, 0) / roundScores.length;
+                const finalScore = Math.round(averageScore);
+                
+                document.getElementById('finalScore').textContent = finalScore;
+                gameOverDiv.style.display = 'block';
+                playAgainBtn.style.display = 'block';
+                homeBtn.style.display = 'block';
+                inputContainer.style.display = 'none';
+                roundCounter.style.display = 'none';
+                noteDisplay.style.display = 'none';
+                noteDisplay.classList.remove('show', 'playing'); // Reset animation
+            } else {
+                startRound();
+            }
+        }
+
+        function startGame() {
+            level = 1;
+            roundScores = [];
+            gameActive = false;
+            gameOver = false;
+            currentNote = null;
+            actualCentsDeviation = null;
+            
+            // Stop any playing audio
+            if (currentReferencePlayer) {
+                currentReferencePlayer.stop();
+                currentReferencePlayer.dispose();
+                currentReferencePlayer = null;
+            }
+            if (currentTestPlayer) {
+                currentTestPlayer.stop();
+                if (currentTestPlayer._pitchShift) {
+                    currentTestPlayer._pitchShift.dispose();
+                }
+                currentTestPlayer.dispose();
+                currentTestPlayer = null;
+            }
+            
+            // Clear input and error message
+            if (centsInput) centsInput.value = '';
+            if (errorMessage) errorMessage.style.display = 'none';
+            
+            // Show rules with continue button (with safety checks)
+            console.log('startGame called - DOM elements:', {
+                rulesDiv: !!rulesDiv,
+                continueBtn: !!continueBtn,
+                playAgainBtn: !!playAgainBtn,
+                gameOverDiv: !!gameOverDiv
+            });
+            
+            if (rulesDiv) rulesDiv.style.display = 'block';
+            if (playAgainBtn) playAgainBtn.style.display = 'none';
+            if (gameOverDiv) gameOverDiv.style.display = 'none';
+            if (homeBtn) homeBtn.style.display = 'none';
+            if (continueBtn) {
+                continueBtn.style.display = 'block';
+                console.log('Continue button should be visible now');
+            } else {
+                console.error('Continue button not found!');
+            }
+            if (inputContainer) inputContainer.style.display = 'none';
+            if (roundCounter) roundCounter.style.display = 'none';
+            if (noteDisplay) {
+                noteDisplay.style.display = 'none';
+                noteDisplay.classList.remove('show', 'playing'); // Reset animation
+            }
+        }
+
+        // Event listeners
+        continueBtn.addEventListener('click', async () => {
+            // Initialize Tone.js on user interaction
+            try {
+                await Tone.start();
+                initTone();
+                console.log('Tone.js initialized successfully');
+            } catch (error) {
+                console.error('Error initializing Tone.js:', error);
+            }
+            
+            rulesDiv.style.display = 'none';
+            continueBtn.style.display = 'none';
+            gameActive = true;
+            startRound();
+        });
+
+        // Handle Enter key press in input field
+        centsInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && gameActive) {
+                checkAnswer();
+            }
+        });
+
+        // Handle submit button click
+        submitBtn.addEventListener('click', () => {
+            if (gameActive) {
+                checkAnswer();
+            }
+        });
+
+        playAgainBtn.addEventListener('click', startGame);
+
+        homeBtn.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        // Play reference note
+        playReferenceBtn.addEventListener('click', () => {
+            console.log('Play Reference button clicked');
+            if (currentNote && gameActive) {
+                console.log(`Playing reference note: ${currentNote}`);
+                currentReferencePlayer = playAudioFile(currentNote, 0);
+            } else {
+                console.log('Cannot play reference note - game not active or no note selected');
+            }
+        });
+
+        // Play test note
+        playTestBtn.addEventListener('click', () => {
+            console.log('Play Test Note button clicked');
+            console.log('Current state:', {
+                currentNote,
+                actualCentsDeviation,
+                gameActive,
+                pitchShiftEffect: !!pitchShiftEffect
+            });
+            
+            if (currentNote && actualCentsDeviation !== null && gameActive) {
+                console.log(`Playing test note: ${currentNote} with ${actualCentsDeviation} cents`);
+                console.log(`Pitch in semitones: ${(actualCentsDeviation / 100).toFixed(2)}`);
+                
+                if (!pitchShiftEffect) {
+                    console.error('PitchShift effect not initialized!');
+                    return;
+                }
+                
+                currentTestPlayer = playAudioFile(currentNote, actualCentsDeviation);
+            } else {
+                console.log('Cannot play test note - missing data:', {
+                    currentNote,
+                    actualCentsDeviation,
+                    gameActive
+                });
+            }
+        });
+
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            // Don't initialize Tone.js yet - wait for user interaction
+            // Delay startGame to ensure DOM is fully ready
+            setTimeout(() => {
+                startGame(); // Show rules with continue button on page load
+            }, 100);
+        });
+
+        // Prevent input container from showing initially
+        inputContainer.style.display = 'none';
+        
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Mobile menu toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('active');
+                    mobileMenuToggle.classList.toggle('active');
+                });
+                
+                // Close mobile menu when clicking on a link
+                const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+                mobileMenuLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    });
+                });
+                
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Musical Metrics</title>
+    <link rel="icon" type="image/svg+xml" href="music-logo.svg?v=1">
+    <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
+    <link rel="stylesheet" href="globals.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <a href="index.html" class="logo-link">
+                        <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+                        <h1 class="logo">MUSICAL METRICS</h1>
+                    </a>
+                </div>
+                
+                <nav class="nav">
+                    <a href="dashboard.html" class="nav-link active">DASHBOARD</a>
+                    <a href="about.html" class="nav-link">ABOUT</a>
+                </nav>
+                
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <i data-lucide="menu" class="hamburger-icon"></i>
+                </button>
+                
+                <!-- Mobile Menu -->
+                <div class="mobile-menu" id="mobile-menu">
+                    <div class="mobile-menu-links">
+                        <a href="dashboard.html" class="mobile-menu-link active">DASHBOARD</a>
+                        <a href="about.html" class="mobile-menu-link">ABOUT</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- User Profile Card -->
+        <div class="dashboard-profile-card">
+            <div class="dashboard-profile-content">
+                <div class="dashboard-profile-section">
+                    <div class="dashboard-profile-label">Username</div>
+                    <div class="dashboard-profile-username">Guest user</div>
+                </div>
+                
+                <div class="dashboard-profile-section">
+                    <div class="dashboard-profile-label">Your overall score</div>
+                    <div class="dashboard-profile-score">?</div>
+                </div>
+                
+                <div class="dashboard-profile-section">
+                    <div class="dashboard-profile-label">You are stronger than</div>
+                    <div class="dashboard-profile-percentile">?% of users</div>
+                </div>
+                
+                <div class="dashboard-profile-section">
+                    <div class="dashboard-profile-label">Joined</div>
+                    <div class="dashboard-profile-joined">12 seconds ago</div>
+                    <a href="#" class="dashboard-profile-permalink">Sign out</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tests Table Card -->
+        <div class="dashboard-tests-card">
+            <div class="dashboard-tests-header">
+                <h2 class="dashboard-tests-title">Musical Tests</h2>
+            </div>
+            
+            <div class="dashboard-tests-table">
+                <div class="dashboard-tests-table-header">
+                    <div class="dashboard-tests-table-cell header-cell">Test</div>
+                    <div class="dashboard-tests-table-cell header-cell">Actions</div>
+                    <div class="dashboard-tests-table-cell header-cell">
+                        Score
+                        <i data-lucide="info" class="info-icon"></i>
+                    </div>
+                    <div class="dashboard-tests-table-cell header-cell">
+                        Percentile
+                        <i data-lucide="info" class="info-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Pitch Tests -->
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Melody I</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Melody II</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Melody III</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <!-- Interval Tests -->
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Interval I</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Interval II</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <!-- Harmony Tests -->
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Harmony I</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Harmony II</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Harmony III</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <!-- Tempo Tests -->
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Tempo I</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Tempo II</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <!-- Pitch and Rhythm Tests -->
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Pitch I</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Rhythm I</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img">
+                    <span class="footer-brand">Musical Metrics</span>
+                </div>
+                <div class="footer-info">
+                    <div class="footer-links">
+                        <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+                            <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo">
+                            <span class="amtf-text">Athens Music Technology Forum</span>
+                        </a>
+                    </div>
+                    <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Mobile menu toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('active');
+                    mobileMenuToggle.classList.toggle('active');
+                });
+                
+                // Close mobile menu when clicking on a link
+                const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+                mobileMenuLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    });
+                });
+                
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    }
+                });
+            }
+        });
+
+        // Add click handlers for play buttons
+        document.querySelectorAll('.play-button').forEach((button, index) => {
+            button.addEventListener('click', () => {
+                const testNames = [
+                    'melody1.html',
+                    'melody2.html', 
+                    'melody3.html',
+                    'interval1.html',
+                    'interval2.html',
+                    'harmony1.html',
+                    'harmony2.html',
+                    'harmony3.html',
+                    'tempo1.html',
+                    'tempo2.html',
+                    'pitch1.html',
+                    'rhythm1.html'
+                ];
+                
+                if (testNames[index]) {
+                    window.location.href = testNames[index];
+                }
+            });
+        });
+
+        // Add click handlers for stats buttons
+        document.querySelectorAll('.stats-button').forEach((button) => {
+            button.addEventListener('click', () => {
+                alert('Stats feature coming soon!');
+            });
+        });
+    </script>
+</body>
+</html>
