@@ -1,4 +1,4 @@
-> **About Musical Metrics**
+<h1>About Musical Metrics</h1>
 
 Musical Metrics is a set of 12 simple and creative music games that test the players' listening ability in various aspects of music and hearing, examining a diverse range of listening skills such as relative pitch and rhythmic recognition. The games are part of an ongoing research to explore hearing ability as a major component of a musician's progression.
 
@@ -6,3 +6,4 @@ The games are of various difficulty levels. Some are beginner-friendly and are a
 
 Musical Metrics isn't only a useful tool for testing players' hearing ability, but also a great method of ear-training, all while having fun, whether that's competing with friends and family, or going against other musicians.
 
+You can enjoy the full game experience at [musicalmetrics.xyz](url).
