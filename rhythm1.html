@@ -1,503 +1,391 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rhythm I</title>
-    <link rel="stylesheet" href="game.css" />
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rhythm I</title>
+  <link rel="stylesheet" href="game.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <div class="header-content">
-                <div class="logo-container">
-                    <a href="index.html" class="logo-link">
-                        <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
-                        <h1 class="logo">MUSICAL METRICS</h1>
-                    </a>
-                </div>
-                <nav class="nav">
-                    <a href="dashboard.html" class="nav-link">DASHBOARD</a>
-                    <a href="about.html" class="nav-link">ABOUT</a>
-                </nav>
-                
-                <!-- Mobile Menu Toggle -->
-                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                    <i data-lucide="menu" class="hamburger-icon"></i>
-                </button>
-                
-                <!-- Mobile Menu -->
-                <div class="mobile-menu" id="mobile-menu">
-                    <div class="mobile-menu-links">
-                        <a href="dashboard.html" class="mobile-menu-link">DASHBOARD</a>
-                        <a href="about.html" class="mobile-menu-link">ABOUT</a>
-                    </div>
-                </div>
-            </div>
+  <header class="header">
+    <div class="header-container">
+      <div class="header-content">
+        <div class="logo-container">
+          <a href="index.html" class="logo-link">
+            <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+            <h1 class="logo">MUSICAL METRICS</h1>
+          </a>
         </div>
-    </header>
+        <nav class="nav">
+          <a href="dashboard.html" class="nav-link">DASHBOARD</a>
+          <a href="about.html" class="nav-link">ABOUT</a>
+        </nav>
 
-    <div class="main-content">
-        <h1>Rhythm I</h1>
-        <p class="subtitle">Test your rhythmic accuracy!</p>
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+          <i data-lucide="menu" class="hamburger-icon"></i>
+        </button>
 
-        <div class="rules">
-            <p>Listen to a 4-beat rhythmic pattern, then tap it back accurately.</p>
-            <p>Each round plays a random rhythm at 70 BPM.</p>
-            <p>Tap the rhythm using the tap area or spacebar - you may tap at a different speed.</p>
-            <p>Your score is based on how accurately you maintain the relative timing between beats.</p>
-            <div class="game-center-container">
-                <button id="continueBtn" class="control-button">Continue</button>
-            </div>
+        <div class="mobile-menu" id="mobile-menu">
+          <div class="mobile-menu-links">
+            <a href="dashboard.html" class="mobile-menu-link">DASHBOARD</a>
+            <a href="about.html" class="mobile-menu-link">ABOUT</a>
+          </div>
         </div>
+      </div>
+    </div>
+  </header>
 
-        <div class="game-container">
-            <div class="level-display">Round <span id="levelNum">1</span></div>
-            <div class="round-counter">Round <span id="roundNum">1</span> of 5</div>
-            
-            <div class="beat-indicator hidden" id="beatIndicator"></div>
-            
-            <div class="ready-display">
-                <h2 class="ready-title">Ready?</h2>
-                <p class="ready-text">Tap the rhythm you just heard</p>
-            </div>
-            
-            <div class="tap-container game-center-column-large-gap">
-                <div class="tap-area">
-                    <span class="tap-text">TAP HERE</span>
-                </div>
-                <div class="tap-instructions">
-                    <p>Click here or press SPACEBAR to tap</p>
-                    <p>Tap the rhythm pattern you heard</p>
-                    <p id="tapCounter" class="tap-counter"></p>
-                </div>
-            </div>
+  <div class="main-content">
+    <h1>Rhythm I</h1>
+    <p class="subtitle">Test your rhythmic accuracy!</p>
 
-            <div class="game-center-align-large-gap">
-                <button id="playAgainBtn" class="control-button" class="hidden">Play Again</button>
-            </div>
-        </div>
-
-        <div class="game-over">
-            <div class="final-score">Final Score: <span id="finalScore">0</span>/100</div>
-            <div class="game-center-align-large-gap">
-                <button id="playAgainBtn" class="control-button">Play Again</button>
-                <button id="homeBtn" class="control-button">Return to home</button>
-            </div>
-        </div>
+    <div class="rules">
+      <p>Listen to a 4-beat rhythmic pattern, then tap it back accurately.</p>
+      <p>Each round plays a random rhythm at 70 BPM.</p>
+      <p>Tap the rhythm using the tap area or spacebar - you may tap at a different speed.</p>
+      <p>Your score is based on how accurately you maintain the relative timing between beats.</p>
+      <div class="game-center-container">
+        <button id="continueBtn" class="control-button">Continue</button>
+      </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img" />
-                    <span class="footer-brand">Musical Metrics</span>
-                </div>
-                <div class="footer-info">
-                    <div class="footer-links">
-                        <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
-                            <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo" />
-                            <span class="amtf-text">Athens Music Technology Forum</span>
-                        </a>
-                    </div>
-                    <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
-                </div>
-            </div>
+    <div class="game-container">
+      <div class="level-display">Round <span id="levelNum">1</span></div>
+      <div class="round-counter">Round <span id="roundNum">1</span> of 5</div>
+
+      <div class="beat-indicator hidden" id="beatIndicator"></div>
+
+      <div class="ready-display">
+        <h2 class="ready-title">Ready?</h2>
+        <p class="ready-text">Tap the rhythm you just heard</p>
+      </div>
+
+      <div class="tap-container game-center-column-large-gap">
+        <div class="tap-area">
+          <span class="tap-text">TAP HERE</span>
         </div>
-    </footer>
+        <div class="tap-instructions">
+          <p>Click here or press SPACEBAR to tap</p>
+          <p>Tap the rhythm pattern you heard</p>
+          <p id="tapCounter" class="tap-counter"></p>
+        </div>
+      </div>
+    </div>
 
-    <script>
-        // Load metronome audio file
-        const metronomeAudio = new Audio('sounds/metronome.mp3');
-        metronomeAudio.load();
+    <div class="game-over">
+      <div class="final-score">Final Score: <span id="finalScore">0</span>/100</div>
+      <div class="game-center-align-large-gap">
+        <button id="playAgainBtn" class="control-button">Play Again</button>
+        <button id="homeBtn" class="control-button">Return to home</button>
+      </div>
+    </div>
+  </div>
 
-        // Game state for rhythm tapping
-        let level = 1;
-        let currentRound = 1; // Separate round counter from level
-        let maxLevels = 5;
-        let roundScores = []; // Store individual round scores
-        let currentPattern = null; // Store the current rhythm pattern
-        let gameActive = false;
-        let gameOver = false;
-        
-        // Tap tempo state
-        let tapTimes = []; // Store tap timestamps
-        let isTapping = false;
-        let tapCountdown = null;
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img" />
+          <span class="footer-brand">Musical Metrics</span>
+        </div>
+        <div class="footer-info">
+          <div class="footer-links">
+            <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+              <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo" />
+              <span class="amtf-text">Athens Music Technology Forum</span>
+            </a>
+          </div>
+          <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
 
-        // Rhythm pattern types
-        const RHYTHM_TYPES = [
-            { name: 'two quavers', subdivisions: 2, timing: [0.5, 0.5] },
-            { name: 'triplet', subdivisions: 3, timing: [1/3, 1/3, 1/3] },
-            { name: 'four semiquavers', subdivisions: 4, timing: [0.25, 0.25, 0.25, 0.25] },
-            { name: 'sextuplet', subdivisions: 6, timing: [1/6, 1/6, 1/6, 1/6, 1/6, 1/6] }
-        ];
+  <script>
+    const metronomeAudio = new Audio('sounds/metronome.mp3');
+    metronomeAudio.load();
 
-        // DOM elements
-        const playAgainBtn = document.getElementById('playAgainBtn');
-        const continueBtn = document.getElementById('continueBtn');
-        const rulesDiv = document.querySelector('.rules');
-        const levelDisplay = document.querySelector('.level-display');
-        const gameOverDiv = document.querySelector('.game-over');
-        const readyDisplay = document.querySelector('.ready-display');
-        const tapContainer = document.querySelector('.tap-container');
-        const tapArea = document.querySelector('.tap-area');
-        const roundCounter = document.querySelector('.round-counter');
-        const beatIndicator = document.getElementById('beatIndicator');
-        const homeBtn = document.getElementById('homeBtn');
+    let level = 1;
+    let currentRound = 1;
+    let maxLevels = 5;
+    let roundScores = [];
+    let currentPattern = null;
+    let gameActive = false;
+    let gameOver = false;
 
-        function generateRandomPattern() {
-            const pattern = [];
-            for (let beat = 0; beat < 4; beat++) {
-                const randomType = RHYTHM_TYPES[Math.floor(Math.random() * RHYTHM_TYPES.length)];
-                pattern.push({
-                    type: randomType,
-                    beat: beat + 1
-                });
-            }
-            return pattern;
-        }
+    let tapTimes = [];
+    let isTapping = false;
 
+    const RHYTHM_TYPES = [
+      { name: 'two quavers', subdivisions: 2, timing: [0.5, 0.5] },
+      { name: 'triplet', subdivisions: 3, timing: [1 / 3, 1 / 3, 1 / 3] },
+      { name: 'four semiquavers', subdivisions: 4, timing: [0.25, 0.25, 0.25, 0.25] },
+      { name: 'sextuplet', subdivisions: 6, timing: [1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6] }
+    ];
 
-        function playPattern() {
-            tapContainer.style.display = 'none';
-            readyDisplay.style.display = 'none';
-            levelDisplay.style.display = 'block';
-            document.getElementById('levelNum').textContent = currentRound;
-            document.getElementById('roundNum').textContent = currentRound;
-            
-            // Generate random pattern for this round
-            currentPattern = generateRandomPattern();
-            
-            setTimeout(() => {
-                levelDisplay.style.display = 'none';
-                roundCounter.style.display = 'block';
-                beatIndicator.style.display = 'block';
-                
-                console.log('Playing rhythm pattern:', currentPattern);
-                
-                // Play the pattern at 70 BPM
-                const bpm = 70;
-                const beatDuration = 60000 / bpm; // Duration of one beat in ms
-                
-                let totalTime = 0;
-                let audioTimeout;
-                
-                function playNextSubdivision(beatIndex, subdivisionIndex) {
-                    if (beatIndex >= currentPattern.length) {
-                        // Pattern complete - show tap interface immediately
-                        beatIndicator.style.display = 'none';
-                        showTapInterface();
-                        return;
-                    }
-                    
-                    const beat = currentPattern[beatIndex];
-                    const subdivision = beat.type.timing[subdivisionIndex];
-                    const subdivisionDuration = subdivision * beatDuration;
-                    
-                    // Play metronome sound
-                    metronomeAudio.currentTime = 0;
-                    metronomeAudio.play();
-                    
-                    // Visual beat indicator
-                    beatIndicator.classList.add('active');
-                    setTimeout(() => {
-                        beatIndicator.classList.remove('active');
-                    }, 100);
-                    
-                    // Schedule next subdivision
-                    audioTimeout = setTimeout(() => {
-                        if (subdivisionIndex + 1 >= beat.type.subdivisions) {
-                            // Move to next beat
-                            playNextSubdivision(beatIndex + 1, 0);
-                        } else {
-                            // Next subdivision in same beat
-                            playNextSubdivision(beatIndex, subdivisionIndex + 1);
-                        }
-                    }, subdivisionDuration);
-                }
-                
-                // Start playing pattern
-                playNextSubdivision(0, 0);
-                
-            }, 2000);
-        }
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const continueBtn = document.getElementById('continueBtn');
+    const rulesDiv = document.querySelector('.rules');
+    const levelDisplay = document.querySelector('.level-display');
+    const gameOverDiv = document.querySelector('.game-over');
+    const readyDisplay = document.querySelector('.ready-display');
+    const tapContainer = document.querySelector('.tap-container');
+    const tapArea = document.querySelector('.tap-area');
+    const roundCounter = document.querySelector('.round-counter');
+    const beatIndicator = document.getElementById('beatIndicator');
+    const homeBtn = document.getElementById('homeBtn');
 
-        function showTapInterface() {
-            // Show tap interface immediately after pattern finishes
-            tapContainer.style.display = 'flex';
-            startTapPhase();
-        }
+    function generateRandomPattern() {
+      const pattern = [];
+      for (let beat = 0; beat < 4; beat++) {
+        const randomType = RHYTHM_TYPES[Math.floor(Math.random() * RHYTHM_TYPES.length)];
+        pattern.push({ type: randomType, beat: beat + 1 });
+      }
+      return pattern;
+    }
 
-        function startTapPhase() {
-            tapTimes = [];
-            isTapping = false;
-            
-            // Reset tap area styling
-            tapArea.classList.remove('tapping');
-            
-            // Show expected number of taps
-            const expectedTaps = currentPattern.reduce((sum, beat) => sum + beat.type.subdivisions, 0);
-            const tapCounter = document.getElementById('tapCounter');
-            tapCounter.textContent = `Taps: 0 / ${expectedTaps}`;
-            
-            // Start tap phase - let user tap the rhythm
-            console.log('Tap phase started, expected taps:', expectedTaps);
-        }
+    function expectedTapCount(pattern) {
+      return pattern.reduce((sum, beat) => sum + beat.type.subdivisions, 0);
+    }
 
-        function recordTap() {
-            // Check if we've already completed this round
-            const expectedTaps = currentPattern.reduce((sum, beat) => sum + beat.type.subdivisions, 0);
-            if (tapTimes.length >= expectedTaps) {
-                return; // Don't record more taps than needed
-            }
-            
-            if (!isTapping) {
-                isTapping = true;
-                tapArea.classList.add('tapping');
-            }
-            
-            const currentTime = Date.now();
-            tapTimes.push(currentTime);
-            
-            // Play audio feedback for tap
-            metronomeAudio.currentTime = 0;
-            metronomeAudio.play();
-            
-            // Visual feedback for tap
-            tapArea.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                tapArea.style.transform = 'scale(1)';
-            }, 100);
-            
-            console.log(`Tap recorded at ${currentTime}, total taps: ${tapTimes.length}`);
-            
-            // Update tap counter display
-            const tapCounter = document.getElementById('tapCounter');
-            tapCounter.textContent = `Taps: ${tapTimes.length} / ${expectedTaps}`;
-            
-            console.log(`Expected taps: ${expectedTaps}, actual taps: ${tapTimes.length}`);
-            
-            if (tapTimes.length >= expectedTaps) {
-                // Immediately move to next round
-                finishTapPhase();
-            }
-        }
+    function playPattern() {
+      tapContainer.style.display = 'none';
+      readyDisplay.style.display = 'none';
+      levelDisplay.style.display = 'block';
+      document.getElementById('levelNum').textContent = currentRound;
+      document.getElementById('roundNum').textContent = currentRound;
 
-        function finishTapPhase() {
-            tapArea.classList.remove('tapping');
-            
-            // Calculate rhythm accuracy
-            const score = calculateRhythmScore();
-            roundScores.push(score);
-            
-            console.log(`Round ${currentRound} score: ${score.accuracy}/100`);
-            if (score.message) {
-                console.log(score.message);
-            }
-            
-            // Move to next round
-            currentRound++;
-            level = currentRound; // Keep level in sync for game logic
-            
-            // Check if we've completed all 5 rounds
-            if (currentRound > maxLevels) {
-                gameActive = false;
-                gameOver = true;
-                
-                // Calculate final score
-                const averageScore = roundScores.reduce((sum, score) => sum + score.accuracy, 0) / roundScores.length;
-                const finalScore = Math.round(averageScore);
-                
-                document.getElementById('finalScore').textContent = finalScore;
-                gameOverDiv.style.display = 'block';
-                playAgainBtn.style.display = 'block';
-                homeBtn.style.display = 'block';
-                tapContainer.style.display = 'none';
-                roundCounter.style.display = 'none';
-            } else {
-                setTimeout(() => {
-                    playPattern();
-                }, 1000);
-            }
-        }
+      currentPattern = generateRandomPattern();
 
-        function calculateRhythmScore() {
-            if (tapTimes.length < 3) {
-                return { accuracy: 0, message: 'Not enough taps recorded (need at least 3)' };
-            }
-            
-            // Build expected intervals for the entire pattern
-            const expectedIntervals = [];
-            currentPattern.forEach(beat => {
-                beat.type.timing.forEach(subdivision => {
-                    expectedIntervals.push(subdivision);
-                });
-            });
-            
-            // Calculate expected ratios using first interval as reference
-            const expectedRatios = [];
-            if (expectedIntervals.length > 1) {
-                const firstInterval = expectedIntervals[0];
-                for (let i = 1; i < expectedIntervals.length; i++) {
-                    const ratio = expectedIntervals[i] / firstInterval;
-                    expectedRatios.push(ratio);
-                }
-            }
-            
-            // Calculate actual timing ratios from user's taps using first two taps as reference
-            const actualRatios = [];
-            const normalizedTapTimes = tapTimes.map(time => time - tapTimes[0]); // Start from 0
-            
-            // Calculate intervals between consecutive taps
-            const actualIntervals = [];
-            for (let i = 1; i < normalizedTapTimes.length; i++) {
-                const interval = normalizedTapTimes[i] - normalizedTapTimes[i-1];
-                actualIntervals.push(interval);
-            }
-            
-            // Calculate ratios using first interval as reference
-            if (actualIntervals.length > 1) {
-                const firstInterval = actualIntervals[0];
-                for (let i = 1; i < actualIntervals.length; i++) {
-                    const ratio = actualIntervals[i] / firstInterval;
-                    actualRatios.push(ratio);
-                }
-            }
-            
-            // Compare expected vs actual ratios
-            if (expectedRatios.length === 0 || actualRatios.length === 0) {
-                return { accuracy: 0, message: 'Unable to calculate ratios' };
-            }
-            
-            let totalRatioError = 0;
-            const maxRatios = Math.min(expectedRatios.length, actualRatios.length);
-            
-            for (let i = 0; i < maxRatios; i++) {
-                const expectedRatio = expectedRatios[i];
-                const actualRatio = actualRatios[i];
-                const ratioError = Math.abs(expectedRatio - actualRatio);
-                totalRatioError += ratioError;
-            }
-            
-            // Calculate average ratio error
-            const averageRatioError = totalRatioError / maxRatios;
-            
-            // Convert ratio error to score (lower error = higher score)
-            // Perfect ratio match (0 error) = 100 points
-            // Very bad ratio match (1+ error) = 0 points
-            const maxAllowedRatioError = 1.0; // 100% ratio error
-            const accuracy = Math.max(0, Math.round(100 - (averageRatioError / maxAllowedRatioError) * 100));
-            
-            console.log('Expected intervals:', expectedIntervals);
-            console.log('Actual intervals:', actualIntervals);
-            console.log('Expected ratios (vs first interval):', expectedRatios);
-            console.log('Actual ratios (vs first interval):', actualRatios);
-            console.log('Average ratio error:', averageRatioError);
-            
-            return { 
-                accuracy, 
-                message: `Average ratio error: ${(averageRatioError * 100).toFixed(1)}%`,
-                expectedTaps: expectedRatios.length,
-                actualTaps: actualRatios.length
-            };
-        }
+      setTimeout(() => {
+        levelDisplay.style.display = 'none';
+        roundCounter.style.display = 'block';
+        beatIndicator.style.display = 'block';
 
-        function startGame() {
-            level = 1;
-            currentRound = 1;
-            roundScores = [];
-            gameActive = true;
-            gameOver = false;
-            currentPattern = null;
-            
-            rulesDiv.style.display = 'block';
-            playAgainBtn.style.display = 'none';
-            gameOverDiv.style.display = 'none';
-            homeBtn.style.display = 'none';
-            continueBtn.style.display = 'block';
-            tapContainer.style.display = 'none';
-            readyDisplay.style.display = 'none';
-            roundCounter.style.display = 'none';
+        const bpm = 70;
+        const beatDuration = 60000 / bpm;
+
+        function playNextSubdivision(beatIndex, subdivisionIndex) {
+          if (beatIndex >= currentPattern.length) {
             beatIndicator.style.display = 'none';
+            showTapInterface();
+            return;
+          }
+
+          const beat = currentPattern[beatIndex];
+          const subdivision = beat.type.timing[subdivisionIndex];
+          const subdivisionDuration = subdivision * beatDuration;
+
+          metronomeAudio.currentTime = 0;
+          metronomeAudio.play();
+
+          beatIndicator.classList.add('active');
+          setTimeout(() => {
+            beatIndicator.classList.remove('active');
+          }, 100);
+
+          setTimeout(() => {
+            if (subdivisionIndex + 1 >= beat.type.subdivisions) {
+              playNextSubdivision(beatIndex + 1, 0);
+            } else {
+              playNextSubdivision(beatIndex, subdivisionIndex + 1);
+            }
+          }, subdivisionDuration);
         }
 
-        // Start game immediately when page loads
-        window.addEventListener('load', startGame);
+        playNextSubdivision(0, 0);
+      }, 2000);
+    }
 
-        continueBtn.addEventListener('click', () => {
-            rulesDiv.style.display = 'none';
-            continueBtn.style.display = 'none';
-            playPattern();
-        });
+    function showTapInterface() {
+      tapContainer.style.display = 'flex';
+      startTapPhase();
+    }
 
-        // Handle tap area mouse events
-        tapArea.addEventListener('mousedown', () => {
-            if (gameActive && tapContainer.style.display !== 'none') {
-                recordTap();
-            }
-        });
-        
-        // Also handle click for accessibility
-        tapArea.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent default click behavior since we're using mousedown
-        });
+    function startTapPhase() {
+      tapTimes = [];
+      isTapping = false;
+      tapArea.classList.remove('tapping');
 
-        // Handle spacebar taps
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && gameActive && tapContainer.style.display !== 'none') {
-                e.preventDefault(); // Prevent page scroll
-                if (!e.repeat) { // Only trigger on initial keydown, not key repeat
-                    recordTap();
-                }
-            }
-        });
+      const expectedTaps = expectedTapCount(currentPattern);
+      const tapCounter = document.getElementById('tapCounter');
+      tapCounter.textContent = `Taps: 0 / ${expectedTaps}`;
+    }
 
-        playAgainBtn.addEventListener('click', startGame);
+    function recordTap() {
+      if (!gameActive || tapContainer.style.display === 'none') return;
+      const expectedTaps = expectedTapCount(currentPattern);
+      if (tapTimes.length >= expectedTaps) return;
 
-        homeBtn.addEventListener('click', () => {
-            window.location.href = 'index.html';
-        });
+      if (!isTapping) {
+        isTapping = true;
+        tapArea.classList.add('tapping');
+      }
 
-        // Prevent tap container from showing initially
+      const t = Date.now();
+      tapTimes.push(t);
+
+      metronomeAudio.currentTime = 0;
+      metronomeAudio.play();
+
+      tapArea.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        tapArea.style.transform = 'scale(1)';
+      }, 100);
+
+      const tapCounter = document.getElementById('tapCounter');
+      tapCounter.textContent = `Taps: ${tapTimes.length} / ${expectedTaps}`;
+
+      if (tapTimes.length >= expectedTaps) {
+        finishTapPhase();
+      }
+    }
+
+    function calculateRhythmScore() {
+      if (!currentPattern) return { accuracy: 0 };
+      if (tapTimes.length < 3) return { accuracy: 0 };
+
+      const expectedIntervals = [];
+      currentPattern.forEach(beat => {
+        beat.type.timing.forEach(subdivision => expectedIntervals.push(subdivision));
+      });
+
+      const expectedRatios = [];
+      if (expectedIntervals.length > 1) {
+        const first = expectedIntervals[0];
+        for (let i = 1; i < expectedIntervals.length; i++) expectedRatios.push(expectedIntervals[i] / first);
+      }
+
+      const normalized = tapTimes.map(t => t - tapTimes[0]);
+
+      const actualIntervals = [];
+      for (let i = 1; i < normalized.length; i++) actualIntervals.push(normalized[i] - normalized[i - 1]);
+
+      const actualRatios = [];
+      if (actualIntervals.length > 1) {
+        const first = actualIntervals[0];
+        for (let i = 1; i < actualIntervals.length; i++) actualRatios.push(actualIntervals[i] / first);
+      }
+
+      if (expectedRatios.length === 0 || actualRatios.length === 0) return { accuracy: 0 };
+
+      const n = Math.min(expectedRatios.length, actualRatios.length);
+      let totalErr = 0;
+      for (let i = 0; i < n; i++) totalErr += Math.abs(expectedRatios[i] - actualRatios[i]);
+
+      const avgErr = totalErr / n;
+      const maxAllowed = 1.0;
+      const accuracy = Math.max(0, Math.round(100 - (avgErr / maxAllowed) * 100));
+      return { accuracy };
+    }
+
+    function finishTapPhase() {
+      tapArea.classList.remove('tapping');
+
+      const score = calculateRhythmScore();
+      roundScores.push(score.accuracy);
+
+      currentRound++;
+      level = currentRound;
+
+      if (currentRound > maxLevels) {
+        gameActive = false;
+        gameOver = true;
+
+        const avg = roundScores.reduce((s, v) => s + v, 0) / roundScores.length;
+        const finalScore = Math.round(avg);
+
+        document.getElementById('finalScore').textContent = finalScore;
+        gameOverDiv.style.display = 'block';
+        playAgainBtn.style.display = 'block';
+        homeBtn.style.display = 'block';
         tapContainer.style.display = 'none';
-        
-        // Initialize Lucide icons
-        lucide.createIcons();
-        
-        // Mobile menu toggle functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-            const mobileMenu = document.getElementById('mobile-menu');
-            
-            if (mobileMenuToggle && mobileMenu) {
-                mobileMenuToggle.addEventListener('click', function() {
-                    mobileMenu.classList.toggle('active');
-                    mobileMenuToggle.classList.toggle('active');
-                });
-                
-                // Close mobile menu when clicking on a link
-                const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
-                mobileMenuLinks.forEach(link => {
-                    link.addEventListener('click', function() {
-                        mobileMenu.classList.remove('active');
-                        mobileMenuToggle.classList.remove('active');
-                    });
-                });
-                
-                // Close mobile menu when clicking outside
-                document.addEventListener('click', function(event) {
-                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
-                        mobileMenu.classList.remove('active');
-                        mobileMenuToggle.classList.remove('active');
-                    }
-                });
-            }
+        roundCounter.style.display = 'none';
+      } else {
+        setTimeout(() => {
+          playPattern();
+        }, 1000);
+      }
+    }
+
+    function startGame() {
+      level = 1;
+      currentRound = 1;
+      roundScores = [];
+      gameActive = true;
+      gameOver = false;
+      currentPattern = null;
+
+      rulesDiv.style.display = 'block';
+      gameOverDiv.style.display = 'none';
+      homeBtn.style.display = 'none';
+      continueBtn.style.display = 'block';
+      tapContainer.style.display = 'none';
+      readyDisplay.style.display = 'none';
+      roundCounter.style.display = 'none';
+      beatIndicator.style.display = 'none';
+    }
+
+    window.addEventListener('load', startGame);
+
+    continueBtn.addEventListener('click', () => {
+      rulesDiv.style.display = 'none';
+      continueBtn.style.display = 'none';
+      playPattern();
+    });
+
+    tapArea.addEventListener('mousedown', () => {
+      recordTap();
+    });
+
+    tapArea.addEventListener('click', (e) => {
+      e.preventDefault();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && gameActive && tapContainer.style.display !== 'none') {
+        e.preventDefault();
+        if (!e.repeat) recordTap();
+      }
+    });
+
+    playAgainBtn.addEventListener('click', startGame);
+
+    homeBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    tapContainer.style.display = 'none';
+
+    lucide.createIcons();
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      if (mobileMenuToggle && mobileMenu) {
+        mobileMenuToggle.addEventListener('click', function () {
+          mobileMenu.classList.toggle('active');
+          mobileMenuToggle.classList.toggle('active');
         });
-    </script>
+
+        const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+        mobileMenuLinks.forEach(link => {
+          link.addEventListener('click', function () {
+            mobileMenu.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+          });
+        });
+
+        document.addEventListener('click', function (event) {
+          if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+            mobileMenu.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+          }
+        });
+      }
+    });
+  </script>
 </body>
 </html>
