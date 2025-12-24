@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-container">
             <div class="header-content">
@@ -24,12 +23,10 @@
                     <a href="about.html" class="nav-link">ABOUT</a>
                 </nav>
                 
-                <!-- Mobile Menu Toggle -->
                 <button class="mobile-menu-toggle" id="mobile-menu-toggle">
                     <i data-lucide="menu" class="hamburger-icon"></i>
                 </button>
                 
-                <!-- Mobile Menu -->
                 <div class="mobile-menu" id="mobile-menu">
                     <div class="mobile-menu-links">
                         <a href="dashboard.html" class="mobile-menu-link">DASHBOARD</a>
@@ -87,7 +84,6 @@
     </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-content">
@@ -109,7 +105,6 @@
     </footer>
 
     <script>
-        // Load audio files
         const notes = {};
         const audioFiles = {
             'c4': 'sounds/C4.mp3',
@@ -127,14 +122,12 @@
             'c5': 'sounds/C5.mp3'
         };
 
-        // Preload audio files
         Object.entries(audioFiles).forEach(([key, path]) => {
             const audio = new Audio(path);
             audio.load();
             notes[key] = audio;
         });
 
-        // Game state
         let level = 1;
         let maxLevels = 10;
         let score = 0;
@@ -144,7 +137,6 @@
         let gameActive = false;
         let gameOver = false;
 
-        // DOM elements
         const playAgainBtn = document.getElementById('playAgainBtn');
         const continueBtn = document.getElementById('continueBtn');
         const qualityButtons = document.querySelectorAll('.interval-quality');
@@ -167,14 +159,11 @@
                 buttonsContainer.style.display = 'flex';
                 roundCounter.style.display = 'block';
                 
-                // First note is always C4
                 const firstNote = new Audio(audioFiles['c4']);
                 await firstNote.play();
                 
-                // Wait 1 second before playing second note
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                // Play random second note (different from C4)
                 const noteNames = Object.keys(audioFiles).filter(note => note !== 'c4');
                 const randomNote = noteNames[Math.floor(Math.random() * noteNames.length)];
                 currentInterval = randomNote;
@@ -192,7 +181,6 @@
             qualityButtons.forEach(btn => btn.classList.remove('active'));
             distanceButtons.forEach(btn => btn.classList.remove('active'));
 
-            // Get the interval details from the current note
             const noteMap = {
                 'c4': 1, 'c#4': 2, 'd4': 3, 'd#4': 4, 'e4': 5,
                 'f4': 6, 'f#4': 7, 'g4': 8, 'g#4': 9, 'a4': 10,
@@ -201,7 +189,6 @@
 
             const intervalDistance = noteMap[currentInterval] - noteMap['c4'];
             
-            // Define correct interval for each note relative to C4
             const correctIntervals = {
                 'c#4': {quality: 'minor', distance: '2'},
                 'd4': {quality: 'major', distance: '2'}, 
@@ -221,7 +208,6 @@
             
             if (selectedQuality === correctInterval.quality && 
                 parseInt(selectedDistance) === parseInt(correctInterval.distance)) {
-                // Show green feedback for correct answer
                 qualityButtons.forEach(btn => {
                     if (btn.dataset.quality === selectedQuality) {
                         btn.classList.add('correct');
@@ -235,7 +221,6 @@
                 
                 score++;
                 
-                // Wait 500ms before proceeding to next level
                 setTimeout(() => {
                     level++;
                     selectedQuality = null;
@@ -247,7 +232,6 @@
                         btn.classList.remove('selected', 'correct');
                     });
                     
-                    // Check if we've completed all 20 rounds
                     if (level > maxLevels) {
                         gameActive = false;
                         gameOver = true;
@@ -260,7 +244,6 @@
                     }
                 }, 500);
             } else {
-                // Show red feedback for incorrect answer
                 qualityButtons.forEach(btn => {
                     if (btn.dataset.quality === selectedQuality) {
                         btn.style.backgroundColor = 'rgb(220, 38, 38)';
@@ -274,7 +257,6 @@
                     }
                 });
                 
-                // Wait 1 second before proceeding to next level
                 setTimeout(() => {
                     level++;
                     selectedQuality = null;
@@ -290,7 +272,6 @@
                         btn.style.boxShadow = '';
                     });
                     
-                    // Check if we've completed all 20 rounds
                     if (level > maxLevels) {
                         gameActive = false;
                         gameOver = true;
@@ -313,7 +294,6 @@
             selectedQuality = null;
             selectedDistance = null;
             
-            // Clear all button states
             qualityButtons.forEach(btn => {
                 btn.classList.remove('selected', 'correct', 'active');
             });
@@ -330,7 +310,6 @@
             roundCounter.style.display = 'none';
         }
 
-        // Start game immediately when page loads
         window.addEventListener('load', startGame);
 
         continueBtn.addEventListener('click', () => {
@@ -368,13 +347,10 @@
             window.location.href = 'index.html';
         });
 
-        // Game starts automatically, no need for start button
         buttonsContainer.style.display = 'none';
         
-        // Initialize Lucide icons
         lucide.createIcons();
         
-        // Mobile menu toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -385,7 +361,6 @@
                     mobileMenuToggle.classList.toggle('active');
                 });
                 
-                // Close mobile menu when clicking on a link
                 const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
                 mobileMenuLinks.forEach(link => {
                     link.addEventListener('click', function() {
@@ -394,7 +369,6 @@
                     });
                 });
                 
-                // Close mobile menu when clicking outside
                 document.addEventListener('click', function(event) {
                     if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
                         mobileMenu.classList.remove('active');
