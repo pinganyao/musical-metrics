@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
-    <!-- Header -->
+
     <header class="header">
         <div class="header-container">
             <div class="header-content">
@@ -26,12 +26,10 @@
                     <a href="about.html" class="nav-link">ABOUT</a>
                 </nav>
                 
-                <!-- Mobile Menu Toggle -->
                 <button class="mobile-menu-toggle" id="mobile-menu-toggle">
                     <i data-lucide="menu" class="hamburger-icon"></i>
                 </button>
                 
-                <!-- Mobile Menu -->
                 <div class="mobile-menu" id="mobile-menu">
                     <div class="mobile-menu-links">
                         <a href="dashboard.html" class="mobile-menu-link active">DASHBOARD</a>
@@ -42,9 +40,8 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="dashboard-main">
-        <!-- Tests Table Card -->
+
         <div class="dashboard-tests-card">
             <div class="dashboard-tests-header">
                 <h2 class="dashboard-tests-title">Musical Tests</h2>
@@ -64,7 +61,6 @@
                     </div>
                 </div>
 
-                <!-- Pitch Tests -->
                 <div class="dashboard-tests-table-row">
                     <div class="dashboard-tests-table-cell test-name">Melody I</div>
                     <div class="dashboard-tests-table-cell actions-cell">
@@ -122,7 +118,6 @@
                     </div>
                 </div>
 
-                <!-- Interval Tests -->
                 <div class="dashboard-tests-table-row">
                     <div class="dashboard-tests-table-cell test-name">Interval I</div>
                     <div class="dashboard-tests-table-cell actions-cell">
@@ -161,7 +156,6 @@
                     </div>
                 </div>
 
-                <!-- Harmony Tests -->
                 <div class="dashboard-tests-table-row">
                     <div class="dashboard-tests-table-cell test-name">Harmony I</div>
                     <div class="dashboard-tests-table-cell actions-cell">
@@ -219,7 +213,6 @@
                     </div>
                 </div>
 
-                <!-- Tempo Tests -->
                 <div class="dashboard-tests-table-row">
                     <div class="dashboard-tests-table-cell test-name">Tempo I</div>
                     <div class="dashboard-tests-table-cell actions-cell">
@@ -258,7 +251,6 @@
                     </div>
                 </div>
 
-                <!-- Pitch and Rhythm Tests -->
                 <div class="dashboard-tests-table-row">
                     <div class="dashboard-tests-table-cell test-name">Pitch I</div>
                     <div class="dashboard-tests-table-cell actions-cell">
@@ -300,7 +292,6 @@
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-content">
@@ -322,10 +313,9 @@
     </footer>
 
     <script>
-        // Initialize Lucide icons
+        
         lucide.createIcons();
         
-        // Mobile menu toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -336,7 +326,6 @@
                     mobileMenuToggle.classList.toggle('active');
                 });
                 
-                // Close mobile menu when clicking on a link
                 const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
                 mobileMenuLinks.forEach(link => {
                     link.addEventListener('click', function() {
@@ -345,7 +334,6 @@
                     });
                 });
                 
-                // Close mobile menu when clicking outside
                 document.addEventListener('click', function(event) {
                     if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
                         mobileMenu.classList.remove('active');
@@ -355,7 +343,6 @@
             }
         });
 
-        // Add click handlers for play buttons
         document.querySelectorAll('.play-button').forEach((button, index) => {
             button.addEventListener('click', () => {
                 const testNames = [
@@ -379,7 +366,6 @@
             });
         });
 
-        // Add click handlers for stats buttons
         document.querySelectorAll('.stats-button').forEach((button) => {
             button.addEventListener('click', () => {
                 alert('Stats feature coming soon!');
