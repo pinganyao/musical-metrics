@@ -10,7 +10,6 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-container">
             <div class="header-content">
@@ -26,12 +25,10 @@
                     <a href="about.html" class="nav-link active">ABOUT</a>
                 </nav>
                 
-                <!-- Mobile Menu Toggle -->
                 <button class="mobile-menu-toggle" id="mobile-menu-toggle">
                     <i data-lucide="menu" class="hamburger-icon"></i>
                 </button>
                 
-                <!-- Mobile Menu -->
                 <div class="mobile-menu" id="mobile-menu">
                     <div class="mobile-menu-links">
                         <a href="dashboard.html" class="mobile-menu-link">DASHBOARD</a>
@@ -42,7 +39,6 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="about-main">
         <div class="about-container">
             <div class="about-content">
@@ -89,7 +85,6 @@
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-content">
@@ -111,10 +106,9 @@
     </footer>
 
     <script>
-        // Initialize Lucide icons
+
         lucide.createIcons();
         
-        // Mobile menu toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -125,7 +119,6 @@
                     mobileMenuToggle.classList.toggle('active');
                 });
                 
-                // Close mobile menu when clicking on a link
                 const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
                 mobileMenuLinks.forEach(link => {
                     link.addEventListener('click', function() {
@@ -134,7 +127,6 @@
                     });
                 });
                 
-                // Close mobile menu when clicking outside
                 document.addEventListener('click', function(event) {
                     if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
                         mobileMenu.classList.remove('active');
