@@ -1,4 +1,3 @@
-/* Reset and base styles */
 * {
     margin: 0;
     padding: 0;
@@ -16,7 +15,6 @@ html {
     font-size: 16px;
 }
 
-/* Header Styles */
 .header {
     width: 100%;
     background-color: #000000;
@@ -91,7 +89,6 @@ html {
     color: #ffffff;
 }
 
-/* Mobile Navigation */
 .mobile-menu-toggle {
     display: none;
     background: none;
@@ -153,7 +150,6 @@ html {
     color: #fbbf24;
 }
 
-/* Responsive Navigation */
 @media (max-width: 768px) {
     .nav {
         display: none;
@@ -168,7 +164,6 @@ html {
     }
 }
 
-/* Hero Styles */
 .hero {
     background-color: #000000;
     color: #ffffff;
@@ -231,7 +226,6 @@ html {
     background-color: #f59e0b;
 }
 
-/* Games Grid Styles */
 .games-section {
     background-color: #000000;
     padding: 4rem 1rem;
@@ -281,7 +275,6 @@ html {
     }
 }
 
-/* Game Card Styles */
 .game-card {
     background-color: #171717;
     border: 1px solid #303030;
@@ -339,7 +332,6 @@ html {
     border-radius: 0.25rem;
 }
 
-/* Responsive adjustments */
 @media (min-width: 768px) {
     .hero-title {
         font-size: 3.75rem;
@@ -349,7 +341,6 @@ html {
     }
 }
 
-/* Footer Styles */
 .footer {
     background-color: #111111;
     border-top: 1px solid #1f2937;
@@ -454,7 +445,6 @@ html {
     }
 }
 
-/* Game-specific styles for pitch games */
 .subtitle {
     color: rgb(251, 191, 36);
     font-size: clamp(16px, 4vw, 24px);
@@ -585,7 +575,6 @@ html {
     margin-top: 20px;
 }
 
-/* Game-specific button styles */
 .black-note {
     background-color: #333;
     color: white;
@@ -596,7 +585,6 @@ html {
     color: black;
 }
 
-/* Game responsive styles */
 @media screen and (min-width: 768px) and (max-width: 1024px) {
     .buttons-container {
         gap: 15px;
@@ -696,11 +684,10 @@ html {
     }
 }
 
-/* Dashboard Styles */
 .dashboard-main {
     background-color: #000000;
     padding: 2rem 1rem;
-    min-height: calc(100vh - 3.5rem - 4rem); /* Subtract header and footer heights */
+    min-height: calc(100vh - 3.5rem - 4rem);
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -708,7 +695,6 @@ html {
     margin: 0 auto;
 }
 
-/* Dashboard Profile Card Styles */
 .dashboard-profile-card {
     background-color: #171717;
     border: 1px solid #303030;
@@ -772,7 +758,6 @@ html {
     text-decoration: underline;
 }
 
-/* Dashboard Tests Card Styles */
 .dashboard-tests-card {
     background-color: #171717;
     border: 1px solid #303030;
@@ -793,7 +778,6 @@ html {
     margin: 0;
 }
 
-/* Dashboard Tests Table Styles */
 .dashboard-tests-table {
     display: flex;
     flex-direction: column;
@@ -910,7 +894,6 @@ html {
     margin-left: 0.25rem;
 }
 
-/* Responsive Design for Dashboard */
 @media (max-width: 768px) {
     .dashboard-main {
         padding: 1rem;
@@ -974,7 +957,6 @@ html {
     }
 }
 
-/* Game-specific styles */
 .round-counter {
     position: fixed;
     top: 4.5rem;
@@ -989,7 +971,6 @@ html {
     display: none;
 }
 
-/* Input focus styles */
 #centsInput:focus,
 #bpmInput:focus {
     outline: none;
@@ -997,7 +978,6 @@ html {
     box-shadow: 0 0 10px rgba(254, 240, 138, 0.3);
 }
 
-/* Game-specific button styles */
 .chord-type,
 .interval-quality,
 .interval-distance {
@@ -1045,7 +1025,6 @@ html {
     transform: scale(1.1);
 }
 
-/* Harmony-specific button styles */
 .harmony1 .chord-type {
     width: clamp(80px, 15vw, 120px);
     height: clamp(60px, 12vw, 100px);
@@ -1057,11 +1036,10 @@ html {
     height: clamp(60px, 12vw, 100px);
 }
 
-/* About Page Styles */
 .about-main {
     background-color: #000000;
     padding: 2rem 1rem;
-    min-height: calc(100vh - 3.5rem - 4rem); /* Subtract header and footer heights */
+    min-height: calc(100vh - 3.5rem - 4rem);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1217,7 +1195,6 @@ html {
     height: 1.25rem;
 }
 
-/* Responsive Design for About Page */
 @media (max-width: 768px) {
     .about-main {
         padding: 1rem;
@@ -1308,5 +1285,3 @@ html {
         min-width: auto;
     }
 }
-
-/* Mobile Menu JavaScript - Removed rotation animation */
