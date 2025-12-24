@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-container">
             <div class="header-content">
@@ -23,12 +22,10 @@
                     <a href="about.html" class="nav-link">ABOUT</a>
                 </nav>
                 
-                <!-- Mobile Menu Toggle -->
                 <button class="mobile-menu-toggle" id="mobile-menu-toggle">
                     <i data-lucide="menu" class="hamburger-icon"></i>
                 </button>
                 
-                <!-- Mobile Menu -->
                 <div class="mobile-menu" id="mobile-menu">
                     <div class="mobile-menu-links">
                         <a href="dashboard.html" class="mobile-menu-link">DASHBOARD</a>
@@ -84,7 +81,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-content">
@@ -106,10 +102,8 @@
     </footer>
 
     <script>
-        // Load audio files for chord notes (middle range)
         const notes = {};
         const audioFiles = {
-            // Middle range notes (C3 to B4)
             'c3': 'sounds/C3.mp3', 'c#3': 'sounds/C%233.mp3', 'd3': 'sounds/D3.mp3', 'd#3': 'sounds/D%233.mp3',
             'e3': 'sounds/E3.mp3', 'f3': 'sounds/F3.mp3', 'f#3': 'sounds/F%233.mp3', 'g3': 'sounds/G3.mp3',
             'g#3': 'sounds/G%233.mp3', 'a3': 'sounds/A3.mp3', 'a#3': 'sounds/A%233.mp3', 'b3': 'sounds/B3.mp3',
@@ -118,14 +112,12 @@
             'g#4': 'sounds/G%234.mp3', 'a4': 'sounds/A4.mp3', 'a#4': 'sounds/A%234.mp3', 'b4': 'sounds/B4.mp3'
         };
 
-        // Preload audio files - EXACTLY like Interval 1
         Object.entries(audioFiles).forEach(([key, path]) => {
             const audio = new Audio(path);
             audio.load();
             notes[key] = audio;
         });
 
-        // Game state - Modified for advanced chord recognition
         let level = 1;
         let maxLevels = 10;
         let score = 0;
@@ -135,7 +127,6 @@
         let gameActive = false;
         let gameOver = false;
 
-        // DOM elements - Modified for advanced chord recognition
         const playAgainBtn = document.getElementById('playAgainBtn');
         const continueBtn = document.getElementById('continueBtn');
         const chordTypeButtons = document.querySelectorAll('.chord-type');
@@ -147,25 +138,20 @@
         const roundCounter = document.querySelector('.round-counter');
         const homeBtn = document.getElementById('homeBtn');
 
-        // Chord definitions (root position only) - Extended with 7th chords
         const chordTypes = {
-            // Triads
-            'major': [0, 4, 7],           // Root, Major 3rd, Perfect 5th (1,3,5)
-            'minor': [0, 3, 7],           // Root, Minor 3rd, Perfect 5th (1,3b,5)
-            'diminished': [0, 3, 6],      // Root, Minor 3rd, Diminished 5th (1,3b,5b)
-            'augmented': [0, 4, 8],       // Root, Major 3rd, Augmented 5th (1,3,5#)
-            'sus2': [0, 2, 7],           // Root, Major 2nd, Perfect 5th (1,2,5)
-            'sus4': [0, 5, 7],           // Root, Perfect 4th, Perfect 5th (1,4,5)
-            
-            // 7th Chords
-            'major7': [0, 4, 7, 11],      // Root, Major 3rd, Perfect 5th, Major 7th (1,3,5,7)
-            'dominant7': [0, 4, 7, 10],   // Root, Major 3rd, Perfect 5th, Minor 7th (1,3,5,7b)
-            'minor7': [0, 3, 7, 10],      // Root, Minor 3rd, Perfect 5th, Minor 7th (1,3b,5,7b)
-            'diminished7': [0, 3, 6, 9], // Root, Minor 3rd, Diminished 5th, Diminished 7th (1,3b,5b,7bb)
-            'half-diminished7': [0, 3, 6, 10] // Root, Minor 3rd, Diminished 5th, Minor 7th (1,3b,5b,7b)
+            'major': [0, 4, 7],
+            'minor': [0, 3, 7],
+            'diminished': [0, 3, 6],
+            'augmented': [0, 4, 8],
+            'sus2': [0, 2, 7],
+            'sus4': [0, 5, 7],
+            'major7': [0, 4, 7, 11],
+            'dominant7': [0, 4, 7, 10],
+            'minor7': [0, 3, 7, 10],
+            'diminished7': [0, 3, 6, 9],
+            'half-diminished7': [0, 3, 6, 10]
         };
 
-        // Note names for middle range
         const noteNames = ['c3', 'c#3', 'd3', 'd#3', 'e3', 'f3', 'f#3', 'g3', 'g#3', 'a3', 'a#3', 'b3',
                           'c4', 'c#4', 'd4', 'd#4', 'e4', 'f4', 'f#4', 'g4', 'g#4', 'a4', 'a#4', 'b4'];
 
@@ -180,19 +166,15 @@
                 buttonsContainer.style.display = 'flex';
                 roundCounter.style.display = 'block';
                 
-                // Choose random chord type
                 const chordTypeNames = Object.keys(chordTypes);
                 const randomChordType = chordTypeNames[Math.floor(Math.random() * chordTypeNames.length)];
                 
-                // Choose random root note from middle range, ensuring all chord notes fit
                 const chordIntervals = chordTypes[randomChordType];
                 const maxInterval = Math.max(...chordIntervals);
                 
-                // Only choose root notes that allow all chord tones to fit in our range
                 const availableRoots = noteNames.slice(0, noteNames.length - maxInterval);
                 const randomRoot = availableRoots[Math.floor(Math.random() * availableRoots.length)];
                 
-                // Calculate chord notes
                 const rootIndex = noteNames.indexOf(randomRoot);
                 const chordNotes = chordIntervals.map(interval => {
                     return noteNames[rootIndex + interval];
@@ -204,13 +186,9 @@
                     notes: chordNotes
                 };
                 
-                console.log(`Playing ${randomChordType} chord: ${chordNotes.join(', ')}`);
-                console.log(`Root: ${randomRoot}, Intervals: [${chordIntervals.join(', ')}]`);
-                
-                // Play all chord notes simultaneously
                 const audioPromises = chordNotes.map(noteName => {
                     const audio = new Audio(audioFiles[noteName]);
-                    audio.volume = 0.4; // Lower volume to prevent clipping with multiple notes
+                    audio.volume = 0.4;
                     return audio.play();
                 });
                 
@@ -227,15 +205,12 @@
             chordTypeButtons.forEach(btn => btn.classList.remove('active'));
             extensionButtons.forEach(btn => btn.classList.remove('active'));
             
-            // Determine expected chord type and extension
             let expectedChordType = currentChord.type;
             let expectedExtension = 'none';
             
-            // Check if it's a 7th chord
             if (currentChord.type.includes('7') || currentChord.type === 'dominant7') {
                 expectedExtension = '7th';
                 
-                // Map 7th chord types to button types
                 if (currentChord.type === 'major7') {
                     expectedChordType = 'major';
                 } else if (currentChord.type === 'dominant7') {
@@ -249,12 +224,9 @@
                 }
             }
             
-            console.log(`Expected: ${expectedChordType} + ${expectedExtension}, Selected: ${selectedChordType} + ${selectedExtension}`);
-            
             const isCorrect = selectedChordType === expectedChordType && selectedExtension === expectedExtension;
             
             if (isCorrect) {
-                // Show green feedback for correct answer
                 chordTypeButtons.forEach(btn => {
                     if (btn.dataset.type === selectedChordType) {
                         btn.classList.add('correct');
@@ -268,7 +240,6 @@
                 
                 score++;
                 
-                // Wait 500ms before proceeding to next level
                 setTimeout(() => {
                     level++;
                     selectedChordType = null;
@@ -280,7 +251,6 @@
                         btn.classList.remove('selected', 'correct');
                     });
                     
-                    // Check if we've completed all 10 rounds
                     if (level > maxLevels) {
                         gameActive = false;
                         gameOver = true;
@@ -293,7 +263,6 @@
                     }
                 }, 500);
             } else {
-                // Show red feedback for incorrect answer
                 chordTypeButtons.forEach(btn => {
                     if (btn.dataset.type === selectedChordType) {
                         btn.style.backgroundColor = 'rgb(220, 38, 38)';
@@ -307,7 +276,6 @@
                     }
                 });
                 
-                // Wait 1 second before proceeding to next level
                 setTimeout(() => {
                     level++;
                     selectedChordType = null;
@@ -323,7 +291,6 @@
                         btn.style.boxShadow = '';
                     });
                     
-                    // Check if we've completed all 10 rounds
                     if (level > maxLevels) {
                         gameActive = false;
                         gameOver = true;
@@ -346,7 +313,6 @@
             selectedChordType = null;
             selectedExtension = null;
             
-            // Clear all button states
             chordTypeButtons.forEach(btn => {
                 btn.classList.remove('selected', 'correct', 'active');
                 btn.style.backgroundColor = '';
@@ -367,7 +333,6 @@
             roundCounter.style.display = 'none';
         }
 
-        // Start game immediately when page loads - EXACTLY like Interval 1
         window.addEventListener('load', startGame);
 
         continueBtn.addEventListener('click', () => {
@@ -405,13 +370,10 @@
             window.location.href = 'index.html';
         });
 
-        // Game starts automatically, no need for start button - EXACTLY like Interval 1
         buttonsContainer.style.display = 'none';
         
-        // Initialize Lucide icons
         lucide.createIcons();
         
-        // Mobile menu toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -422,7 +384,6 @@
                     mobileMenuToggle.classList.toggle('active');
                 });
                 
-                // Close mobile menu when clicking on a link
                 const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
                 mobileMenuLinks.forEach(link => {
                     link.addEventListener('click', function() {
@@ -431,7 +392,6 @@
                     });
                 });
                 
-                // Close mobile menu when clicking outside
                 document.addEventListener('click', function(event) {
                     if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
                         mobileMenu.classList.remove('active');
