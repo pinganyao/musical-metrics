@@ -6,4 +6,4 @@ The games are of various difficulty levels. Some are beginner-friendly and are a
 
 Musical Metrics isn't only a useful tool for testing players' hearing ability, but also a great method of ear-training, all while having fun, whether that's competing with friends and family, or going against other musicians.
 
-You can enjoy the full game experience at [musicalmetrics.xyz](url).
+You can enjoy the full game experience at [musicalmetrics.xyz](https://musicalmetrics.xyz).
