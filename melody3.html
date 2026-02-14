@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Melody III — Musical Metrics: melody ear-training game. Pitch memory with multiple melodies.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Melody III — Musical Metrics">
+  <meta property="og:description" content="Melody ear-training game. Pitch memory.">
+  <meta property="og:image" content="https://musicalmetrics.xyz/amtf.png">
+  <meta property="og:url" content="https://musicalmetrics.xyz/melody3">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Melody III — Musical Metrics">
+  <meta name="twitter:description" content="Melody ear-training game.">
+  <meta name="twitter:image" content="https://musicalmetrics.xyz/amtf.png">
+  <title>Melody III</title>
+  <link rel="canonical" href="https://musicalmetrics.xyz/melody3">
+  <link rel="icon" type="image/svg+xml" href="music-logo.svg?v=1">
+  <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
+  <link rel="stylesheet" href="game.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <div class="header-content">
+        <div class="logo-container">
+          <a href="/" class="logo-link">
+            <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo" />
+            <h1 class="logo">MUSICAL METRICS</h1>
+          </a>
+        </div>
+
+        <nav class="nav">
+          <a href="/dashboard" class="nav-link">DASHBOARD</a>
+          <a href="/about" class="nav-link">ABOUT</a>
+        </nav>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+          <i data-lucide="menu" class="hamburger-icon"></i>
+        </button>
+
+        <div class="mobile-menu" id="mobile-menu">
+          <div class="mobile-menu-links">
+            <a href="/dashboard" class="mobile-menu-link">DASHBOARD</a>
+            <a href="/about" class="mobile-menu-link">ABOUT</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <h1>Melody III</h1>
+    <p class="subtitle">Test your musical memory with chromatic notes!</p>
+
+    <div class="rules">
+      <p>Maximum difficulty level with the introduction of chromatic notes.</p>
+      <p>Listen to the melody played and play it back correctly.</p>
+      <p>The number of notes increases with each level.</p>
+      <div class="continue-button">
+        <button id="continueBtn" class="control-button control-button-block">Continue</button>
+      </div>
+    </div>
+
+    <div class="game-container">
+      <div class="level-display">Level <span id="levelNum">1</span></div>
+
+      <div class="buttons-container-column">
+        <div class="game-center-row-gap">
+          <button class="note-button black-note" data-note="2" data-key="1">C#</button>
+          <button class="note-button black-note" data-note="4" data-key="2">D#</button>
+          <button class="hidden-placeholder"></button>
+          <button class="note-button black-note" data-note="7" data-key="3">F#</button>
+          <button class="note-button black-note" data-note="9" data-key="4">G#</button>
+          <button class="note-button black-note" data-note="11" data-key="5">A#</button>
+          <button class="hidden-placeholder"></button>
+        </div>
+        <div class="spacer-small"></div>
+        <div class="game-center-row-gap">
+          <button class="note-button white-note" data-note="1" data-key="c">C</button>
+          <button class="note-button white-note" data-note="3" data-key="d">D</button>
+          <button class="note-button white-note" data-note="5" data-key="e">E</button>
+          <button class="note-button white-note" data-note="6" data-key="f">F</button>
+          <button class="note-button white-note" data-note="8" data-key="g">G</button>
+          <button class="note-button white-note" data-note="10" data-key="a">A</button>
+          <button class="note-button white-note" data-note="12" data-key="b">B</button>
+          <button class="note-button white-note" data-note="13" data-key="h">C</button>
+        </div>
+      </div>
+
+      <div class="game-center-align-large-gap">
+        <button id="startBtn" class="control-button control-button-block">Start Game</button>
+      </div>
+    </div>
+
+    <div class="game-over">
+      <div class="final-score">Final Score: <span id="finalScore">0</span></div>
+      <div class="game-center-align-large-gap">
+        <button id="playAgainBtn" class="control-button">Play Again</button>
+        <button id="homeBtn" class="control-button">Return to home</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img" />
+          <span class="footer-brand">Musical Metrics</span>
+        </div>
+        <div class="footer-info">
+          <div class="footer-links">
+            <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+              <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo" />
+              <span class="amtf-text">Athens Music Technology Forum</span>
+            </a>
+          </div>
+          <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const notes = {};
+    const audioFiles = {
+      1: 'sounds/C4.mp3',
+      2: 'sounds/C%234.mp3',
+      3: 'sounds/D4.mp3',
+      4: 'sounds/D%234.mp3',
+      5: 'sounds/E4.mp3',
+      6: 'sounds/F4.mp3',
+      7: 'sounds/F%234.mp3',
+      8: 'sounds/G4.mp3',
+      9: 'sounds/G%234.mp3',
+      10: 'sounds/A4.mp3',
+      11: 'sounds/A%234.mp3',
+      12: 'sounds/B4.mp3',
+      13: 'sounds/C5.mp3'
+    };
+
+    Object.entries(audioFiles).forEach(([key, path]) => {
+      const audio = new Audio(path);
+      audio.load();
+      notes[key] = audio;
+    });
+
+    let level = 1;
+    let sequence = [];
+    let playerSequence = [];
+    let waitingForInput = false;
+    let gameActive = false;
+    let demonstrating = false;
+    let gameOver = false;
+
+    const startBtn = document.getElementById('startBtn');
+    const continueBtn = document.getElementById('continueBtn');
+    const noteButtons = document.querySelectorAll('.note-button');
+    const rulesDiv = document.querySelector('.rules');
+    const levelDisplay = document.querySelector('.level-display');
+    const gameOverDiv = document.querySelector('.game-over');
+    const buttonsContainer = document.querySelector('.buttons-container-column');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const homeBtn = document.getElementById('homeBtn');
+
+    async function playNote(noteNum, isPlayerInput = false) {
+      const button = document.querySelector(`[data-note="${noteNum}"]`);
+      if (isPlayerInput) button.classList.add('playing');
+
+      const audio = new Audio(audioFiles[noteNum]);
+      try {
+        await audio.play();
+      } catch (err) {}
+
+      if (isPlayerInput) {
+        setTimeout(() => {
+          button.classList.remove('playing');
+        }, 500);
+      }
+    }
+
+    function demonstrateNotes() {
+      demonstrating = true;
+      let i = 1;
+      const demo = setInterval(() => {
+        if (i <= 13) {
+          playNote(i, true);
+          i++;
+        } else {
+          clearInterval(demo);
+          demonstrating = false;
+          setTimeout(playRound, 1000);
+        }
+      }, 700);
+    }
+
+    function playSequence() {
+      let i = 0;
+      noteButtons.forEach(btn => btn.classList.remove('active'));
+
+      const play = setInterval(() => {
+        if (i < sequence.length) {
+          playNote(sequence[i], false);
+          i++;
+        } else {
+          clearInterval(play);
+          waitingForInput = true;
+          noteButtons.forEach(btn => btn.classList.add('active'));
+        }
+      }, 700);
+    }
+
+    function playRound() {
+      sequence = Array.from({ length: level }, () => Math.floor(Math.random() * 13) + 1);
+      playerSequence = [];
+
+      buttonsContainer.style.display = 'none';
+      levelDisplay.style.display = 'block';
+      document.getElementById('levelNum').textContent = level;
+
+      setTimeout(() => {
+        levelDisplay.style.display = 'none';
+        buttonsContainer.style.display = 'flex';
+        setTimeout(playSequence, 500);
+      }, 2000);
+    }
+
+    function checkSequence() {
+      waitingForInput = false;
+      noteButtons.forEach(btn => btn.classList.remove('active'));
+
+      if (playerSequence.join('') === sequence.join('')) {
+        level++;
+        setTimeout(playRound, 1000);
+      } else {
+        gameActive = false;
+        gameOver = true;
+        document.getElementById('finalScore').textContent = level - 1;
+        gameOverDiv.style.display = 'block';
+        playAgainBtn.style.display = 'block';
+        homeBtn.style.display = 'block';
+      }
+    }
+
+    function startGame() {
+      level = 1;
+      sequence = [];
+      playerSequence = [];
+      waitingForInput = false;
+      gameActive = true;
+      gameOver = false;
+      rulesDiv.style.display = 'flex';
+      startBtn.style.display = 'none';
+      gameOverDiv.style.display = 'none';
+      playAgainBtn.style.display = 'none';
+      homeBtn.style.display = 'none';
+      continueBtn.style.display = 'block';
+      buttonsContainer.style.display = 'none';
+    }
+
+    startBtn.addEventListener('click', startGame);
+
+    continueBtn.addEventListener('click', () => {
+      rulesDiv.style.display = 'none';
+      continueBtn.style.display = 'none';
+      buttonsContainer.style.display = 'flex';
+      demonstrateNotes();
+    });
+
+    noteButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        if (waitingForInput && gameActive) {
+          const noteNum = parseInt(button.dataset.note, 10);
+          playNote(noteNum, true);
+          playerSequence.push(noteNum);
+          if (playerSequence.length === sequence.length) {
+            setTimeout(checkSequence, 500);
+          }
+        }
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (waitingForInput && gameActive) {
+        const key = e.key.toLowerCase();
+        const button = document.querySelector(`[data-key="${key}"]`);
+        if (button) {
+          const noteNum = parseInt(button.dataset.note, 10);
+          playNote(noteNum, true);
+          playerSequence.push(noteNum);
+          if (playerSequence.length === sequence.length) {
+            setTimeout(checkSequence, 500);
+          }
+        }
+      }
+    });
+
+    playAgainBtn.addEventListener('click', startGame);
+
+    homeBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    startBtn.style.display = 'block';
+    continueBtn.style.display = 'none';
+    buttonsContainer.style.display = 'none';
+
+    lucide.createIcons();
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      if (mobileMenuToggle && mobileMenu) {
+        mobileMenuToggle.addEventListener('click', function () {
+          mobileMenu.classList.toggle('active');
+          mobileMenuToggle.classList.toggle('active');
+        });
+
+        const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+        mobileMenuLinks.forEach(link => {
+          link.addEventListener('click', function () {
+            mobileMenu.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+          });
+        });
+
+        document.addEventListener('click', function (event) {
+          if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+            mobileMenu.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+          }
+        });
+      }
+    });
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

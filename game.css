@@ -1,0 +1,1281 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #000000;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    min-height: calc(100vh - 3.5rem);
+}
+
+.header {
+    width: 100%;
+    background-color: #000000;
+    border-bottom: 1px solid #1f2937;
+}
+
+.header-container {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 3.5rem;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s ease;
+}
+
+.logo-link:hover {
+    text-decoration: none;
+    color: #fbbf24;
+}
+
+.logo-link:hover .logo {
+    color: #fbbf24;
+}
+
+.logo-container img,
+.logo-container h1 {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+}
+
+.nav-logo {
+    width: 2rem;
+    height: 2rem;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.logo {
+    color: #ffffff;
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1;
+    margin: 0;
+    vertical-align: baseline;
+    transition: color 0.3s ease;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: #d1d5db;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: #ffffff;
+}
+
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: #ffffff;
+    transition: color 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+    color: #fbbf24;
+}
+
+.mobile-menu-toggle .hamburger-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.mobile-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #000000;
+    border-bottom: 1px solid #1f2937;
+    padding: 1rem;
+    z-index: 1000;
+}
+
+.mobile-menu.active {
+    display: block;
+}
+
+.mobile-menu-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mobile-menu-link {
+    color: #d1d5db;
+    text-decoration: none;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #1f2937;
+    transition: color 0.3s ease;
+}
+
+.mobile-menu-link:last-child {
+    border-bottom: none;
+}
+
+.mobile-menu-link:hover {
+    color: #ffffff;
+}
+
+.mobile-menu-link.active {
+    color: #fbbf24;
+}
+
+@media (max-width: 768px) {
+    .nav {
+        display: none;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .header-content {
+        position: relative;
+    }
+}
+
+.footer {
+    background-color: #111111;
+    border-top: 1px solid #1f2937;
+    padding: 2rem 1rem;
+    margin-top: 4rem;
+}
+
+.footer-container {
+    max-width: 80rem;
+    margin: 0 auto;
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.footer-logo-img {
+    width: 2rem;
+    height: 2rem;
+}
+
+.footer-brand {
+    color: #ffffff;
+    font-size: 1.125rem;
+    font-weight: 500;
+}
+
+.footer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.footer-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.footer-link:hover {
+    opacity: 0.8;
+}
+
+.amtf-logo {
+    height: 2rem;
+    width: auto;
+}
+
+.amtf-text {
+    color: #d1d5db;
+    font-size: 0.875rem;
+}
+
+.footer-copyright {
+    color: #6b7280;
+    font-size: 0.75rem;
+}
+
+@media (min-width: 768px) {
+    .footer {
+        padding: 1.5rem 1rem;
+    }
+    
+    .footer-content {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+        gap: 2rem;
+    }
+    
+    .footer-info {
+        align-items: flex-end;
+        text-align: right;
+    }
+    
+    .footer-links {
+        align-items: center;
+    }
+    
+    .footer-link {
+        flex-direction: row-reverse;
+    }
+}
+
+h1 {
+    font-size: clamp(28px, 6vw, 48px);
+    margin-top: clamp(20px, 5vh, 50px);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: rgb(251, 191, 36);
+    font-size: clamp(16px, 4vw, 24px);
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.rules {
+    text-align: center;
+    margin: clamp(20px, 5vh, 50px) 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    max-width: 90%;
+}
+
+.rules p {
+    margin: 8px 0;
+    font-size: clamp(14px, 3vw, 18px);
+    line-height: 1.4;
+}
+
+.game-container {
+    width: 100%;
+    max-width: 1024px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.buttons-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: clamp(8px, 2vw, 20px);
+    margin-top: clamp(30px, 8vh, 100px);
+    padding: 0 10px;
+}
+
+.note-button {
+    width: clamp(60px, 12vw, 100px);
+    height: clamp(60px, 12vw, 100px);
+    min-width: 60px;
+    min-height: 60px;
+    background-color: rgb(43, 43, 43);
+    border: none;
+    border-radius: clamp(8px, 2vw, 10px);
+    color: white;
+    font-size: clamp(20px, 4vw, 32px);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.note-button:hover {
+    background-color: rgb(60, 60, 60);
+    transform: scale(1.05);
+}
+
+.note-button:active {
+    transform: scale(0.95);
+}
+
+.note-button.active {
+    background-color: rgb(254, 240, 138);
+    box-shadow: 0 0 20px rgba(254, 240, 138, 0.5);
+    color: #000000;
+}
+
+.note-button.playing {
+    background-color: rgb(0, 255, 0);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+    transform: scale(1.1);
+}
+
+.control-button {
+    width: clamp(120px, 25vw, 160px);
+    height: clamp(45px, 8vh, 60px);
+    background-color: rgb(251, 191, 36);
+    border: none;
+    border-radius: clamp(6px, 1.5vw, 8px);
+    color: #000000;
+    font-size: clamp(14px, 3vw, 20px);
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-align: center;
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    margin: clamp(8px, 1.5vh, 15px);
+    display: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.control-button:hover {
+    background-color: rgb(245, 158, 11);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.control-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.level-display {
+    font-size: clamp(48px, 12vw, 96px);
+    color: rgb(251, 191, 36);
+    text-align: center;
+    display: none;
+    margin: clamp(20px, 5vh, 40px) 0;
+}
+
+.round-counter {
+    position: fixed;
+    top: 74px;
+    right: 20px;
+    background-color: rgba(251, 191, 36, 0.9);
+    color: #000000;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.game-over {
+    text-align: center;
+    display: none;
+    padding: 20px;
+    max-width: 90%;
+}
+
+.final-score {
+    font-size: clamp(32px, 8vw, 64px);
+    margin: clamp(10px, 3vh, 20px) 0;
+}
+
+.restart-prompt {
+    color: rgb(251, 191, 36);
+    font-size: clamp(16px, 4vw, 24px);
+    margin-top: 20px;
+}
+
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    .buttons-container {
+        gap: 15px;
+        margin-top: 60px;
+    }
+    
+    .note-button {
+        width: 80px;
+        height: 80px;
+        font-size: 28px;
+    }
+    
+    .control-button {
+        width: 180px;
+        height: 70px;
+        font-size: 28px;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    
+    .main-content {
+        padding: 15px 10px;
+        min-height: calc(100vh - 3.5rem - 2rem);
+    }
+    
+    h1 {
+        font-size: clamp(24px, 6vw, 32px);
+        margin: 15px 0 10px 0;
+        text-align: center;
+    }
+    
+    .subtitle {
+        font-size: clamp(16px, 4vw, 20px);
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .rules {
+        margin: 20px 0;
+        padding: 0 15px;
+        max-width: 100%;
+    }
+    
+    .rules p {
+        margin: 8px 0;
+        font-size: clamp(14px, 3.5vw, 16px);
+        line-height: 1.4;
+        text-align: center;
+    }
+    
+    .buttons-container {
+        gap: 10px;
+        margin-top: 30px;
+        padding: 0 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .note-button {
+        width: clamp(55px, 12vw, 70px);
+        height: clamp(55px, 12vw, 70px);
+        font-size: clamp(18px, 4vw, 24px);
+        min-width: 55px;
+        min-height: 55px;
+        border-radius: 8px;
+    }
+    
+    .control-button {
+        width: clamp(140px, 30vw, 180px);
+        height: clamp(50px, 10vh, 60px);
+        font-size: clamp(16px, 3.5vw, 20px);
+        margin: 10px;
+        border-radius: 8px;
+    }
+    
+    .game-container {
+        padding: 0 10px;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .level-display {
+        font-size: clamp(36px, 8vw, 48px);
+        margin: 20px 0;
+        text-align: center;
+    }
+    
+    .round-counter {
+        font-size: clamp(14px, 3vw, 16px);
+        margin: 10px 0;
+        text-align: center;
+    }
+    
+    .chord-type,
+    .interval-quality,
+    .interval-distance {
+        width: clamp(70px, 15vw, 100px);
+        height: clamp(50px, 10vh, 70px);
+        font-size: clamp(12px, 2.5vw, 16px);
+        min-width: 70px;
+        min-height: 50px;
+        border-radius: 8px;
+    }
+    
+    .harmony1 .chord-type {
+        width: clamp(80px, 18vw, 120px);
+        height: clamp(50px, 10vh, 70px);
+    }
+    
+    .harmony2 .chord-type,
+    .harmony3 .chord-type {
+        width: clamp(75px, 16vw, 110px);
+        height: clamp(50px, 10vh, 70px);
+    }
+    
+    .game-over {
+        padding: 15px;
+        max-width: 95%;
+    }
+    
+    .final-score {
+        font-size: clamp(28px, 6vw, 48px);
+        margin: 15px 0;
+    }
+    
+    .restart-prompt {
+        font-size: clamp(14px, 3vw, 20px);
+        margin-top: 15px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .main-content {
+        padding: 10px 8px;
+    }
+    
+    h1 {
+        font-size: clamp(20px, 5vw, 28px);
+        margin: 10px 0 8px 0;
+    }
+    
+    .subtitle {
+        font-size: clamp(14px, 3.5vw, 18px);
+        margin-bottom: 15px;
+    }
+    
+    .rules {
+        margin: 15px 0;
+        padding: 0 10px;
+    }
+    
+    .rules p {
+        margin: 6px 0;
+        font-size: clamp(13px, 3vw, 15px);
+    }
+    
+    .buttons-container {
+        gap: 8px;
+        margin-top: 25px;
+        padding: 0 5px;
+    }
+    
+    .note-button {
+        width: clamp(50px, 11vw, 65px);
+        height: clamp(50px, 11vw, 65px);
+        font-size: clamp(16px, 3.5vw, 20px);
+        min-width: 50px;
+        min-height: 50px;
+    }
+    
+    .control-button {
+        width: clamp(120px, 28vw, 160px);
+        height: clamp(45px, 9vh, 55px);
+        font-size: clamp(14px, 3vw, 18px);
+        margin: 8px;
+    }
+    
+    .level-display {
+        font-size: clamp(28px, 7vw, 40px);
+        margin: 15px 0;
+    }
+    
+    .chord-type,
+    .interval-quality,
+    .interval-distance {
+        width: clamp(60px, 13vw, 90px);
+        height: clamp(45px, 9vh, 65px);
+        font-size: clamp(11px, 2.2vw, 14px);
+        min-width: 60px;
+        min-height: 45px;
+    }
+    
+    .harmony1 .chord-type {
+        width: clamp(70px, 15vw, 100px);
+        height: clamp(45px, 9vh, 65px);
+    }
+    
+    .harmony2 .chord-type,
+    .harmony3 .chord-type {
+        width: clamp(65px, 14vw, 95px);
+        height: clamp(45px, 9vh, 65px);
+    }
+    
+    .final-score {
+        font-size: clamp(24px, 5vw, 40px);
+        margin: 12px 0;
+    }
+    
+    .restart-prompt {
+        font-size: clamp(12px, 2.5vw, 18px);
+        margin-top: 12px;
+    }
+}
+
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .main-content {
+        padding: 8px 10px;
+        min-height: calc(100vh - 3.5rem - 1rem);
+    }
+    
+    h1 {
+        font-size: clamp(18px, 4vh, 28px);
+        margin: 8px 0 5px 0;
+    }
+    
+    .subtitle {
+        font-size: clamp(13px, 2.8vh, 16px);
+        margin-bottom: 8px;
+    }
+    
+    .buttons-container {
+        margin-top: 15px;
+        gap: 6px;
+    }
+    
+    .note-button {
+        width: clamp(40px, 7vh, 60px);
+        height: clamp(40px, 7vh, 60px);
+        font-size: clamp(14px, 2.8vh, 20px);
+    }
+    
+    .control-button {
+        width: clamp(100px, 20vw, 140px);
+        height: clamp(35px, 7vh, 50px);
+        font-size: clamp(12px, 2.5vh, 16px);
+        margin: 5px;
+    }
+    
+    .level-display {
+        font-size: clamp(24px, 6vh, 40px);
+        margin: 8px 0;
+    }
+    
+    .round-counter {
+        font-size: clamp(12px, 2.5vh, 14px);
+        margin: 5px 0;
+    }
+    
+    .rules {
+        margin: 8px 0;
+        padding: 0 8px;
+    }
+    
+    .rules p {
+        margin: 3px 0;
+        font-size: clamp(11px, 2.2vh, 14px);
+    }
+    
+    .chord-type,
+    .interval-quality,
+    .interval-distance {
+        width: clamp(50px, 10vw, 80px);
+        height: clamp(35px, 7vh, 55px);
+        font-size: clamp(10px, 2vh, 13px);
+    }
+    
+    .game-over {
+        padding: 10px;
+    }
+    
+    .final-score {
+        font-size: clamp(20px, 5vh, 32px);
+        margin: 8px 0;
+    }
+    
+    .restart-prompt {
+        font-size: clamp(11px, 2.2vh, 16px);
+        margin-top: 8px;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    input, select, textarea {
+        font-size: 16px;
+    }
+    
+    .input-container {
+        margin: 20px 0;
+        padding: 0 15px;
+    }
+    
+    .input-container input {
+        width: 100%;
+        max-width: 200px;
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .input-container label {
+        font-size: clamp(14px, 3vw, 16px);
+        margin-bottom: 8px;
+        display: block;
+        text-align: center;
+    }
+    
+    .tap-container {
+        margin: 20px 0;
+        padding: 0 15px;
+    }
+    
+    .tap-button {
+        width: clamp(120px, 25vw, 160px);
+        height: clamp(120px, 25vw, 160px);
+        font-size: clamp(16px, 3.5vw, 20px);
+        border-radius: 50%;
+        margin: 10px;
+    }
+    
+    .bpm-display {
+        font-size: clamp(24px, 5vw, 32px);
+        margin: 15px 0;
+        text-align: center;
+    }
+    
+    .score-display {
+        font-size: clamp(18px, 4vw, 24px);
+        margin: 10px 0;
+        text-align: center;
+    }
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .note-button, .control-button {
+        border: 0.5px solid rgba(255, 255, 255, 0.1);
+    }
+}
+
+.game-center-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.game-center-align {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.game-center-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.game-center-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.game-center-row-gap {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.game-center-column-gap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.game-center-align-gap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.game-center-column-large-gap {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-center-row-large-gap {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.game-center-align-large-gap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.hidden {
+    display: none;
+}
+
+.input-container {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+}
+
+.note-display {
+    display: none;
+}
+
+.beat-indicator {
+    display: none;
+    width: 100px;
+    height: 100px;
+    background-color: rgb(251, 191, 36);
+    border-radius: 50%;
+    margin: 20px auto;
+    transition: all 0.1s ease;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+}
+
+.beat-indicator.active {
+    background-color: rgb(254, 240, 138);
+    box-shadow: 0 0 30px rgba(254, 240, 138, 0.6);
+    transform: scale(1.2);
+}
+
+.ready-display {
+    display: none;
+    text-align: center;
+    margin: 40px 0;
+}
+
+.ready-title {
+    color: rgb(251, 191, 36);
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.ready-text {
+    color: white;
+    font-size: 18px;
+}
+
+.tap-container {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.tap-area {
+    width: 300px;
+    height: 200px;
+    background-color: rgb(40, 40, 40);
+    border: 3px solid rgb(251, 191, 36);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.tap-area:hover {
+    background-color: rgba(251, 191, 36, 0.15);
+    border-color: rgb(251, 191, 36);
+}
+
+.tap-area:active {
+    background-color: rgba(251, 191, 36, 0.2);
+    border-color: rgb(251, 191, 36);
+    transform: scale(0.95);
+}
+
+.tap-text {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.tap-instructions {
+    color: white;
+    font-size: 16px;
+    text-align: center;
+}
+
+.tap-counter {
+    color: rgb(251, 191, 36);
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.buttons-container-column {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.buttons-container-row {
+    display: none;
+    flex-direction: row;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.buttons-container-column-large {
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.buttons-row-large-gap {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 0 10px;
+    height: 120px;
+    align-items: center;
+}
+
+.buttons-row-small-gap {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.spacer-small {
+    height: 5px;
+}
+
+.spacer-large {
+    height: 10px;
+}
+
+.hidden-placeholder {
+    width: 100px;
+    visibility: hidden;
+}
+
+.control-button-block {
+    margin-top: 10px;
+    display: block;
+}
+
+.control-button-hidden {
+    display: none;
+}
+
+.error-message {
+    color: rgb(220, 38, 38);
+    font-size: 16px;
+    text-align: center;
+    display: none;
+}
+
+.cents-label {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.play-again-button {
+    display: none;
+}
+
+.continue-button {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.interval-quality,
+.interval-distance {
+    width: clamp(60px, 12vw, 100px);
+    height: clamp(60px, 12vw, 100px);
+    min-width: 60px;
+    min-height: 60px;
+    background-color: rgb(43, 43, 43);
+    border: none;
+    border-radius: clamp(8px, 2vw, 10px);
+    color: white;
+    font-size: clamp(12px, 3vw, 16px);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    padding: 5px;
+}
+
+.interval-quality:hover,
+.interval-distance:hover {
+    background-color: rgb(60, 60, 60);
+    transform: scale(1.05);
+}
+
+.interval-quality:active,
+.interval-distance:active {
+    transform: scale(0.95);
+}
+
+.interval-quality.selected,
+.interval-distance.selected {
+    background-color: rgb(254, 240, 138);
+    box-shadow: 0 0 20px rgba(254, 240, 138, 0.5);
+    transform: scale(1.05);
+    color: #000000;
+}
+
+.interval-quality.correct,
+.interval-distance.correct {
+    background-color: rgb(34, 197, 94);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+    transform: scale(1.05);
+}
+
+.interval-quality.active,
+.interval-distance.active {
+    cursor: pointer;
+    pointer-events: auto;
+    opacity: 1;
+}
+
+.interval-quality:not(.active),
+.interval-distance:not(.active) {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.chord-type {
+    width: clamp(60px, 12vw, 100px);
+    height: clamp(60px, 12vw, 100px);
+    min-width: 60px;
+    min-height: 60px;
+    background-color: rgb(43, 43, 43);
+    border: none;
+    border-radius: clamp(8px, 2vw, 10px);
+    color: white;
+    font-size: clamp(12px, 3vw, 16px);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.chord-type:hover {
+    background-color: rgb(60, 60, 60);
+    transform: scale(1.05);
+}
+
+.chord-type:active {
+    transform: scale(0.95);
+}
+
+.chord-type.selected {
+    background-color: rgb(254, 240, 138);
+    box-shadow: 0 0 20px rgba(254, 240, 138, 0.5);
+    color: #000000;
+}
+
+.chord-type.correct {
+    background-color: rgb(34, 197, 94);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+}
+
+.chord-type.active {
+    cursor: pointer;
+    pointer-events: auto;
+    opacity: 1;
+}
+
+.chord-type:not(.active) {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.extension-type {
+    width: clamp(80px, 15vw, 120px);
+    height: clamp(60px, 12vw, 100px);
+    min-width: 80px;
+    min-height: 60px;
+    background-color: rgb(43, 43, 43);
+    border: none;
+    border-radius: clamp(8px, 2vw, 10px);
+    color: white;
+    font-size: clamp(10px, 2.5vw, 14px);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    padding: 5px;
+}
+
+.extension-type:hover {
+    background-color: rgb(60, 60, 60);
+    transform: scale(1.05);
+}
+
+.extension-type:active {
+    transform: scale(0.95);
+}
+
+.extension-type.selected {
+    background-color: rgb(254, 240, 138);
+    box-shadow: 0 0 20px rgba(254, 240, 138, 0.5);
+    transform: scale(1.05);
+    color: #000000;
+}
+
+.extension-type.correct {
+    background-color: rgb(34, 197, 94);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+    transform: scale(1.05);
+}
+
+.extension-type.active {
+    cursor: pointer;
+    pointer-events: auto;
+    opacity: 1;
+}
+
+.extension-type:not(.active) {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.harmony1 .chord-type {
+    width: clamp(60px, 12vw, 100px);
+    height: clamp(60px, 12vw, 100px);
+    min-width: 60px;
+    min-height: 60px;
+    font-size: clamp(12px, 3vw, 16px);
+}
+
+.harmony2 .chord-type,
+.harmony3 .chord-type {
+    width: clamp(60px, 12vw, 100px);
+    height: clamp(60px, 12vw, 100px);
+    min-width: 60px;
+    min-height: 60px;
+    font-size: clamp(12px, 3vw, 16px);
+}
+
+.game-input {
+    padding: 12px 20px;
+    font-size: 18px;
+    border: 2px solid rgb(251, 191, 36);
+    border-radius: 8px;
+    background-color: rgb(43, 43, 43);
+    color: white;
+    text-align: center;
+    width: 200px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.game-input:focus {
+    border-color: rgb(254, 240, 138);
+    box-shadow: 0 0 10px rgba(254, 240, 138, 0.3);
+}
+
+.black-note {
+    background-color: #333;
+}
+
+.white-note {
+    background-color: #666;
+}
+
+.melody-background::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-size: cover;
+    background-color: black;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: grayscale(100%) brightness(0.18);
+}

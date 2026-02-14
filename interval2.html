@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Interval II — Musical Metrics: interval ear-training game. Identify and compare musical intervals.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Interval II — Musical Metrics">
+  <meta property="og:description" content="Interval ear-training game. Identify intervals by ear.">
+  <meta property="og:image" content="https://musicalmetrics.xyz/amtf.png">
+  <meta property="og:url" content="https://musicalmetrics.xyz/interval2">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Interval II — Musical Metrics">
+  <meta name="twitter:description" content="Interval ear-training game.">
+  <meta name="twitter:image" content="https://musicalmetrics.xyz/amtf.png">
+  <title>Interval II</title>
+  <link rel="canonical" href="https://musicalmetrics.xyz/interval2">
+  <link rel="icon" type="image/svg+xml" href="music-logo.svg?v=1">
+  <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
+  <link rel="stylesheet" href="game.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <div class="header-content">
+        <div class="logo-container">
+          <a href="/" class="logo-link">
+            <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo" />
+            <h1 class="logo">MUSICAL METRICS</h1>
+          </a>
+        </div>
+        <nav class="nav">
+          <a href="/dashboard" class="nav-link">DASHBOARD</a>
+          <a href="/about" class="nav-link">ABOUT</a>
+        </nav>
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+          <i data-lucide="menu" class="hamburger-icon"></i>
+        </button>
+        <div class="mobile-menu" id="mobile-menu">
+          <div class="mobile-menu-links">
+            <a href="/dashboard" class="mobile-menu-link">DASHBOARD</a>
+            <a href="/about" class="mobile-menu-link">ABOUT</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <h1>Interval II</h1>
+    <p class="subtitle">Test your interval recognition skills with extended range!</p>
+
+    <div class="rules">
+      <p>Listen to two notes played in rising or falling sequence and identify the interval.</p>
+      <p>Each level uses a random first note.</p>
+      <p>For compound intervals (spanning more than an octave), identify the simple equivalent.</p>
+      <p>Select the quality and the distance.</p>
+      <div class="game-center-container">
+        <button id="continueBtn" class="control-button">Continue</button>
+      </div>
+    </div>
+
+    <div class="game-container">
+      <div class="level-display">Round <span id="levelNum">1</span></div>
+      <div class="round-counter">Round <span id="roundNum">1</span> of 10</div>
+
+      <div class="buttons-container" class="buttons-container-column">
+        <div class="game-center-row-gap">
+          <button class="interval-quality" data-quality="major">Major</button>
+          <button class="interval-quality" data-quality="minor">Minor</button>
+          <button class="interval-quality" data-quality="perfect">Perfect</button>
+          <button class="interval-quality" data-quality="diminished">Diminished</button>
+          <button class="interval-quality" data-quality="augmented">Augmented</button>
+        </div>
+        <div class="spacer-small"></div>
+        <div class="game-center-row-gap">
+          <button class="interval-distance" data-distance="2">2nd</button>
+          <button class="interval-distance" data-distance="3">3rd</button>
+          <button class="interval-distance" data-distance="4">4th</button>
+          <button class="interval-distance" data-distance="5">5th</button>
+          <button class="interval-distance" data-distance="6">6th</button>
+          <button class="interval-distance" data-distance="7">7th</button>
+          <button class="interval-distance" data-distance="8">8th</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-over">
+      <div class="final-score">Final Score: <span id="finalScore">0</span></div>
+      <div class="game-center-align-large-gap">
+        <button id="playAgainBtn" class="control-button">Play Again</button>
+        <button id="homeBtn" class="control-button">Return to home</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img" />
+          <span class="footer-brand">Musical Metrics</span>
+        </div>
+        <div class="footer-info">
+          <div class="footer-links">
+            <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+              <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo" />
+              <span class="amtf-text">Athens Music Technology Forum</span>
+            </a>
+          </div>
+          <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const notes = {};
+    const audioFiles = {
+      'c2': 'sounds/C2.mp3', 'c#2': 'sounds/C%232.mp3', 'd2': 'sounds/D2.mp3', 'd#2': 'sounds/D%232.mp3',
+      'e2': 'sounds/E2.mp3', 'f2': 'sounds/F2.mp3', 'f#2': 'sounds/F%232.mp3', 'g2': 'sounds/G2.mp3',
+      'g#2': 'sounds/G%232.mp3', 'a2': 'sounds/A2.mp3', 'a#2': 'sounds/A%232.mp3', 'b2': 'sounds/B2.mp3',
+      'c3': 'sounds/C3.mp3', 'c#3': 'sounds/C%233.mp3', 'd3': 'sounds/D3.mp3', 'd#3': 'sounds/D%233.mp3',
+      'e3': 'sounds/E3.mp3', 'f3': 'sounds/F3.mp3', 'f#3': 'sounds/F%233.mp3', 'g3': 'sounds/G3.mp3',
+      'g#3': 'sounds/G%233.mp3', 'a3': 'sounds/A3.mp3', 'a#3': 'sounds/A%233.mp3', 'b3': 'sounds/B3.mp3',
+      'c4': 'sounds/C4.mp3', 'c#4': 'sounds/C%234.mp3', 'd4': 'sounds/D4.mp3', 'd#4': 'sounds/D%234.mp3',
+      'e4': 'sounds/E4.mp3', 'f4': 'sounds/F4.mp3', 'f#4': 'sounds/F%234.mp3', 'g4': 'sounds/G4.mp3',
+      'g#4': 'sounds/G%234.mp3', 'a4': 'sounds/A4.mp3', 'a#4': 'sounds/A%234.mp3', 'b4': 'sounds/B4.mp3',
+      'c5': 'sounds/C5.mp3'
+    };
+
+    Object.entries(audioFiles).forEach(([key, path]) => {
+      const audio = new Audio(path);
+      audio.load();
+      notes[key] = audio;
+    });
+
+    let level = 1;
+    let maxLevels = 10;
+    let score = 0;
+    let firstNote = null;
+    let secondNote = null;
+    let selectedQuality = null;
+    let selectedDistance = null;
+    let gameActive = false;
+    let gameOver = false;
+
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const continueBtn = document.getElementById('continueBtn');
+    const qualityButtons = document.querySelectorAll('.interval-quality');
+    const distanceButtons = document.querySelectorAll('.interval-distance');
+    const rulesDiv = document.querySelector('.rules');
+    const levelDisplay = document.querySelector('.level-display');
+    const gameOverDiv = document.querySelector('.game-over');
+    const buttonsContainer = document.querySelector('.buttons-container');
+    const roundCounter = document.querySelector('.round-counter');
+    const homeBtn = document.getElementById('homeBtn');
+
+    const noteMap = {
+      'c2': -24, 'c#2': -23, 'd2': -22, 'd#2': -21, 'e2': -20, 'f2': -19, 'f#2': -18, 'g2': -17, 'g#2': -16, 'a2': -15, 'a#2': -14, 'b2': -13,
+      'c3': -12, 'c#3': -11, 'd3': -10, 'd#3': -9, 'e3': -8, 'f3': -7, 'f#3': -6, 'g3': -5, 'g#3': -4, 'a3': -3, 'a#3': -2, 'b3': -1,
+      'c4': 0, 'c#4': 1, 'd4': 2, 'd#4': 3, 'e4': 4, 'f4': 5, 'f#4': 6, 'g4': 7, 'g#4': 8, 'a4': 9, 'a#4': 10, 'b4': 11,
+      'c5': 12
+    };
+
+    const intervalMap = {
+      0: { quality: 'perfect', distance: 1 },
+      1: { quality: 'minor', distance: 2 },
+      2: { quality: 'major', distance: 2 },
+      3: { quality: 'minor', distance: 3 },
+      4: { quality: 'major', distance: 3 },
+      5: { quality: 'perfect', distance: 4 },
+      6: { quality: 'augmented', distance: 4 },
+      7: { quality: 'perfect', distance: 5 },
+      8: { quality: 'minor', distance: 6 },
+      9: { quality: 'major', distance: 6 },
+      10: { quality: 'minor', distance: 7 },
+      11: { quality: 'major', distance: 7 },
+      12: { quality: 'perfect', distance: 8 }
+    };
+
+    async function playInterval() {
+      buttonsContainer.style.display = 'none';
+      levelDisplay.style.display = 'block';
+      document.getElementById('levelNum').textContent = level;
+      document.getElementById('roundNum').textContent = level;
+
+      setTimeout(async () => {
+        levelDisplay.style.display = 'none';
+        buttonsContainer.style.display = 'flex';
+        roundCounter.style.display = 'block';
+
+        const allNoteNames = Object.keys(audioFiles);
+        firstNote = allNoteNames[Math.floor(Math.random() * allNoteNames.length)];
+        const otherNotes = allNoteNames.filter(n => n !== firstNote);
+        secondNote = otherNotes[Math.floor(Math.random() * otherNotes.length)];
+
+        const firstAudio = new Audio(audioFiles[firstNote]);
+        await firstAudio.play();
+        await new Promise(r => setTimeout(r, 1000));
+        const secondAudio = new Audio(audioFiles[secondNote]);
+        await secondAudio.play();
+
+        qualityButtons.forEach(btn => btn.classList.add('active'));
+        distanceButtons.forEach(btn => btn.classList.add('active'));
+      }, 2000);
+    }
+
+    function checkAnswer() {
+      if (!selectedQuality || !selectedDistance) return;
+
+      qualityButtons.forEach(btn => btn.classList.remove('active'));
+      distanceButtons.forEach(btn => btn.classList.remove('active'));
+
+      const semitones = Math.abs(noteMap[secondNote] - noteMap[firstNote]);
+      const simpleSemitones = (semitones % 12 === 0 && semitones !== 0) ? 12 : (semitones % 12);
+      const correctInterval = intervalMap[simpleSemitones] || { quality: 'unknown', distance: 8 };
+
+      const isCorrect =
+        selectedQuality === correctInterval.quality &&
+        parseInt(selectedDistance, 10) === parseInt(correctInterval.distance, 10);
+
+      if (isCorrect) {
+        qualityButtons.forEach(btn => {
+          if (btn.dataset.quality === selectedQuality) btn.classList.add('correct');
+        });
+        distanceButtons.forEach(btn => {
+          if (btn.dataset.distance === selectedDistance) btn.classList.add('correct');
+        });
+
+        score++;
+
+        setTimeout(() => {
+          level++;
+          selectedQuality = null;
+          selectedDistance = null;
+          qualityButtons.forEach(btn => btn.classList.remove('selected', 'correct'));
+          distanceButtons.forEach(btn => btn.classList.remove('selected', 'correct'));
+
+          if (level > maxLevels) {
+            gameActive = false;
+            gameOver = true;
+            document.getElementById('finalScore').textContent = `${score}/${maxLevels}`;
+            gameOverDiv.style.display = 'block';
+            playAgainBtn.style.display = 'block';
+            homeBtn.style.display = 'block';
+          } else {
+            playInterval();
+          }
+        }, 500);
+      } else {
+        qualityButtons.forEach(btn => {
+          if (btn.dataset.quality === selectedQuality) {
+            btn.style.backgroundColor = 'rgb(220, 38, 38)';
+            btn.style.boxShadow = '0 0 20px rgba(220, 38, 38, 0.5)';
+          }
+        });
+        distanceButtons.forEach(btn => {
+          if (btn.dataset.distance === selectedDistance) {
+            btn.style.backgroundColor = 'rgb(220, 38, 38)';
+            btn.style.boxShadow = '0 0 20px rgba(220, 38, 38, 0.5)';
+          }
+        });
+
+        setTimeout(() => {
+          level++;
+          selectedQuality = null;
+          selectedDistance = null;
+          qualityButtons.forEach(btn => {
+            btn.classList.remove('selected', 'correct');
+            btn.style.backgroundColor = '';
+            btn.style.boxShadow = '';
+          });
+          distanceButtons.forEach(btn => {
+            btn.classList.remove('selected', 'correct');
+            btn.style.backgroundColor = '';
+            btn.style.boxShadow = '';
+          });
+
+          if (level > maxLevels) {
+            gameActive = false;
+            gameOver = true;
+            document.getElementById('finalScore').textContent = `${score}/${maxLevels}`;
+            gameOverDiv.style.display = 'block';
+            playAgainBtn.style.display = 'block';
+            homeBtn.style.display = 'block';
+          } else {
+            playInterval();
+          }
+        }, 1000);
+      }
+    }
+
+    function startGame() {
+      level = 1;
+      score = 0;
+      gameActive = true;
+      gameOver = false;
+      selectedQuality = null;
+      selectedDistance = null;
+
+      qualityButtons.forEach(btn => btn.classList.remove('selected', 'correct', 'active'));
+      distanceButtons.forEach(btn => btn.classList.remove('selected', 'correct', 'active'));
+
+      rulesDiv.style.display = 'block';
+      playAgainBtn.style.display = 'none';
+      gameOverDiv.style.display = 'none';
+      homeBtn.style.display = 'none';
+      continueBtn.style.display = 'block';
+      buttonsContainer.style.display = 'none';
+      roundCounter.style.display = 'none';
+    }
+
+    window.addEventListener('load', startGame);
+
+    continueBtn.addEventListener('click', () => {
+      rulesDiv.style.display = 'none';
+      continueBtn.style.display = 'none';
+      buttonsContainer.style.display = 'flex';
+      playInterval();
+    });
+
+    qualityButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        if (gameActive && button.classList.contains('active')) {
+          qualityButtons.forEach(btn => btn.classList.remove('selected'));
+          button.classList.add('selected');
+          selectedQuality = button.dataset.quality;
+          if (selectedDistance) checkAnswer();
+        }
+      });
+    });
+
+    distanceButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        if (gameActive && button.classList.contains('active')) {
+          distanceButtons.forEach(btn => btn.classList.remove('selected'));
+          button.classList.add('selected');
+          selectedDistance = button.dataset.distance;
+          if (selectedQuality) checkAnswer();
+        }
+      });
+    });
+
+    playAgainBtn.addEventListener('click', startGame);
+
+    homeBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    buttonsContainer.style.display = 'none';
+
+    lucide.createIcons();
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      if (mobileMenuToggle && mobileMenu) {
+        mobileMenuToggle.addEventListener('click', function() {
+          mobileMenu.classList.toggle('active');
+          mobileMenuToggle.classList.toggle('active');
+        });
+
+        const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+        mobileMenuLinks.forEach(link => {
+          link.addEventListener('click', function() {
+            mobileMenu.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+          });
+        });
+
+        document.addEventListener('click', function(event) {
+          if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+            mobileMenu.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+          }
+        });
+      }
+    });
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

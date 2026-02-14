@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Musical Metrics dashboard — view scores and play ear-training games: melody, harmony, interval, pitch, rhythm, tempo.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Dashboard — Musical Metrics">
+    <meta property="og:description" content="View scores and play ear-training games.">
+    <meta property="og:image" content="https://musicalmetrics.xyz/amtf.png">
+    <meta property="og:url" content="https://musicalmetrics.xyz/dashboard">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Dashboard — Musical Metrics">
+    <meta name="twitter:description" content="View scores and play ear-training games.">
+    <meta name="twitter:image" content="https://musicalmetrics.xyz/amtf.png">
+    <title>Dashboard - Musical Metrics</title>
+    <link rel="canonical" href="https://musicalmetrics.xyz/dashboard">
+    <link rel="icon" type="image/svg+xml" href="music-logo.svg?v=1">
+    <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
+    <link rel="stylesheet" href="globals.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <a href="/" class="logo-link">
+                        <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+                        <h1 class="logo">MUSICAL METRICS</h1>
+                    </a>
+                </div>
+                
+                <nav class="nav">
+                    <a href="/dashboard" class="nav-link active">DASHBOARD</a>
+                    <a href="/about" class="nav-link">ABOUT</a>
+                </nav>
+                
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <i data-lucide="menu" class="hamburger-icon"></i>
+                </button>
+                
+                <div class="mobile-menu" id="mobile-menu">
+                    <div class="mobile-menu-links">
+                        <a href="/dashboard" class="mobile-menu-link active">DASHBOARD</a>
+                        <a href="/about" class="mobile-menu-link">ABOUT</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-tests-card">
+            <div class="dashboard-tests-header">
+                <h2 class="dashboard-tests-title">Musical Tests</h2>
+            </div>
+            
+            <div class="dashboard-tests-table">
+                <div class="dashboard-tests-table-header">
+                    <div class="dashboard-tests-table-cell header-cell">Test</div>
+                    <div class="dashboard-tests-table-cell header-cell">Actions</div>
+                    <div class="dashboard-tests-table-cell header-cell">
+                        Score
+                        <i data-lucide="info" class="info-icon"></i>
+                    </div>
+                    <div class="dashboard-tests-table-cell header-cell">
+                        Percentile
+                        <i data-lucide="info" class="info-icon"></i>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Melody I</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Melody II</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Melody III</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Interval I</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Interval II</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Harmony I</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Harmony II</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Harmony III</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Tempo I</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Tempo II</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Pitch I</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tests-table-row">
+                    <div class="dashboard-tests-table-cell test-name">Rhythm I</div>
+                    <div class="dashboard-tests-table-cell actions-cell">
+                        <button class="dashboard-action-button play-button">
+                            <i data-lucide="play" class="action-icon"></i>
+                            Play
+                        </button>
+                        <button class="dashboard-action-button stats-button">
+                            <i data-lucide="bar-chart-3" class="action-icon"></i>
+                            Stats
+                        </button>
+                    </div>
+                    <div class="dashboard-tests-table-cell score-cell">?</div>
+                    <div class="dashboard-tests-table-cell percentile-cell">
+                        ?
+                        <div class="percentile-bar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img">
+                    <span class="footer-brand">Musical Metrics</span>
+                </div>
+                <div class="footer-info">
+                    <div class="footer-links">
+                        <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+                            <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo">
+                            <span class="amtf-text">Athens Music Technology Forum</span>
+                        </a>
+                    </div>
+                    <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        
+        lucide.createIcons();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('active');
+                    mobileMenuToggle.classList.toggle('active');
+                });
+                
+                const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+                mobileMenuLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    });
+                });
+                
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    }
+                });
+            }
+        });
+
+        document.querySelectorAll('.play-button').forEach((button, index) => {
+            button.addEventListener('click', () => {
+                const testNames = [
+                    '/melody1',
+                    '/melody2',
+                    '/melody3',
+                    '/interval1',
+                    '/interval2',
+                    '/harmony1',
+                    '/harmony2',
+                    '/harmony3',
+                    '/tempo1',
+                    '/tempo2',
+                    '/pitch1',
+                    '/rhythm1'
+                ];
+                
+                if (testNames[index]) {
+                    window.location.href = testNames[index];
+                }
+            });
+        });
+
+        document.querySelectorAll('.stats-button').forEach((button) => {
+            button.addEventListener('click', () => {
+                alert('Stats feature coming soon!');
+            });
+        });
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

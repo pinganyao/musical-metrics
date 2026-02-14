@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="About Musical Metrics — ear-training games for pitch, rhythm, harmony, and more. For musicians and beginners. Part of research on hearing ability.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="About — Musical Metrics">
+    <meta property="og:description" content="Ear-training games testing listening ability. For musicians and beginners.">
+    <meta property="og:image" content="https://musicalmetrics.xyz/amtf.png">
+    <meta property="og:url" content="https://musicalmetrics.xyz/about">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="About — Musical Metrics">
+    <meta name="twitter:description" content="Ear-training games testing listening ability.">
+    <meta name="twitter:image" content="https://musicalmetrics.xyz/amtf.png">
+    <title>About - Musical Metrics</title>
+    <link rel="canonical" href="https://musicalmetrics.xyz/about">
+    <link rel="icon" type="image/svg+xml" href="music-logo.svg?v=1">
+    <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
+    <link rel="stylesheet" href="globals.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <a href="/" class="logo-link">
+                        <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+                        <h1 class="logo">MUSICAL METRICS</h1>
+                    </a>
+                </div>
+                
+                <nav class="nav">
+                    <a href="/dashboard" class="nav-link">DASHBOARD</a>
+                    <a href="/about" class="nav-link active">ABOUT</a>
+                </nav>
+                
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <i data-lucide="menu" class="hamburger-icon"></i>
+                </button>
+                
+                <div class="mobile-menu" id="mobile-menu">
+                    <div class="mobile-menu-links">
+                        <a href="/dashboard" class="mobile-menu-link">DASHBOARD</a>
+                        <a href="/about" class="mobile-menu-link active">ABOUT</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="about-main">
+        <div class="about-container">
+            <div class="about-content">
+                <div class="about-logo-container">
+                    <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="about-logo">
+                </div>
+                <h1 class="about-title">About Musical Metrics</h1>
+                
+                <div class="about-description">
+                    <p>Musical Metrics is a set of 12 simple and creative music games that test the players' listening ability in various aspects of music and hearing, examining a diverse range of listening skills such as relative pitch and rhythmic recognition. The games are part of an ongoing research to explore hearing ability as a major component of a musician's progression.</p>
+                    
+                    <p>The games are of various difficulty levels. Some are beginner-friendly and are accessible to people with no musical experience, while some test the capacity of even the most proficient musicians. A few games require a certain level of understanding of musical theory and terminology, but are nonetheless playable after a few practices.</p>
+                    
+                    <p>Musical Metrics isn't only a useful tool for testing players' hearing ability, but also a great method of ear-training, all while having fun, whether that's competing with friends and family, or going against other musicians.</p>
+                </div>
+                
+                <div class="about-buttons">
+                    <a href="melody1.html" class="about-button primary-button">
+                        <i data-lucide="play" class="button-icon"></i>
+                        Start Playing
+                    </a>
+                    <a href="dashboard.html" class="about-button secondary-button">
+                        <i data-lucide="bar-chart-3" class="button-icon"></i>
+                        Go to Dashboard
+                    </a>
+                </div>
+                
+                <div class="about-creator">
+                    <p class="creator-text">Made by <a href="https://yaopingan.com" target="_blank" rel="noopener noreferrer" class="creator-link">Patrick Yao</a></p>
+                    
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/ytpyao/" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <i data-lucide="instagram" class="social-icon"></i>
+                        </a>
+                        <a href="https://www.youtube.com/@patrickyao/videos" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <img src="youtube.svg" alt="YouTube" class="social-icon">
+                        </a>
+                        <a href="https://www.linkedin.com/in/pinganyao/" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <img src="linkedin.svg" alt="LinkedIn" class="social-icon">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img">
+                    <span class="footer-brand">Musical Metrics</span>
+                </div>
+                <div class="footer-info">
+                    <div class="footer-links">
+                        <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+                            <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo">
+                            <span class="amtf-text">Athens Music Technology Forum</span>
+                        </a>
+                    </div>
+                    <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+
+        lucide.createIcons();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('active');
+                    mobileMenuToggle.classList.toggle('active');
+                });
+                
+                const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+                mobileMenuLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    });
+                });
+                
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

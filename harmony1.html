@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Harmony I — Musical Metrics: harmony ear-training game. Chord and harmony recognition.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Harmony I — Musical Metrics">
+    <meta property="og:description" content="Harmony ear-training game. Chord recognition.">
+    <meta property="og:image" content="https://musicalmetrics.xyz/amtf.png">
+    <meta property="og:url" content="https://musicalmetrics.xyz/harmony1">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Harmony I — Musical Metrics">
+    <meta name="twitter:description" content="Harmony ear-training game.">
+    <meta name="twitter:image" content="https://musicalmetrics.xyz/amtf.png">
+    <title>Harmony I</title>
+    <link rel="canonical" href="https://musicalmetrics.xyz/harmony1">
+    <link rel="stylesheet" href="game.css" />
+    <link rel="icon" type="image/svg+xml" href="music-logo.svg?v=1">
+    <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <a href="/" class="logo-link">
+                        <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+                        <h1 class="logo">MUSICAL METRICS</h1>
+                    </a>
+                </div>
+                <nav class="nav">
+                    <a href="/dashboard" class="nav-link">DASHBOARD</a>
+                    <a href="/about" class="nav-link">ABOUT</a>
+                </nav>
+                
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <i data-lucide="menu" class="hamburger-icon"></i>
+                </button>
+                
+                <div class="mobile-menu" id="mobile-menu">
+                    <div class="mobile-menu-links">
+                        <a href="/dashboard" class="mobile-menu-link">DASHBOARD</a>
+                        <a href="/about" class="mobile-menu-link">ABOUT</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <h1>Harmony I</h1>
+        <p class="subtitle">Test your chord recognition skills!</p>
+
+        <div class="rules">
+            <p>Listen to the triad played and identify the chord type.</p>
+            <p>No inversions - all chords are played in root position.</p>
+            <div class="game-center-container">
+                <button id="continueBtn" class="control-button">Continue</button>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <div class="level-display">Round <span id="levelNum">1</span></div>
+            <div class="round-counter">Round <span id="roundNum">1</span> of 10</div>
+            
+            <div class="buttons-container" style="display: none; flex-direction: row; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button class="chord-type" data-type="major">Major</button>
+                <button class="chord-type" data-type="minor">Minor</button>
+                <button class="chord-type" data-type="diminished">Diminished</button>
+                <button class="chord-type" data-type="augmented">Augmented</button>
+                <button class="chord-type" data-type="sus2">Sus2</button>
+                <button class="chord-type" data-type="sus4">Sus4</button>
+            </div>
+        </div>
+
+        <div class="game-over">
+            <div class="final-score">Final Score: <span id="finalScore">0</span></div>
+            <div class="game-center-align-large-gap">
+                <button id="playAgainBtn" class="control-button">Play Again</button>
+                <button id="homeBtn" class="control-button">Return to home</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img" />
+                    <span class="footer-brand">Musical Metrics</span>
+                </div>
+                <div class="footer-info">
+                    <div class="footer-links">
+                        <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+                            <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo" />
+                            <span class="amtf-text">Athens Music Technology Forum</span>
+                        </a>
+                    </div>
+                    <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const notes = {};
+        const audioFiles = {
+            'c3': 'sounds/C3.mp3', 'c#3': 'sounds/C%233.mp3', 'd3': 'sounds/D3.mp3', 'd#3': 'sounds/D%233.mp3',
+            'e3': 'sounds/E3.mp3', 'f3': 'sounds/F3.mp3', 'f#3': 'sounds/F%233.mp3', 'g3': 'sounds/G3.mp3',
+            'g#3': 'sounds/G%233.mp3', 'a3': 'sounds/A3.mp3', 'a#3': 'sounds/A%233.mp3', 'b3': 'sounds/B3.mp3',
+            'c4': 'sounds/C4.mp3', 'c#4': 'sounds/C%234.mp3', 'd4': 'sounds/D4.mp3', 'd#4': 'sounds/D%234.mp3',
+            'e4': 'sounds/E4.mp3', 'f4': 'sounds/F4.mp3', 'f#4': 'sounds/F%234.mp3', 'g4': 'sounds/G4.mp3',
+            'g#4': 'sounds/G%234.mp3', 'a4': 'sounds/A4.mp3', 'a#4': 'sounds/A%234.mp3', 'b4': 'sounds/B4.mp3'
+        };
+
+        Object.entries(audioFiles).forEach(([key, path]) => {
+            const audio = new Audio(path);
+            audio.load();
+            notes[key] = audio;
+        });
+
+        let level = 1;
+        let maxLevels = 10;
+        let score = 0;
+        let currentChord = null;
+        let selectedChordType = null;
+        let gameActive = false;
+        let gameOver = false;
+
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const chordTypeButtons = document.querySelectorAll('.chord-type');
+        const rulesDiv = document.querySelector('.rules');
+        const levelDisplay = document.querySelector('.level-display');
+        const gameOverDiv = document.querySelector('.game-over');
+        const buttonsContainer = document.querySelector('.buttons-container');
+        const roundCounter = document.querySelector('.round-counter');
+        const homeBtn = document.getElementById('homeBtn');
+
+        const chordTypes = {
+            'major': [0, 4, 7],
+            'minor': [0, 3, 7],
+            'diminished': [0, 3, 6],
+            'augmented': [0, 4, 8],
+            'sus2': [0, 2, 7],
+            'sus4': [0, 5, 7]
+        };
+
+        const noteNames = ['c3', 'c#3', 'd3', 'd#3', 'e3', 'f3', 'f#3', 'g3', 'g#3', 'a3', 'a#3', 'b3',
+                          'c4', 'c#4', 'd4', 'd#4', 'e4', 'f4', 'f#4', 'g4', 'g#4', 'a4', 'a#4', 'b4'];
+
+        async function playChord() {
+            buttonsContainer.style.display = 'none';
+            levelDisplay.style.display = 'block';
+            document.getElementById('levelNum').textContent = level;
+            document.getElementById('roundNum').textContent = level;
+            
+            setTimeout(async () => {
+                levelDisplay.style.display = 'none';
+                buttonsContainer.style.display = 'flex';
+                roundCounter.style.display = 'block';
+                
+                const chordTypeNames = Object.keys(chordTypes);
+                const randomChordType = chordTypeNames[Math.floor(Math.random() * chordTypeNames.length)];
+                
+                const chordIntervals = chordTypes[randomChordType];
+                const maxInterval = Math.max(...chordIntervals);
+                
+                const availableRoots = noteNames.slice(0, noteNames.length - maxInterval);
+                const randomRoot = availableRoots[Math.floor(Math.random() * availableRoots.length)];
+                
+                const rootIndex = noteNames.indexOf(randomRoot);
+                const chordNotes = chordIntervals.map(interval => {
+                    return noteNames[rootIndex + interval];
+                });
+                
+                currentChord = {
+                    type: randomChordType,
+                    root: randomRoot,
+                    notes: chordNotes
+                };
+                
+                const audioPromises = chordNotes.map(noteName => {
+                    const audio = new Audio(audioFiles[noteName]);
+                    audio.volume = 0.7;
+                    return audio.play();
+                });
+                
+                await Promise.all(audioPromises);
+                
+                chordTypeButtons.forEach(btn => btn.classList.add('active'));
+            }, 2000);
+        }
+
+        function checkAnswer() {
+            if (!selectedChordType) return;
+
+            chordTypeButtons.forEach(btn => btn.classList.remove('active'));
+            
+            if (selectedChordType === currentChord.type) {
+                chordTypeButtons.forEach(btn => {
+                    if (btn.dataset.type === selectedChordType) {
+                        btn.classList.add('correct');
+                    }
+                });
+                
+                score++;
+                
+                setTimeout(() => {
+                    level++;
+                    selectedChordType = null;
+                    chordTypeButtons.forEach(btn => {
+                        btn.classList.remove('selected', 'correct');
+                    });
+                    
+                    if (level > maxLevels) {
+                        gameActive = false;
+                        gameOver = true;
+                        document.getElementById('finalScore').textContent = `${score}/${maxLevels}`;
+                        gameOverDiv.style.display = 'block';
+                        playAgainBtn.style.display = 'block';
+                        homeBtn.style.display = 'block';
+                    } else {
+                        playChord();
+                    }
+                }, 500);
+            } else {
+                chordTypeButtons.forEach(btn => {
+                    if (btn.dataset.type === selectedChordType) {
+                        btn.style.backgroundColor = 'rgb(220, 38, 38)';
+                        btn.style.boxShadow = '0 0 20px rgba(220, 38, 38, 0.5)';
+                    }
+                });
+                
+                setTimeout(() => {
+                    level++;
+                    selectedChordType = null;
+                    chordTypeButtons.forEach(btn => {
+                        btn.classList.remove('selected', 'correct');
+                        btn.style.backgroundColor = '';
+                        btn.style.boxShadow = '';
+                    });
+                    
+                    if (level > maxLevels) {
+                        gameActive = false;
+                        gameOver = true;
+                        document.getElementById('finalScore').textContent = `${score}/${maxLevels}`;
+                        gameOverDiv.style.display = 'block';
+                        playAgainBtn.style.display = 'block';
+                        homeBtn.style.display = 'block';
+                    } else {
+                        playChord();
+                    }
+                }, 1000);
+            }
+        }
+
+        function startGame() {
+            level = 1;
+            score = 0;
+            gameActive = true;
+            gameOver = false;
+            selectedChordType = null;
+            
+            chordTypeButtons.forEach(btn => {
+                btn.classList.remove('selected', 'correct', 'active');
+                btn.style.backgroundColor = '';
+                btn.style.boxShadow = '';
+            });
+            
+            rulesDiv.style.display = 'block';
+            playAgainBtn.style.display = 'none';
+            gameOverDiv.style.display = 'none';
+            homeBtn.style.display = 'none';
+            continueBtn.style.display = 'block';
+            buttonsContainer.style.display = 'none';
+            roundCounter.style.display = 'none';
+        }
+
+        window.addEventListener('load', startGame);
+
+        continueBtn.addEventListener('click', () => {
+            rulesDiv.style.display = 'none';
+            continueBtn.style.display = 'none';
+            buttonsContainer.style.display = 'flex';
+            playChord();
+        });
+
+        chordTypeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (gameActive && button.classList.contains('active')) {
+                    chordTypeButtons.forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    selectedChordType = button.dataset.type;
+                    checkAnswer();
+                }
+            });
+        });
+
+        playAgainBtn.addEventListener('click', startGame);
+
+        homeBtn.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        buttonsContainer.style.display = 'none';
+        
+        lucide.createIcons();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('active');
+                    mobileMenuToggle.classList.toggle('active');
+                });
+                
+                const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+                mobileMenuLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    });
+                });
+                
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Tempo I — Musical Metrics: tempo and timing ear-training game. Match and identify tempo by ear.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tempo I — Musical Metrics">
+  <meta property="og:description" content="Tempo ear-training game. Match tempo by ear.">
+  <meta property="og:image" content="https://musicalmetrics.xyz/amtf.png">
+  <meta property="og:url" content="https://musicalmetrics.xyz/tempo1">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Tempo I — Musical Metrics">
+  <meta name="twitter:description" content="Tempo ear-training game.">
+  <meta name="twitter:image" content="https://musicalmetrics.xyz/amtf.png">
+  <title>Tempo I</title>
+  <link rel="canonical" href="https://musicalmetrics.xyz/tempo1">
+  <link rel="icon" type="image/svg+xml" href="music-logo.svg?v=1">
+  <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
+  <link rel="stylesheet" href="game.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <div class="header-content">
+        <div class="logo-container">
+          <a href="/" class="logo-link">
+            <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+            <h1 class="logo">MUSICAL METRICS</h1>
+          </a>
+        </div>
+
+        <nav class="nav">
+          <a href="/dashboard" class="nav-link">DASHBOARD</a>
+          <a href="/about" class="nav-link">ABOUT</a>
+        </nav>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+          <i data-lucide="menu" class="hamburger-icon"></i>
+        </button>
+
+        <div class="mobile-menu" id="mobile-menu">
+          <div class="mobile-menu-links">
+            <a href="/dashboard" class="mobile-menu-link">DASHBOARD</a>
+            <a href="/about" class="mobile-menu-link">ABOUT</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <h1>Tempo I</h1>
+    <p class="subtitle">Test your tempo identification skills!</p>
+
+    <div class="rules">
+      <p>Listen to a metronome beat and identify the BPM (beats per minute).</p>
+      <p>Each round plays a random tempo.</p>
+      <p>Enter your guess as an integer in the text box.</p>
+      <div class="game-center-container">
+        <button id="continueBtn" class="control-button">Continue</button>
+      </div>
+    </div>
+
+    <div class="game-container">
+      <div class="level-display">Round <span id="levelNum">1</span></div>
+      <div class="round-counter">Round <span id="roundNum">1</span> of 10</div>
+
+      <div class="input-container game-center-column-large-gap">
+        <div class="game-center-column">
+          <div class="game-center-align-gap">
+            <input type="text" id="bpmInput" placeholder="Enter BPM" class="game-input">
+            <span class="cents-label">BPM</span>
+          </div>
+          <button id="submitBtn" class="control-button control-button-block">Enter</button>
+        </div>
+        <div id="errorMessage" class="error-message"></div>
+      </div>
+    </div>
+
+    <div class="game-over">
+      <div class="final-score">Final Score: <span id="finalScore">0</span>/100</div>
+      <div class="game-center-align-large-gap">
+        <button id="playAgainBtn" class="control-button">Play Again</button>
+        <button id="homeBtn" class="control-button">Return to home</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img" />
+          <span class="footer-brand">Musical Metrics</span>
+        </div>
+        <div class="footer-info">
+          <div class="footer-links">
+            <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+              <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo" />
+              <span class="amtf-text">Athens Music Technology Forum</span>
+            </a>
+          </div>
+          <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const metronomeAudio = new Audio('sounds/metronome.mp3');
+    metronomeAudio.load();
+
+    let level = 1;
+    let maxLevels = 10;
+    let roundScores = [];
+    let currentTempo = null;
+    let metronomeInterval = null;
+    let gameActive = false;
+    let gameOver = false;
+
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const continueBtn = document.getElementById('continueBtn');
+    const bpmInput = document.getElementById('bpmInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const rulesDiv = document.querySelector('.rules');
+    const levelDisplay = document.querySelector('.level-display');
+    const gameOverDiv = document.querySelector('.game-over');
+    const inputContainer = document.querySelector('.input-container');
+    const roundCounter = document.querySelector('.round-counter');
+    const homeBtn = document.getElementById('homeBtn');
+
+    function playMetronome() {
+      inputContainer.style.display = 'none';
+      levelDisplay.style.display = 'block';
+      document.getElementById('levelNum').textContent = level;
+      document.getElementById('roundNum').textContent = level;
+
+      setTimeout(() => {
+        levelDisplay.style.display = 'none';
+        inputContainer.style.display = 'flex';
+        roundCounter.style.display = 'block';
+
+        currentTempo = Math.floor(Math.random() * 201) + 40;
+
+        const beatInterval = 60000 / currentTempo;
+
+        metronomeAudio.currentTime = 0;
+        metronomeAudio.play();
+
+        metronomeInterval = setInterval(() => {
+          metronomeAudio.currentTime = 0;
+          metronomeAudio.play();
+        }, beatInterval);
+
+        bpmInput.focus();
+      }, 2000);
+    }
+
+    function validateInput(input) {
+      const value = input.trim();
+      if (value === '') return false;
+
+      const num = parseInt(value, 10);
+      if (isNaN(num) || num.toString() !== value) return false;
+      if (num <= 0) return false;
+
+      return true;
+    }
+
+    function checkAnswer() {
+      const userInput = bpmInput.value.trim();
+
+      if (!validateInput(userInput)) {
+        errorMessage.textContent = 'Please enter a valid positive integer';
+        errorMessage.style.display = 'block';
+        bpmInput.focus();
+        return;
+      }
+
+      if (metronomeInterval) {
+        clearInterval(metronomeInterval);
+        metronomeInterval = null;
+      }
+
+      const userBPM = parseInt(userInput, 10);
+      const difference = Math.abs(userBPM - currentTempo);
+      const roundScore = Math.max(0, 100 - difference);
+
+      roundScores.push(roundScore);
+
+      bpmInput.value = '';
+      errorMessage.style.display = 'none';
+
+      level++;
+
+      if (level > maxLevels) {
+        gameActive = false;
+        gameOver = true;
+
+        const averageScore = roundScores.reduce((sum, score) => sum + score, 0) / roundScores.length;
+        const finalScore = Math.round(averageScore);
+
+        document.getElementById('finalScore').textContent = finalScore;
+        gameOverDiv.style.display = 'block';
+        playAgainBtn.style.display = 'block';
+        homeBtn.style.display = 'block';
+        inputContainer.style.display = 'none';
+        roundCounter.style.display = 'none';
+      } else {
+        playMetronome();
+      }
+    }
+
+    function startGame() {
+      level = 1;
+      roundScores = [];
+      gameActive = true;
+      gameOver = false;
+      currentTempo = null;
+
+      if (metronomeInterval) {
+        clearInterval(metronomeInterval);
+        metronomeInterval = null;
+      }
+
+      bpmInput.value = '';
+      errorMessage.style.display = 'none';
+
+      rulesDiv.style.display = 'block';
+      playAgainBtn.style.display = 'none';
+      gameOverDiv.style.display = 'none';
+      homeBtn.style.display = 'none';
+      continueBtn.style.display = 'block';
+      inputContainer.style.display = 'none';
+      roundCounter.style.display = 'none';
+    }
+
+    window.addEventListener('load', startGame);
+
+    continueBtn.addEventListener('click', () => {
+      rulesDiv.style.display = 'none';
+      continueBtn.style.display = 'none';
+      playMetronome();
+    });
+
+    bpmInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && gameActive) {
+        checkAnswer();
+      }
+    });
+
+    submitBtn.addEventListener('click', () => {
+      if (gameActive) {
+        checkAnswer();
+      }
+    });
+
+    playAgainBtn.addEventListener('click', startGame);
+
+    homeBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    inputContainer.style.display = 'none';
+
+    lucide.createIcons();
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      if (mobileMenuToggle && mobileMenu) {
+        mobileMenuToggle.addEventListener('click', function () {
+          mobileMenu.classList.toggle('active');
+          mobileMenuToggle.classList.toggle('active');
+        });
+
+        const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+        mobileMenuLinks.forEach(link => {
+          link.addEventListener('click', function () {
+            mobileMenu.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+          });
+        });
+
+        document.addEventListener('click', function (event) {
+          if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+            mobileMenu.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+          }
+        });
+      }
+    });
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

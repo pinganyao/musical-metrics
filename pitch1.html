@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Pitch I — Musical Metrics: pitch recognition ear-training game. Identify and match pitches by ear.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Pitch I — Musical Metrics">
+  <meta property="og:description" content="Pitch recognition ear-training game.">
+  <meta property="og:image" content="https://musicalmetrics.xyz/amtf.png">
+  <meta property="og:url" content="https://musicalmetrics.xyz/pitch1">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Pitch I — Musical Metrics">
+  <meta name="twitter:description" content="Pitch recognition ear-training game.">
+  <meta name="twitter:image" content="https://musicalmetrics.xyz/amtf.png">
+  <title>Pitch I</title>
+  <link rel="canonical" href="https://musicalmetrics.xyz/pitch1">
+  <link rel="icon" type="image/svg+xml" href="music-logo.svg?v=1">
+  <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
+  <link rel="stylesheet" href="game.css" />
+  <script src="https://unpkg.com/tone@latest/build/Tone.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <div class="header-content">
+        <div class="logo-container">
+          <a href="/" class="logo-link">
+            <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo" />
+            <h1 class="logo">MUSICAL METRICS</h1>
+          </a>
+        </div>
+        <nav class="nav">
+          <a href="/dashboard" class="nav-link">DASHBOARD</a>
+          <a href="/about" class="nav-link">ABOUT</a>
+        </nav>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+          <i data-lucide="menu" class="hamburger-icon"></i>
+        </button>
+
+        <div class="mobile-menu" id="mobile-menu">
+          <div class="mobile-menu-links">
+            <a href="/dashboard" class="mobile-menu-link">DASHBOARD</a>
+            <a href="/about" class="mobile-menu-link">ABOUT</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <h1>Pitch I</h1>
+    <p class="subtitle">Test your pitch detection skills!</p>
+
+    <div class="rules">
+      <p>Listen to a reference note.</p>
+      <p>Then, listen to the same note played slightly out of tune.</p>
+      <p>Enter how many cents the note is sharp (+) or flat (-) compared to the reference.</p>
+      <div class="game-center-container">
+        <button id="continueBtn" class="control-button">Continue</button>
+      </div>
+    </div>
+
+    <div class="game-container">
+      <div class="level-display">Round <span id="levelNum">1</span></div>
+      <div class="round-counter">Round <span id="roundNum">1</span> of 5</div>
+
+      <div class="note-display" id="noteDisplay"></div>
+
+      <div class="input-container" style="display: none; flex-direction: column; gap: 20px; justify-content: center; align-items: center; padding: 20px; margin: 20px auto; max-width: 600px;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+          <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: center;">
+            <button id="playReferenceBtn" class="control-button control-button-block play-reference-btn">Play Reference</button>
+            <button id="playTestBtn" class="control-button control-button-block play-test-btn">Play Test Note</button>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="text" id="centsInput" placeholder="Enter cents" class="game-input" />
+            <span class="cents-label">cents</span>
+          </div>
+          <button id="submitBtn" class="control-button control-button-block">Submit</button>
+        </div>
+        <div id="errorMessage" class="error-message"></div>
+      </div>
+    </div>
+
+    <div class="game-over">
+      <div class="final-score">Final Score: <span id="finalScore">0</span>/100</div>
+      <div class="game-center-align-large-gap">
+        <button id="playAgainBtn" class="control-button">Play Again</button>
+        <button id="homeBtn" class="control-button">Return to home</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img" />
+          <span class="footer-brand">Musical Metrics</span>
+        </div>
+        <div class="footer-info">
+          <div class="footer-links">
+            <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+              <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo" />
+              <span class="amtf-text">Athens Music Technology Forum</span>
+            </a>
+          </div>
+          <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let currentReferencePlayer = null;
+    let currentTestPlayer = null;
+
+    let level = 1;
+    let maxLevels = 5;
+    let roundScores = [];
+    let currentNote = null;
+    let actualCentsDeviation = null;
+    let gameActive = false;
+    let gameOver = false;
+
+    const noteNames = ['C3', 'C#3', 'D3', 'D#3', 'E3', 'F3', 'F#3', 'G3', 'G#3', 'A3', 'A#3', 'B3', 'C4'];
+    const audioFiles = {
+      'B2': 'sounds/B2.mp3',
+      'C3': 'sounds/C3.mp3',
+      'C#3': 'sounds/C%233.mp3',
+      'D3': 'sounds/D3.mp3',
+      'D#3': 'sounds/D%233.mp3',
+      'E3': 'sounds/E3.mp3',
+      'F3': 'sounds/F3.mp3',
+      'F#3': 'sounds/F%233.mp3',
+      'G3': 'sounds/G3.mp3',
+      'G#3': 'sounds/G%233.mp3',
+      'A3': 'sounds/A3.mp3',
+      'A#3': 'sounds/A%233.mp3',
+      'B3': 'sounds/B3.mp3',
+      'C4': 'sounds/C4.mp3'
+    };
+
+    const noteSubstitutionMap = {
+      'C3': { lowerNote: 'B2', centsOffset: 100 },
+      'C#3': { lowerNote: 'C3', centsOffset: 100 },
+      'D3': { lowerNote: 'C#3', centsOffset: 100 },
+      'D#3': { lowerNote: 'D3', centsOffset: 100 },
+      'E3': { lowerNote: 'D#3', centsOffset: 100 },
+      'F3': { lowerNote: 'E3', centsOffset: 100 },
+      'F#3': { lowerNote: 'F3', centsOffset: 100 },
+      'G3': { lowerNote: 'F#3', centsOffset: 100 },
+      'G#3': { lowerNote: 'G3', centsOffset: 100 },
+      'A3': { lowerNote: 'G#3', centsOffset: 100 },
+      'A#3': { lowerNote: 'A3', centsOffset: 100 },
+      'B3': { lowerNote: 'A#3', centsOffset: 100 },
+      'C4': { lowerNote: 'B3', centsOffset: 100 }
+    };
+
+    function stopAll() {
+      if (currentReferencePlayer) {
+        currentReferencePlayer.stop();
+        currentReferencePlayer.dispose();
+        currentReferencePlayer = null;
+      }
+      if (currentTestPlayer) {
+        currentTestPlayer.stop();
+        if (currentTestPlayer._pitchShift) currentTestPlayer._pitchShift.dispose();
+        currentTestPlayer.dispose();
+        currentTestPlayer = null;
+      }
+    }
+
+    function playAudioFile(noteName, centsShift = 0) {
+      if (Tone.context.state !== 'running') return null;
+
+      stopAll();
+
+      if (centsShift === 0) {
+        currentReferencePlayer = new Tone.Player({
+          url: audioFiles[noteName],
+          autostart: true,
+          volume: -6
+        }).toDestination();
+        return currentReferencePlayer;
+      }
+
+      let actualNoteName = noteName;
+      let actualCentsShift = centsShift;
+
+      if (centsShift < 0) {
+        const substitution = noteSubstitutionMap[noteName];
+        if (!substitution) return null;
+        actualNoteName = substitution.lowerNote;
+        actualCentsShift = substitution.centsOffset + centsShift;
+      }
+
+      const limitedCentsShift = Math.max(0, Math.min(50, actualCentsShift));
+      const semitones = limitedCentsShift / 100;
+
+      const playerPitchShift = new Tone.PitchShift({
+        pitch: semitones,
+        windowSize: 0.1,
+        overlap: 0.5,
+        delayTime: 0.01
+      }).toDestination();
+
+      currentTestPlayer = new Tone.Player({
+        url: audioFiles[actualNoteName],
+        autostart: true,
+        volume: -6
+      });
+
+      currentTestPlayer.connect(playerPitchShift);
+      currentTestPlayer._pitchShift = playerPitchShift;
+      return currentTestPlayer;
+    }
+
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const continueBtn = document.getElementById('continueBtn');
+    const centsInput = document.getElementById('centsInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const rulesDiv = document.querySelector('.rules');
+    const levelDisplay = document.querySelector('.level-display');
+    const gameOverDiv = document.querySelector('.game-over');
+    const inputContainer = document.querySelector('.input-container');
+    const roundCounter = document.querySelector('.round-counter');
+    const noteDisplay = document.getElementById('noteDisplay');
+    const playReferenceBtn = document.getElementById('playReferenceBtn');
+    const playTestBtn = document.getElementById('playTestBtn');
+    const homeBtn = document.getElementById('homeBtn');
+
+    function validateInput(input) {
+      const value = input.trim();
+      if (value === '') return false;
+      const num = parseInt(value, 10);
+      if (isNaN(num) || num.toString() !== value) return false;
+      if (num < -50 || num > 50) return false;
+      return true;
+    }
+
+    function startRound() {
+      inputContainer.style.display = 'none';
+      levelDisplay.style.display = 'block';
+      document.getElementById('levelNum').textContent = level;
+      document.getElementById('roundNum').textContent = level;
+
+      noteDisplay.textContent = '';
+      noteDisplay.style.display = 'none';
+      noteDisplay.classList.remove('show', 'playing');
+
+      setTimeout(() => {
+        levelDisplay.style.display = 'none';
+        roundCounter.style.display = 'block';
+
+        currentNote = noteNames[Math.floor(Math.random() * noteNames.length)];
+
+        const isDownward = Math.random() < 0.5;
+        if (isDownward) {
+          actualCentsDeviation = Math.floor(Math.random() * 50) - 50;
+        } else {
+          actualCentsDeviation = Math.floor(Math.random() * 50) + 1;
+        }
+
+        noteDisplay.textContent = `Reference Note: ${currentNote}`;
+        noteDisplay.style.display = 'block';
+
+        setTimeout(() => {
+          noteDisplay.classList.add('show');
+        }, 100);
+
+        setTimeout(() => {
+          noteDisplay.classList.add('playing');
+          currentReferencePlayer = playAudioFile(currentNote, 0);
+          setTimeout(() => {
+            noteDisplay.classList.remove('playing');
+          }, 2000);
+        }, 500);
+
+        setTimeout(() => {
+          inputContainer.style.display = 'flex';
+          centsInput.focus();
+        }, 2000);
+      }, 2000);
+    }
+
+    function checkAnswer() {
+      const userInput = centsInput.value.trim();
+
+      if (!validateInput(userInput)) {
+        errorMessage.textContent = 'Please enter a valid integer between -50 and 50';
+        errorMessage.style.display = 'block';
+        centsInput.focus();
+        return;
+      }
+
+      stopAll();
+
+      const userCents = parseInt(userInput, 10);
+      const difference = Math.abs(actualCentsDeviation - userCents);
+      const roundScore = Math.max(0, 100 - difference);
+
+      roundScores.push(roundScore);
+
+      centsInput.value = '';
+      errorMessage.style.display = 'none';
+
+      level++;
+
+      if (level > maxLevels) {
+        gameActive = false;
+        gameOver = true;
+
+        const averageScore = roundScores.reduce((sum, s) => sum + s, 0) / roundScores.length;
+        const finalScore = Math.round(averageScore);
+
+        document.getElementById('finalScore').textContent = finalScore;
+        gameOverDiv.style.display = 'block';
+        playAgainBtn.style.display = 'block';
+        homeBtn.style.display = 'block';
+        inputContainer.style.display = 'none';
+        roundCounter.style.display = 'none';
+        noteDisplay.style.display = 'none';
+        noteDisplay.classList.remove('show', 'playing');
+      } else {
+        startRound();
+      }
+    }
+
+    function startGame() {
+      level = 1;
+      roundScores = [];
+      gameActive = false;
+      gameOver = false;
+      currentNote = null;
+      actualCentsDeviation = null;
+
+      stopAll();
+
+      centsInput.value = '';
+      errorMessage.style.display = 'none';
+
+      rulesDiv.style.display = 'block';
+      playAgainBtn.style.display = 'none';
+      gameOverDiv.style.display = 'none';
+      homeBtn.style.display = 'none';
+      continueBtn.style.display = 'block';
+      inputContainer.style.display = 'none';
+      roundCounter.style.display = 'none';
+      noteDisplay.style.display = 'none';
+      noteDisplay.classList.remove('show', 'playing');
+    }
+
+    continueBtn.addEventListener('click', async () => {
+      try {
+        await Tone.start();
+      } catch (e) {}
+
+      rulesDiv.style.display = 'none';
+      continueBtn.style.display = 'none';
+      gameActive = true;
+      startRound();
+    });
+
+    centsInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && gameActive) checkAnswer();
+    });
+
+    submitBtn.addEventListener('click', () => {
+      if (gameActive) checkAnswer();
+    });
+
+    playAgainBtn.addEventListener('click', startGame);
+
+    homeBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    playReferenceBtn.addEventListener('click', () => {
+      if (currentNote && gameActive) currentReferencePlayer = playAudioFile(currentNote, 0);
+    });
+
+    playTestBtn.addEventListener('click', () => {
+      if (currentNote && actualCentsDeviation !== null && gameActive) {
+        currentTestPlayer = playAudioFile(currentNote, actualCentsDeviation);
+      }
+    });
+
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        startGame();
+      }, 100);
+    });
+
+    inputContainer.style.display = 'none';
+
+    lucide.createIcons();
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      if (mobileMenuToggle && mobileMenu) {
+        mobileMenuToggle.addEventListener('click', function () {
+          mobileMenu.classList.toggle('active');
+          mobileMenuToggle.classList.toggle('active');
+        });
+
+        const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+        mobileMenuLinks.forEach(link => {
+          link.addEventListener('click', function () {
+            mobileMenu.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+          });
+        });
+
+        document.addEventListener('click', function (event) {
+          if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+            mobileMenu.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+          }
+        });
+      }
+    });
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

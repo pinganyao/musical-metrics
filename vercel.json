@@ -1,0 +1,37 @@
+{
+  "outputDirectory": ".",
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/about", "destination": "/about.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/melody1", "destination": "/melody1.html" },
+    { "source": "/melody2", "destination": "/melody2.html" },
+    { "source": "/melody3", "destination": "/melody3.html" },
+    { "source": "/harmony1", "destination": "/harmony1.html" },
+    { "source": "/harmony2", "destination": "/harmony2.html" },
+    { "source": "/harmony3", "destination": "/harmony3.html" },
+    { "source": "/interval1", "destination": "/interval1.html" },
+    { "source": "/interval2", "destination": "/interval2.html" },
+    { "source": "/pitch1", "destination": "/pitch1.html" },
+    { "source": "/rhythm1", "destination": "/rhythm1.html" },
+    { "source": "/tempo1", "destination": "/tempo1.html" },
+    { "source": "/tempo2", "destination": "/tempo2.html" }
+  ],
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/about.html", "destination": "/about", "permanent": true },
+    { "source": "/dashboard.html", "destination": "/dashboard", "permanent": true },
+    { "source": "/melody1.html", "destination": "/melody1", "permanent": true },
+    { "source": "/melody2.html", "destination": "/melody2", "permanent": true },
+    { "source": "/melody3.html", "destination": "/melody3", "permanent": true },
+    { "source": "/harmony1.html", "destination": "/harmony1", "permanent": true },
+    { "source": "/harmony2.html", "destination": "/harmony2", "permanent": true },
+    { "source": "/harmony3.html", "destination": "/harmony3", "permanent": true },
+    { "source": "/interval1.html", "destination": "/interval1", "permanent": true },
+    { "source": "/interval2.html", "destination": "/interval2", "permanent": true },
+    { "source": "/pitch1.html", "destination": "/pitch1", "permanent": true },
+    { "source": "/rhythm1.html", "destination": "/rhythm1", "permanent": true },
+    { "source": "/tempo1.html", "destination": "/tempo1", "permanent": true },
+    { "source": "/tempo2.html", "destination": "/tempo2", "permanent": true }
+  ]
+}

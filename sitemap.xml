@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://musicalmetrics.xyz/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://musicalmetrics.xyz/about</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://musicalmetrics.xyz/dashboard</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://musicalmetrics.xyz/melody1</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://musicalmetrics.xyz/melody2</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://musicalmetrics.xyz/melody3</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://musicalmetrics.xyz/harmony1</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://musicalmetrics.xyz/harmony2</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://musicalmetrics.xyz/harmony3</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://musicalmetrics.xyz/interval1</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://musicalmetrics.xyz/interval2</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://musicalmetrics.xyz/pitch1</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://musicalmetrics.xyz/rhythm1</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://musicalmetrics.xyz/tempo1</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://musicalmetrics.xyz/tempo2</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+</urlset>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Rhythm I — Musical Metrics: rhythm recognition ear-training game. Identify and replicate rhythms by ear.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Rhythm I — Musical Metrics">
+  <meta property="og:description" content="Rhythm recognition ear-training game.">
+  <meta property="og:image" content="https://musicalmetrics.xyz/amtf.png">
+  <meta property="og:url" content="https://musicalmetrics.xyz/rhythm1">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Rhythm I — Musical Metrics">
+  <meta name="twitter:description" content="Rhythm recognition ear-training game.">
+  <meta name="twitter:image" content="https://musicalmetrics.xyz/amtf.png">
+  <title>Rhythm I</title>
+  <link rel="canonical" href="https://musicalmetrics.xyz/rhythm1">
+  <link rel="icon" type="image/svg+xml" href="music-logo.svg?v=1">
+  <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
+  <link rel="stylesheet" href="game.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <div class="header-content">
+        <div class="logo-container">
+          <a href="/" class="logo-link">
+            <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+            <h1 class="logo">MUSICAL METRICS</h1>
+          </a>
+        </div>
+        <nav class="nav">
+          <a href="/dashboard" class="nav-link">DASHBOARD</a>
+          <a href="/about" class="nav-link">ABOUT</a>
+        </nav>
+
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+          <i data-lucide="menu" class="hamburger-icon"></i>
+        </button>
+
+        <div class="mobile-menu" id="mobile-menu">
+          <div class="mobile-menu-links">
+            <a href="/dashboard" class="mobile-menu-link">DASHBOARD</a>
+            <a href="/about" class="mobile-menu-link">ABOUT</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <h1>Rhythm I</h1>
+    <p class="subtitle">Test your rhythmic accuracy!</p>
+
+    <div class="rules">
+      <p>Listen to a 4-beat rhythmic pattern, then tap it back accurately.</p>
+      <p>Each round plays a random rhythm at 70 BPM.</p>
+      <p>Tap the rhythm using the tap area or spacebar - you may tap at a different speed.</p>
+      <p>Your score is based on how accurately you maintain the relative timing between beats.</p>
+      <div class="game-center-container">
+        <button id="continueBtn" class="control-button">Continue</button>
+      </div>
+    </div>
+
+    <div class="game-container">
+      <div class="level-display">Round <span id="levelNum">1</span></div>
+      <div class="round-counter">Round <span id="roundNum">1</span> of 5</div>
+
+      <div class="beat-indicator hidden" id="beatIndicator"></div>
+
+      <div class="ready-display">
+        <h2 class="ready-title">Ready?</h2>
+        <p class="ready-text">Tap the rhythm you just heard</p>
+      </div>
+
+      <div class="tap-container game-center-column-large-gap">
+        <div class="tap-area">
+          <span class="tap-text">TAP HERE</span>
+        </div>
+        <div class="tap-instructions">
+          <p>Click here or press SPACEBAR to tap</p>
+          <p>Tap the rhythm pattern you heard</p>
+          <p id="tapCounter" class="tap-counter"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-over">
+      <div class="final-score">Final Score: <span id="finalScore">0</span>/100</div>
+      <div class="game-center-align-large-gap">
+        <button id="playAgainBtn" class="control-button">Play Again</button>
+        <button id="homeBtn" class="control-button">Return to home</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img" />
+          <span class="footer-brand">Musical Metrics</span>
+        </div>
+        <div class="footer-info">
+          <div class="footer-links">
+            <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+              <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo" />
+              <span class="amtf-text">Athens Music Technology Forum</span>
+            </a>
+          </div>
+          <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const metronomeAudio = new Audio('sounds/metronome.mp3');
+    metronomeAudio.load();
+
+    let level = 1;
+    let currentRound = 1;
+    let maxLevels = 5;
+    let roundScores = [];
+    let currentPattern = null;
+    let gameActive = false;
+    let gameOver = false;
+
+    let tapTimes = [];
+    let isTapping = false;
+
+    const RHYTHM_TYPES = [
+      { name: 'two quavers', subdivisions: 2, timing: [0.5, 0.5] },
+      { name: 'triplet', subdivisions: 3, timing: [1 / 3, 1 / 3, 1 / 3] },
+      { name: 'four semiquavers', subdivisions: 4, timing: [0.25, 0.25, 0.25, 0.25] },
+      { name: 'sextuplet', subdivisions: 6, timing: [1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6] }
+    ];
+
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const continueBtn = document.getElementById('continueBtn');
+    const rulesDiv = document.querySelector('.rules');
+    const levelDisplay = document.querySelector('.level-display');
+    const gameOverDiv = document.querySelector('.game-over');
+    const readyDisplay = document.querySelector('.ready-display');
+    const tapContainer = document.querySelector('.tap-container');
+    const tapArea = document.querySelector('.tap-area');
+    const roundCounter = document.querySelector('.round-counter');
+    const beatIndicator = document.getElementById('beatIndicator');
+    const homeBtn = document.getElementById('homeBtn');
+
+    function generateRandomPattern() {
+      const pattern = [];
+      for (let beat = 0; beat < 4; beat++) {
+        const randomType = RHYTHM_TYPES[Math.floor(Math.random() * RHYTHM_TYPES.length)];
+        pattern.push({ type: randomType, beat: beat + 1 });
+      }
+      return pattern;
+    }
+
+    function expectedTapCount(pattern) {
+      return pattern.reduce((sum, beat) => sum + beat.type.subdivisions, 0);
+    }
+
+    function playPattern() {
+      tapContainer.style.display = 'none';
+      readyDisplay.style.display = 'none';
+      levelDisplay.style.display = 'block';
+      document.getElementById('levelNum').textContent = currentRound;
+      document.getElementById('roundNum').textContent = currentRound;
+
+      currentPattern = generateRandomPattern();
+
+      setTimeout(() => {
+        levelDisplay.style.display = 'none';
+        roundCounter.style.display = 'block';
+        beatIndicator.style.display = 'block';
+
+        const bpm = 70;
+        const beatDuration = 60000 / bpm;
+
+        function playNextSubdivision(beatIndex, subdivisionIndex) {
+          if (beatIndex >= currentPattern.length) {
+            beatIndicator.style.display = 'none';
+            showTapInterface();
+            return;
+          }
+
+          const beat = currentPattern[beatIndex];
+          const subdivision = beat.type.timing[subdivisionIndex];
+          const subdivisionDuration = subdivision * beatDuration;
+
+          metronomeAudio.currentTime = 0;
+          metronomeAudio.play();
+
+          beatIndicator.classList.add('active');
+          setTimeout(() => {
+            beatIndicator.classList.remove('active');
+          }, 100);
+
+          setTimeout(() => {
+            if (subdivisionIndex + 1 >= beat.type.subdivisions) {
+              playNextSubdivision(beatIndex + 1, 0);
+            } else {
+              playNextSubdivision(beatIndex, subdivisionIndex + 1);
+            }
+          }, subdivisionDuration);
+        }
+
+        playNextSubdivision(0, 0);
+      }, 2000);
+    }
+
+    function showTapInterface() {
+      tapContainer.style.display = 'flex';
+      startTapPhase();
+    }
+
+    function startTapPhase() {
+      tapTimes = [];
+      isTapping = false;
+      tapArea.classList.remove('tapping');
+
+      const expectedTaps = expectedTapCount(currentPattern);
+      const tapCounter = document.getElementById('tapCounter');
+      tapCounter.textContent = `Taps: 0 / ${expectedTaps}`;
+    }
+
+    function recordTap() {
+      if (!gameActive || tapContainer.style.display === 'none') return;
+      const expectedTaps = expectedTapCount(currentPattern);
+      if (tapTimes.length >= expectedTaps) return;
+
+      if (!isTapping) {
+        isTapping = true;
+        tapArea.classList.add('tapping');
+      }
+
+      const t = Date.now();
+      tapTimes.push(t);
+
+      metronomeAudio.currentTime = 0;
+      metronomeAudio.play();
+
+      tapArea.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        tapArea.style.transform = 'scale(1)';
+      }, 100);
+
+      const tapCounter = document.getElementById('tapCounter');
+      tapCounter.textContent = `Taps: ${tapTimes.length} / ${expectedTaps}`;
+
+      if (tapTimes.length >= expectedTaps) {
+        finishTapPhase();
+      }
+    }
+
+    function calculateRhythmScore() {
+      if (!currentPattern) return { accuracy: 0 };
+      if (tapTimes.length < 3) return { accuracy: 0 };
+
+      const expectedIntervals = [];
+      currentPattern.forEach(beat => {
+        beat.type.timing.forEach(subdivision => expectedIntervals.push(subdivision));
+      });
+
+      const expectedRatios = [];
+      if (expectedIntervals.length > 1) {
+        const first = expectedIntervals[0];
+        for (let i = 1; i < expectedIntervals.length; i++) expectedRatios.push(expectedIntervals[i] / first);
+      }
+
+      const normalized = tapTimes.map(t => t - tapTimes[0]);
+
+      const actualIntervals = [];
+      for (let i = 1; i < normalized.length; i++) actualIntervals.push(normalized[i] - normalized[i - 1]);
+
+      const actualRatios = [];
+      if (actualIntervals.length > 1) {
+        const first = actualIntervals[0];
+        for (let i = 1; i < actualIntervals.length; i++) actualRatios.push(actualIntervals[i] / first);
+      }
+
+      if (expectedRatios.length === 0 || actualRatios.length === 0) return { accuracy: 0 };
+
+      const n = Math.min(expectedRatios.length, actualRatios.length);
+      let totalErr = 0;
+      for (let i = 0; i < n; i++) totalErr += Math.abs(expectedRatios[i] - actualRatios[i]);
+
+      const avgErr = totalErr / n;
+      const maxAllowed = 1.0;
+      const accuracy = Math.max(0, Math.round(100 - (avgErr / maxAllowed) * 100));
+      return { accuracy };
+    }
+
+    function finishTapPhase() {
+      tapArea.classList.remove('tapping');
+
+      const score = calculateRhythmScore();
+      roundScores.push(score.accuracy);
+
+      currentRound++;
+      level = currentRound;
+
+      if (currentRound > maxLevels) {
+        gameActive = false;
+        gameOver = true;
+
+        const avg = roundScores.reduce((s, v) => s + v, 0) / roundScores.length;
+        const finalScore = Math.round(avg);
+
+        document.getElementById('finalScore').textContent = finalScore;
+        gameOverDiv.style.display = 'block';
+        playAgainBtn.style.display = 'block';
+        homeBtn.style.display = 'block';
+        tapContainer.style.display = 'none';
+        roundCounter.style.display = 'none';
+      } else {
+        setTimeout(() => {
+          playPattern();
+        }, 1000);
+      }
+    }
+
+    function startGame() {
+      level = 1;
+      currentRound = 1;
+      roundScores = [];
+      gameActive = true;
+      gameOver = false;
+      currentPattern = null;
+
+      rulesDiv.style.display = 'block';
+      gameOverDiv.style.display = 'none';
+      homeBtn.style.display = 'none';
+      continueBtn.style.display = 'block';
+      tapContainer.style.display = 'none';
+      readyDisplay.style.display = 'none';
+      roundCounter.style.display = 'none';
+      beatIndicator.style.display = 'none';
+    }
+
+    window.addEventListener('load', startGame);
+
+    continueBtn.addEventListener('click', () => {
+      rulesDiv.style.display = 'none';
+      continueBtn.style.display = 'none';
+      playPattern();
+    });
+
+    tapArea.addEventListener('mousedown', () => {
+      recordTap();
+    });
+
+    tapArea.addEventListener('click', (e) => {
+      e.preventDefault();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && gameActive && tapContainer.style.display !== 'none') {
+        e.preventDefault();
+        if (!e.repeat) recordTap();
+      }
+    });
+
+    playAgainBtn.addEventListener('click', startGame);
+
+    homeBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    tapContainer.style.display = 'none';
+
+    lucide.createIcons();
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      if (mobileMenuToggle && mobileMenu) {
+        mobileMenuToggle.addEventListener('click', function () {
+          mobileMenu.classList.toggle('active');
+          mobileMenuToggle.classList.toggle('active');
+        });
+
+        const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+        mobileMenuLinks.forEach(link => {
+          link.addEventListener('click', function () {
+            mobileMenu.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+          });
+        });
+
+        document.addEventListener('click', function (event) {
+          if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+            mobileMenu.classList.remove('active');
+            mobileMenuToggle.classList.remove('active');
+          }
+        });
+      }
+    });
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+  <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

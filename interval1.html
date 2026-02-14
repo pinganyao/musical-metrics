@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interval I — Musical Metrics: interval recognition ear-training game. Identify musical intervals by ear.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Interval I — Musical Metrics">
+    <meta property="og:description" content="Interval recognition ear-training game.">
+    <meta property="og:image" content="https://musicalmetrics.xyz/amtf.png">
+    <meta property="og:url" content="https://musicalmetrics.xyz/interval1">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Interval I — Musical Metrics">
+    <meta name="twitter:description" content="Interval recognition ear-training game.">
+    <meta name="twitter:image" content="https://musicalmetrics.xyz/amtf.png">
+    <title>Interval I</title>
+    <link rel="canonical" href="https://musicalmetrics.xyz/interval1">
+    <link rel="icon" type="image/svg+xml" href="music-logo.svg?v=1">
+    <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
+    <link rel="stylesheet" href="game.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <a href="/" class="logo-link">
+                        <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+                        <h1 class="logo">MUSICAL METRICS</h1>
+                    </a>
+                </div>
+                
+                <nav class="nav">
+                    <a href="/dashboard" class="nav-link">DASHBOARD</a>
+                    <a href="/about" class="nav-link">ABOUT</a>
+                </nav>
+                
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <i data-lucide="menu" class="hamburger-icon"></i>
+                </button>
+                
+                <div class="mobile-menu" id="mobile-menu">
+                    <div class="mobile-menu-links">
+                        <a href="/dashboard" class="mobile-menu-link">DASHBOARD</a>
+                        <a href="/about" class="mobile-menu-link">ABOUT</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <h1>Interval I</h1>
+        <p class="subtitle">Test your interval recognition skills!</p>
+
+    <div class="rules">
+        <p>Listen to two notes played in rising sequence and identify the interval.</p>
+        <p>The first of the two notes will always be middle C (C4).</p>
+        <p>Select both the quality and the distance.</p>
+        <div class="game-center-container">
+            <button id="continueBtn" class="control-button">Continue</button>
+        </div>
+    </div>
+
+        <div class="game-container">
+            <div class="level-display">Round <span id="levelNum">1</span></div>
+            <div class="round-counter">Round <span id="roundNum">1</span> of 10</div>
+        
+        <div class="buttons-container" class="buttons-container-column">
+            <div class="game-center-row-gap">
+                <button class="interval-quality" data-quality="major">Major</button>
+                <button class="interval-quality" data-quality="minor">Minor</button>
+                <button class="interval-quality" data-quality="perfect">Perfect</button>
+                <button class="interval-quality" data-quality="diminished">Diminished</button>
+                <button class="interval-quality" data-quality="augmented">Augmented</button>
+            </div>
+            <div class="spacer-small"></div>
+            <div class="game-center-row-gap">
+                <button class="interval-distance" data-distance="2">2nd</button>
+                <button class="interval-distance" data-distance="3">3rd</button>
+                <button class="interval-distance" data-distance="4">4th</button>
+                <button class="interval-distance" data-distance="5">5th</button>
+                <button class="interval-distance" data-distance="6">6th</button>
+                <button class="interval-distance" data-distance="7">7th</button>
+                <button class="interval-distance" data-distance="8">8th</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-over">
+        <div class="final-score">Final Score: <span id="finalScore">0</span></div>
+        <div class="game-center-align-large-gap">
+            <button id="playAgainBtn" class="control-button">Play Again</button>
+            <button id="homeBtn" class="control-button">Return to home</button>
+        </div>
+    </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img">
+                    <span class="footer-brand">Musical Metrics</span>
+                </div>
+                <div class="footer-info">
+                    <div class="footer-links">
+                        <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+                            <img src="amtf.png" alt="Athens Music Technology Forum" class="amtf-logo">
+                            <span class="amtf-text">Athens Music Technology Forum</span>
+                        </a>
+                    </div>
+                    <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const notes = {};
+        const audioFiles = {
+            'c4': 'sounds/C4.mp3',
+            'c#4': 'sounds/C%234.mp3',
+            'd4': 'sounds/D4.mp3',
+            'd#4': 'sounds/D%234.mp3',
+            'e4': 'sounds/E4.mp3',
+            'f4': 'sounds/F4.mp3',
+            'f#4': 'sounds/F%234.mp3',
+            'g4': 'sounds/G4.mp3',
+            'g#4': 'sounds/G%234.mp3',
+            'a4': 'sounds/A4.mp3',
+            'a#4': 'sounds/A%234.mp3',
+            'b4': 'sounds/B4.mp3',
+            'c5': 'sounds/C5.mp3'
+        };
+
+        Object.entries(audioFiles).forEach(([key, path]) => {
+            const audio = new Audio(path);
+            audio.load();
+            notes[key] = audio;
+        });
+
+        let level = 1;
+        let maxLevels = 10;
+        let score = 0;
+        let currentInterval = null;
+        let selectedQuality = null;
+        let selectedDistance = null;
+        let gameActive = false;
+        let gameOver = false;
+
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const qualityButtons = document.querySelectorAll('.interval-quality');
+        const distanceButtons = document.querySelectorAll('.interval-distance');
+        const rulesDiv = document.querySelector('.rules');
+        const levelDisplay = document.querySelector('.level-display');
+        const gameOverDiv = document.querySelector('.game-over');
+        const buttonsContainer = document.querySelector('.buttons-container');
+        const roundCounter = document.querySelector('.round-counter');
+        const homeBtn = document.getElementById('homeBtn');
+
+        async function playInterval() {
+            buttonsContainer.style.display = 'none';
+            levelDisplay.style.display = 'block';
+            document.getElementById('levelNum').textContent = level;
+            document.getElementById('roundNum').textContent = level;
+            
+            setTimeout(async () => {
+                levelDisplay.style.display = 'none';
+                buttonsContainer.style.display = 'flex';
+                roundCounter.style.display = 'block';
+                
+                const firstNote = new Audio(audioFiles['c4']);
+                await firstNote.play();
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const noteNames = Object.keys(audioFiles).filter(note => note !== 'c4');
+                const randomNote = noteNames[Math.floor(Math.random() * noteNames.length)];
+                currentInterval = randomNote;
+                const secondNote = new Audio(audioFiles[randomNote]);
+                await secondNote.play();
+
+                qualityButtons.forEach(btn => btn.classList.add('active'));
+                distanceButtons.forEach(btn => btn.classList.add('active'));
+            }, 2000);
+        }
+
+        function checkAnswer() {
+            if (!selectedQuality || !selectedDistance) return;
+
+            qualityButtons.forEach(btn => btn.classList.remove('active'));
+            distanceButtons.forEach(btn => btn.classList.remove('active'));
+
+            const noteMap = {
+                'c4': 1, 'c#4': 2, 'd4': 3, 'd#4': 4, 'e4': 5,
+                'f4': 6, 'f#4': 7, 'g4': 8, 'g#4': 9, 'a4': 10,
+                'a#4': 11, 'b4': 12, 'c5': 13
+            };
+
+            const intervalDistance = noteMap[currentInterval] - noteMap['c4'];
+            
+            const correctIntervals = {
+                'c#4': {quality: 'minor', distance: '2'},
+                'd4': {quality: 'major', distance: '2'}, 
+                'd#4': {quality: 'minor', distance: '3'},
+                'e4': {quality: 'major', distance: '3'},
+                'f4': {quality: 'perfect', distance: '4'},
+                'f#4': {quality: 'augmented', distance: '4'},
+                'g4': {quality: 'perfect', distance: '5'},
+                'g#4': {quality: 'minor', distance: '6'},
+                'a4': {quality: 'major', distance: '6'},
+                'a#4': {quality: 'minor', distance: '7'},
+                'b4': {quality: 'major', distance: '7'},
+                'c5': {quality: 'perfect', distance: '8'}
+            };
+
+            const correctInterval = correctIntervals[currentInterval];
+            
+            if (selectedQuality === correctInterval.quality && 
+                parseInt(selectedDistance) === parseInt(correctInterval.distance)) {
+                qualityButtons.forEach(btn => {
+                    if (btn.dataset.quality === selectedQuality) {
+                        btn.classList.add('correct');
+                    }
+                });
+                distanceButtons.forEach(btn => {
+                    if (btn.dataset.distance === selectedDistance) {
+                        btn.classList.add('correct');
+                    }
+                });
+                
+                score++;
+                
+                setTimeout(() => {
+                    level++;
+                    selectedQuality = null;
+                    selectedDistance = null;
+                    qualityButtons.forEach(btn => {
+                        btn.classList.remove('selected', 'correct');
+                    });
+                    distanceButtons.forEach(btn => {
+                        btn.classList.remove('selected', 'correct');
+                    });
+                    
+                    if (level > maxLevels) {
+                        gameActive = false;
+                        gameOver = true;
+                        document.getElementById('finalScore').textContent = `${score}/${maxLevels}`;
+                        gameOverDiv.style.display = 'block';
+                        playAgainBtn.style.display = 'block';
+                        homeBtn.style.display = 'block';
+                    } else {
+                        playInterval();
+                    }
+                }, 500);
+            } else {
+                qualityButtons.forEach(btn => {
+                    if (btn.dataset.quality === selectedQuality) {
+                        btn.style.backgroundColor = 'rgb(220, 38, 38)';
+                        btn.style.boxShadow = '0 0 20px rgba(220, 38, 38, 0.5)';
+                    }
+                });
+                distanceButtons.forEach(btn => {
+                    if (btn.dataset.distance === selectedDistance) {
+                        btn.style.backgroundColor = 'rgb(220, 38, 38)';
+                        btn.style.boxShadow = '0 0 20px rgba(220, 38, 38, 0.5)';
+                    }
+                });
+                
+                setTimeout(() => {
+                    level++;
+                    selectedQuality = null;
+                    selectedDistance = null;
+                    qualityButtons.forEach(btn => {
+                        btn.classList.remove('selected', 'correct');
+                        btn.style.backgroundColor = '';
+                        btn.style.boxShadow = '';
+                    });
+                    distanceButtons.forEach(btn => {
+                        btn.classList.remove('selected', 'correct');
+                        btn.style.backgroundColor = '';
+                        btn.style.boxShadow = '';
+                    });
+                    
+                    if (level > maxLevels) {
+                        gameActive = false;
+                        gameOver = true;
+                        document.getElementById('finalScore').textContent = `${score}/${maxLevels}`;
+                        gameOverDiv.style.display = 'block';
+                        playAgainBtn.style.display = 'block';
+                        homeBtn.style.display = 'block';
+                    } else {
+                        playInterval();
+                    }
+                }, 1000);
+            }
+        }
+
+        function startGame() {
+            level = 1;
+            score = 0;
+            gameActive = true;
+            gameOver = false;
+            selectedQuality = null;
+            selectedDistance = null;
+            
+            qualityButtons.forEach(btn => {
+                btn.classList.remove('selected', 'correct', 'active');
+            });
+            distanceButtons.forEach(btn => {
+                btn.classList.remove('selected', 'correct', 'active');
+            });
+            
+            rulesDiv.style.display = 'block';
+            playAgainBtn.style.display = 'none';
+            gameOverDiv.style.display = 'none';
+            homeBtn.style.display = 'none';
+            continueBtn.style.display = 'block';
+            buttonsContainer.style.display = 'none';
+            roundCounter.style.display = 'none';
+        }
+
+        window.addEventListener('load', startGame);
+
+        continueBtn.addEventListener('click', () => {
+            rulesDiv.style.display = 'none';
+            continueBtn.style.display = 'none';
+            buttonsContainer.style.display = 'flex';
+            playInterval();
+        });
+
+        qualityButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (gameActive && button.classList.contains('active')) {
+                    qualityButtons.forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    selectedQuality = button.dataset.quality;
+                    if (selectedDistance) checkAnswer();
+                }
+            });
+        });
+
+        distanceButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (gameActive && button.classList.contains('active')) {
+                    distanceButtons.forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    selectedDistance = button.dataset.distance;
+                    if (selectedQuality) checkAnswer();
+                }
+            });
+        });
+
+        playAgainBtn.addEventListener('click', startGame);
+
+        homeBtn.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        buttonsContainer.style.display = 'none';
+        
+        lucide.createIcons();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('active');
+                    mobileMenuToggle.classList.toggle('active');
+                });
+                
+                const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+                mobileMenuLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    });
+                });
+                
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>
