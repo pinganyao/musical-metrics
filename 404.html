@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Page not found — Musical Metrics</title>
+    <link rel="icon" type="image/svg+xml" href="music-logo.svg?v=1">
+    <link rel="stylesheet" href="globals.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <a href="/" class="logo-link">
+                        <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+                        <h1 class="logo">MUSICAL METRICS</h1>
+                    </a>
+                </div>
+                
+                <nav class="nav">
+                    <a href="/dashboard" class="nav-link">DASHBOARD</a>
+                    <a href="/about" class="nav-link">ABOUT</a>
+                </nav>
+                
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                    <i data-lucide="menu" class="hamburger-icon"></i>
+                </button>
+                
+                <div class="mobile-menu" id="mobile-menu">
+                    <div class="mobile-menu-links">
+                        <a href="/dashboard" class="mobile-menu-link">DASHBOARD</a>
+                        <a href="/about" class="mobile-menu-link">ABOUT</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="about-main" style="text-align: center; padding: 4rem 1rem;">
+        <h1 style="font-size: 4rem; margin-bottom: 0.5rem;">404</h1>
+        <p style="font-size: 1.25rem; margin-bottom: 2rem;">This page doesn’t exist or has been moved.</p>
+        <a href="/" class="hero-button">Back to home</a>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img">
+                    <span class="footer-brand">Musical Metrics</span>
+                </div>
+                <div class="footer-info">
+                    <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('active');
+                    mobileMenuToggle.classList.toggle('active');
+                });
+                
+                const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
+                mobileMenuLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    });
+                });
+                
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>
