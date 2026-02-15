@@ -226,6 +226,29 @@ html {
     background-color: #f59e0b;
 }
 
+/* 404 page */
+.error-page {
+    min-height: calc(100vh - 3.5rem - 4rem);
+    display: flex;
+    align-items: center;
+}
+
+.error-page .hero {
+    flex: 1;
+    padding: 4rem 1rem;
+}
+
+.error-page-code {
+    font-size: 5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+}
+
+.error-page .hero-description {
+    margin-bottom: 2rem;
+}
+
 .games-section {
     background-color: #000000;
     padding: 4rem 1rem;
