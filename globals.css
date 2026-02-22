@@ -752,18 +752,6 @@ html {
     color: #ffffff;
 }
 
-.dashboard-profile-score {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #fbbf24;
-}
-
-.dashboard-profile-percentile {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #fbbf24;
-}
-
 .dashboard-profile-joined {
     font-size: 1rem;
     color: #ffffff;
@@ -787,7 +775,9 @@ html {
     border-radius: 0.5rem;
     padding: 1.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    flex: 1;
+    max-width: 36rem;
+    width: 100%;
+    align-self: center;
 }
 
 .dashboard-tests-header {
@@ -808,7 +798,7 @@ html {
 
 .dashboard-tests-table-header {
     display: grid;
-    grid-template-columns: 1fr 1.2fr 0.8fr 0.8fr;
+    grid-template-columns: 1fr auto;
     gap: 1rem;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid #303030;
@@ -817,7 +807,7 @@ html {
 
 .dashboard-tests-table-row {
     display: grid;
-    grid-template-columns: 1fr 1.2fr 0.8fr 0.8fr;
+    grid-template-columns: 1fr auto;
     gap: 1rem;
     padding: 1rem 0;
     border-bottom: 1px solid #262626;
@@ -886,37 +876,6 @@ html {
     background-color: #4b5563;
 }
 
-.dashboard-tests-table-cell.score-cell {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #9ca3af;
-    justify-content: flex-start;
-}
-
-.dashboard-tests-table-cell.percentile-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #9ca3af;
-}
-
-.percentile-bar {
-    width: 3.75rem;
-    height: 0.5rem;
-    background-color: #374151;
-    border-radius: 0.25rem;
-    flex-shrink: 0;
-}
-
-.info-icon {
-    width: 0.875rem;
-    height: 0.875rem;
-    color: #6b7280;
-    margin-left: 0.25rem;
-}
-
 @media (max-width: 768px) {
     .dashboard-main {
         padding: 1rem;
@@ -956,26 +915,7 @@ html {
         margin-right: auto;
     }
     
-    .dashboard-tests-table-cell.score-cell::before {
-        content: "Score: ";
-        font-weight: 600;
-        color: #9ca3af;
-        margin-right: auto;
-    }
-    
-    .dashboard-tests-table-cell.percentile-cell::before {
-        content: "Percentile: ";
-        font-weight: 600;
-        color: #9ca3af;
-        margin-right: auto;
-    }
-    
     .dashboard-tests-table-cell.actions-cell {
-        justify-content: flex-end;
-    }
-    
-    .dashboard-tests-table-cell.score-cell,
-    .dashboard-tests-table-cell.percentile-cell {
         justify-content: flex-end;
     }
 }
