@@ -1522,6 +1522,20 @@ a {
     width: 100%;
 }
 
+.error-page-body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.error-page-body .error-page {
+    flex: 1;
+}
+
+.error-page-body .footer {
+    margin-top: 0;
+}
+
 .seo-content-section {
     padding-top: 0.5rem;
 }
