@@ -71,13 +71,13 @@
 
       <div class="note-display" id="noteDisplay"></div>
 
-      <div class="input-container" style="display: none; flex-direction: column; gap: 20px; justify-content: center; align-items: center; padding: 20px; margin: 20px auto; max-width: 600px;">
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-          <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: center;">
+      <div class="input-container">
+        <div class="game-center-column">
+          <div class="game-center-row">
             <button id="playReferenceBtn" class="control-button control-button-block play-reference-btn">Play Reference</button>
             <button id="playTestBtn" class="control-button control-button-block play-test-btn">Play Test Note</button>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="game-center-align-gap">
             <input type="text" id="centsInput" placeholder="Enter cents" class="game-input" />
             <span class="cents-label">cents</span>
           </div>
@@ -429,6 +429,7 @@
       }
     });
   </script>
+  <script defer src="game-rules.js"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
   <script defer src="/_vercel/speed-insights/script.js"></script>

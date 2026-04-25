@@ -21,6 +21,7 @@
     <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
     <link rel="stylesheet" href="game.css" />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="audio-engine.js"></script>
 </head>
 <body>
     <header class="header">
@@ -68,8 +69,8 @@
             <div class="level-display">Round <span id="levelNum">1</span></div>
             <div class="round-counter">Round <span id="roundNum">1</span> of 10</div>
             
-            <div class="buttons-container" style="display: none; flex-direction: column; gap: 15px; justify-content: center; align-items: center;">
-                <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: nowrap; overflow-x: auto; padding: 0 10px; height: 120px; align-items: center;">
+            <div class="buttons-container buttons-container-column-large">
+                <div class="buttons-row-large-gap">
                     <button class="chord-type" data-type="major">Major</button>
                     <button class="chord-type" data-type="minor">Minor</button>
                     <button class="chord-type" data-type="diminished">Diminished</button>
@@ -79,7 +80,7 @@
                     <button class="chord-type" data-type="dominant">Dominant</button>
                     <button class="chord-type" data-type="half-diminished">Half-diminished</button>
                 </div>
-                <div style="display: flex; gap: 15px; justify-content: center;">
+                <div class="buttons-row-small-gap">
                     <button class="extension-type" data-extension="none">None</button>
                     <button class="extension-type" data-extension="7th">7th</button>
                     <button class="extension-type" data-extension="6th">6th</button>
@@ -119,7 +120,6 @@
     </footer>
 
     <script>
-        const notes = {};
         const audioFiles = {
             'c2': 'sounds/C2.mp3', 'c#2': 'sounds/C%232.mp3', 'd2': 'sounds/D2.mp3', 'd#2': 'sounds/D%232.mp3',
             'e2': 'sounds/E2.mp3', 'f2': 'sounds/F2.mp3', 'f#2': 'sounds/F%232.mp3', 'g2': 'sounds/G2.mp3',
@@ -132,12 +132,6 @@
             'g#4': 'sounds/G%234.mp3', 'a4': 'sounds/A4.mp3', 'a#4': 'sounds/A%234.mp3', 'b4': 'sounds/B4.mp3',
             'c5': 'sounds/C5.mp3'
         };
-
-        Object.entries(audioFiles).forEach(([key, path]) => {
-            const audio = new Audio(path);
-            audio.load();
-            notes[key] = audio;
-        });
 
         let level = 1;
         let maxLevels = 10;
@@ -241,13 +235,7 @@
                     inversion: inversion
                 };
                 
-                const audioPromises = chordNotes.map(noteName => {
-                    const audio = new Audio(audioFiles[noteName]);
-                    audio.volume = 0.3;
-                    return audio.play();
-                });
-                
-                await Promise.all(audioPromises);
+                AudioEngine.playChord(chordNotes, { gain: 0.3 });
                 
                 chordTypeButtons.forEach(btn => btn.classList.add('active'));
                 extensionButtons.forEach(btn => btn.classList.add('active'));
@@ -330,6 +318,8 @@
                         gameActive = false;
                         gameOver = true;
                         document.getElementById('finalScore').textContent = `${score}/${maxLevels}`;
+                        buttonsContainer.style.display = 'none';
+                        roundCounter.style.display = 'none';
                         gameOverDiv.style.display = 'block';
                         playAgainBtn.style.display = 'block';
                         homeBtn.style.display = 'block';
@@ -370,6 +360,8 @@
                         gameActive = false;
                         gameOver = true;
                         document.getElementById('finalScore').textContent = `${score}/${maxLevels}`;
+                        buttonsContainer.style.display = 'none';
+                        roundCounter.style.display = 'none';
                         gameOverDiv.style.display = 'block';
                         playAgainBtn.style.display = 'block';
                         homeBtn.style.display = 'block';
@@ -410,7 +402,9 @@
 
         window.addEventListener('load', startGame);
 
-        continueBtn.addEventListener('click', () => {
+        continueBtn.addEventListener('click', async () => {
+            await AudioEngine.resume();
+            await AudioEngine.init(audioFiles);
             rulesDiv.style.display = 'none';
             continueBtn.style.display = 'none';
             buttonsContainer.style.display = 'flex';
@@ -476,6 +470,7 @@
             }
         });
     </script>
+    <script defer src="game-rules.js"></script>
     <script defer src="/_vercel/insights/script.js"></script>
     <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
     <script defer src="/_vercel/speed-insights/script.js"></script>

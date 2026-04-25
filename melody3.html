@@ -21,6 +21,7 @@
   <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
   <link rel="stylesheet" href="game.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="audio-engine.js"></script>
 </head>
 <body>
   <header class="header">
@@ -126,7 +127,6 @@
   </footer>
 
   <script>
-    const notes = {};
     const audioFiles = {
       1: 'sounds/C4.mp3',
       2: 'sounds/C%234.mp3',
@@ -142,12 +142,6 @@
       12: 'sounds/B4.mp3',
       13: 'sounds/C5.mp3'
     };
-
-    Object.entries(audioFiles).forEach(([key, path]) => {
-      const audio = new Audio(path);
-      audio.load();
-      notes[key] = audio;
-    });
 
     let level = 1;
     let sequence = [];
@@ -167,14 +161,10 @@
     const playAgainBtn = document.getElementById('playAgainBtn');
     const homeBtn = document.getElementById('homeBtn');
 
-    async function playNote(noteNum, isPlayerInput = false) {
+    function playNote(noteNum, isPlayerInput = false) {
       const button = document.querySelector(`[data-note="${noteNum}"]`);
       if (isPlayerInput) button.classList.add('playing');
-
-      const audio = new Audio(audioFiles[noteNum]);
-      try {
-        await audio.play();
-      } catch (err) {}
+      AudioEngine.playNote(String(noteNum));
 
       if (isPlayerInput) {
         setTimeout(() => {
@@ -264,7 +254,9 @@
 
     startBtn.addEventListener('click', startGame);
 
-    continueBtn.addEventListener('click', () => {
+    continueBtn.addEventListener('click', async () => {
+      await AudioEngine.resume();
+      await AudioEngine.init(audioFiles);
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';
       buttonsContainer.style.display = 'flex';
@@ -338,6 +330,7 @@
       }
     });
   </script>
+  <script defer src="game-rules.js"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
   <script defer src="/_vercel/speed-insights/script.js"></script>

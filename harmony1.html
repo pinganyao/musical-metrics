@@ -21,6 +21,7 @@
     <link rel="icon" type="image/svg+xml" href="music-logo.svg?v=1">
     <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="audio-engine.js"></script>
 </head>
 <body>
     <header class="header">
@@ -67,7 +68,7 @@
             <div class="level-display">Round <span id="levelNum">1</span></div>
             <div class="round-counter">Round <span id="roundNum">1</span> of 10</div>
             
-            <div class="buttons-container" style="display: none; flex-direction: row; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <div class="buttons-container buttons-container-row">
                 <button class="chord-type" data-type="major">Major</button>
                 <button class="chord-type" data-type="minor">Minor</button>
                 <button class="chord-type" data-type="diminished">Diminished</button>
@@ -107,7 +108,6 @@
     </footer>
 
     <script>
-        const notes = {};
         const audioFiles = {
             'c3': 'sounds/C3.mp3', 'c#3': 'sounds/C%233.mp3', 'd3': 'sounds/D3.mp3', 'd#3': 'sounds/D%233.mp3',
             'e3': 'sounds/E3.mp3', 'f3': 'sounds/F3.mp3', 'f#3': 'sounds/F%233.mp3', 'g3': 'sounds/G3.mp3',
@@ -116,12 +116,6 @@
             'e4': 'sounds/E4.mp3', 'f4': 'sounds/F4.mp3', 'f#4': 'sounds/F%234.mp3', 'g4': 'sounds/G4.mp3',
             'g#4': 'sounds/G%234.mp3', 'a4': 'sounds/A4.mp3', 'a#4': 'sounds/A%234.mp3', 'b4': 'sounds/B4.mp3'
         };
-
-        Object.entries(audioFiles).forEach(([key, path]) => {
-            const audio = new Audio(path);
-            audio.load();
-            notes[key] = audio;
-        });
 
         let level = 1;
         let maxLevels = 10;
@@ -184,13 +178,7 @@
                     notes: chordNotes
                 };
                 
-                const audioPromises = chordNotes.map(noteName => {
-                    const audio = new Audio(audioFiles[noteName]);
-                    audio.volume = 0.7;
-                    return audio.play();
-                });
-                
-                await Promise.all(audioPromises);
+                AudioEngine.playChord(chordNotes, { gain: 0.7 });
                 
                 chordTypeButtons.forEach(btn => btn.classList.add('active'));
             }, 2000);
@@ -221,6 +209,8 @@
                         gameActive = false;
                         gameOver = true;
                         document.getElementById('finalScore').textContent = `${score}/${maxLevels}`;
+                        buttonsContainer.style.display = 'none';
+                        roundCounter.style.display = 'none';
                         gameOverDiv.style.display = 'block';
                         playAgainBtn.style.display = 'block';
                         homeBtn.style.display = 'block';
@@ -249,6 +239,8 @@
                         gameActive = false;
                         gameOver = true;
                         document.getElementById('finalScore').textContent = `${score}/${maxLevels}`;
+                        buttonsContainer.style.display = 'none';
+                        roundCounter.style.display = 'none';
                         gameOverDiv.style.display = 'block';
                         playAgainBtn.style.display = 'block';
                         homeBtn.style.display = 'block';
@@ -283,7 +275,9 @@
 
         window.addEventListener('load', startGame);
 
-        continueBtn.addEventListener('click', () => {
+        continueBtn.addEventListener('click', async () => {
+            await AudioEngine.resume();
+            await AudioEngine.init(audioFiles);
             rulesDiv.style.display = 'none';
             continueBtn.style.display = 'none';
             buttonsContainer.style.display = 'flex';
@@ -338,6 +332,7 @@
             }
         });
     </script>
+    <script defer src="game-rules.js"></script>
     <script defer src="/_vercel/insights/script.js"></script>
     <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
     <script defer src="/_vercel/speed-insights/script.js"></script>

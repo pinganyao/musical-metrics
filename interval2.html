@@ -21,6 +21,7 @@
   <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
   <link rel="stylesheet" href="game.css" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="audio-engine.js"></script>
 </head>
 <body>
   <header class="header">
@@ -118,7 +119,6 @@
   </footer>
 
   <script>
-    const notes = {};
     const audioFiles = {
       'c2': 'sounds/C2.mp3', 'c#2': 'sounds/C%232.mp3', 'd2': 'sounds/D2.mp3', 'd#2': 'sounds/D%232.mp3',
       'e2': 'sounds/E2.mp3', 'f2': 'sounds/F2.mp3', 'f#2': 'sounds/F%232.mp3', 'g2': 'sounds/G2.mp3',
@@ -131,12 +131,6 @@
       'g#4': 'sounds/G%234.mp3', 'a4': 'sounds/A4.mp3', 'a#4': 'sounds/A%234.mp3', 'b4': 'sounds/B4.mp3',
       'c5': 'sounds/C5.mp3'
     };
-
-    Object.entries(audioFiles).forEach(([key, path]) => {
-      const audio = new Audio(path);
-      audio.load();
-      notes[key] = audio;
-    });
 
     let level = 1;
     let maxLevels = 10;
@@ -198,11 +192,9 @@
         const otherNotes = allNoteNames.filter(n => n !== firstNote);
         secondNote = otherNotes[Math.floor(Math.random() * otherNotes.length)];
 
-        const firstAudio = new Audio(audioFiles[firstNote]);
-        await firstAudio.play();
+        AudioEngine.playNote(firstNote);
         await new Promise(r => setTimeout(r, 1000));
-        const secondAudio = new Audio(audioFiles[secondNote]);
-        await secondAudio.play();
+        AudioEngine.playNote(secondNote);
 
         qualityButtons.forEach(btn => btn.classList.add('active'));
         distanceButtons.forEach(btn => btn.classList.add('active'));
@@ -316,7 +308,9 @@
 
     window.addEventListener('load', startGame);
 
-    continueBtn.addEventListener('click', () => {
+    continueBtn.addEventListener('click', async () => {
+      await AudioEngine.resume();
+      await AudioEngine.init(audioFiles);
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';
       buttonsContainer.style.display = 'flex';
@@ -382,6 +376,7 @@
       }
     });
   </script>
+  <script defer src="game-rules.js"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
   <script defer src="/_vercel/speed-insights/script.js"></script>

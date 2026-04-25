@@ -32,16 +32,13 @@
                         <h1 class="logo">MUSICAL METRICS</h1>
                     </a>
                 </div>
-                
                 <nav class="nav">
                     <a href="/dashboard" class="nav-link">DASHBOARD</a>
                     <a href="/about" class="nav-link active">ABOUT</a>
                 </nav>
-                
                 <button class="mobile-menu-toggle" id="mobile-menu-toggle">
                     <i data-lucide="menu" class="hamburger-icon"></i>
                 </button>
-                
                 <div class="mobile-menu" id="mobile-menu">
                     <div class="mobile-menu-links">
                         <a href="/dashboard" class="mobile-menu-link">DASHBOARD</a>
@@ -59,32 +56,26 @@
                     <img src="music-logo-white.svg" alt="Musical Metrics Logo" class="about-logo">
                 </div>
                 <h1 class="about-title">About Musical Metrics</h1>
-                
                 <div class="about-description">
                     <p>Musical Metrics is a set of 12 simple and creative music games that test the players' listening ability in various aspects of music and hearing, examining a diverse range of listening skills such as relative pitch and rhythmic recognition. The games are part of an ongoing research to explore hearing ability as a major component of a musician's progression.</p>
-                    
                     <p>The games are of various difficulty levels. Some are beginner-friendly and are accessible to people with no musical experience, while some test the capacity of even the most proficient musicians. A few games require a certain level of understanding of musical theory and terminology, but are nonetheless playable after a few practices.</p>
-                    
                     <p>Musical Metrics isn't only a useful tool for testing players' hearing ability, but also a great method of ear-training, all while having fun, whether that's competing with friends and family, or going against other musicians.</p>
                 </div>
-                
                 <div class="about-buttons">
-                    <a href="melody1.html" class="about-button primary-button">
+                    <a href="/melody1" class="about-button primary-button">
                         <i data-lucide="play" class="button-icon"></i>
                         Start Playing
                     </a>
-                    <a href="dashboard.html" class="about-button secondary-button">
+                    <a href="/dashboard" class="about-button secondary-button">
                         <i data-lucide="bar-chart-3" class="button-icon"></i>
                         Go to Dashboard
                     </a>
                 </div>
-                
                 <div class="about-creator">
                     <p class="creator-text">Made by <a href="https://yaopingan.com" target="_blank" rel="noopener noreferrer" class="creator-link">Patrick Yao</a></p>
-                    
                     <div class="social-links">
                         <a href="https://www.instagram.com/ytpyao/" target="_blank" rel="noopener noreferrer" class="social-link">
-                            <i data-lucide="instagram" class="social-icon"></i>
+                            <img src="instagram.svg" alt="Instagram" class="social-icon">
                         </a>
                         <a href="https://www.youtube.com/@patrickyao/videos" target="_blank" rel="noopener noreferrer" class="social-link">
                             <img src="youtube.svg" alt="YouTube" class="social-icon">
@@ -119,19 +110,15 @@
     </footer>
 
     <script>
-
         lucide.createIcons();
-        
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
             const mobileMenu = document.getElementById('mobile-menu');
-            
             if (mobileMenuToggle && mobileMenu) {
                 mobileMenuToggle.addEventListener('click', function() {
                     mobileMenu.classList.toggle('active');
                     mobileMenuToggle.classList.toggle('active');
                 });
-                
                 const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
                 mobileMenuLinks.forEach(link => {
                     link.addEventListener('click', function() {
@@ -139,7 +126,6 @@
                         mobileMenuToggle.classList.remove('active');
                     });
                 });
-                
                 document.addEventListener('click', function(event) {
                     if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
                         mobileMenu.classList.remove('active');

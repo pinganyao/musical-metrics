@@ -21,6 +21,7 @@
     <meta name="msapplication-TileImage" content="music-logo.svg?v=1">
     <link rel="stylesheet" href="game.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="audio-engine.js"></script>
 </head>
 <body>
     <header class="header">
@@ -120,7 +121,6 @@
     </footer>
 
     <script>
-        const notes = {};
         const audioFiles = {
             'c4': 'sounds/C4.mp3',
             'c#4': 'sounds/C%234.mp3',
@@ -136,12 +136,6 @@
             'b4': 'sounds/B4.mp3',
             'c5': 'sounds/C5.mp3'
         };
-
-        Object.entries(audioFiles).forEach(([key, path]) => {
-            const audio = new Audio(path);
-            audio.load();
-            notes[key] = audio;
-        });
 
         let level = 1;
         let maxLevels = 10;
@@ -174,16 +168,14 @@
                 buttonsContainer.style.display = 'flex';
                 roundCounter.style.display = 'block';
                 
-                const firstNote = new Audio(audioFiles['c4']);
-                await firstNote.play();
+                AudioEngine.playNote('c4');
                 
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
                 const noteNames = Object.keys(audioFiles).filter(note => note !== 'c4');
                 const randomNote = noteNames[Math.floor(Math.random() * noteNames.length)];
                 currentInterval = randomNote;
-                const secondNote = new Audio(audioFiles[randomNote]);
-                await secondNote.play();
+                AudioEngine.playNote(randomNote);
 
                 qualityButtons.forEach(btn => btn.classList.add('active'));
                 distanceButtons.forEach(btn => btn.classList.add('active'));
@@ -327,7 +319,9 @@
 
         window.addEventListener('load', startGame);
 
-        continueBtn.addEventListener('click', () => {
+        continueBtn.addEventListener('click', async () => {
+            await AudioEngine.resume();
+            await AudioEngine.init(audioFiles);
             rulesDiv.style.display = 'none';
             continueBtn.style.display = 'none';
             buttonsContainer.style.display = 'flex';
@@ -393,6 +387,7 @@
             }
         });
     </script>
+    <script defer src="game-rules.js"></script>
     <script defer src="/_vercel/insights/script.js"></script>
     <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
     <script defer src="/_vercel/speed-insights/script.js"></script>
