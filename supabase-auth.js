@@ -85,6 +85,7 @@
   };
 
   const showStatus = (message, type = "info") => {
+    const inlineStatus = document.getElementById("mm-inline-status");
     const bar = ensureStatusBar();
     const styles = {
       info: {
@@ -101,14 +102,26 @@
       }
     };
 
-    bar.textContent = message;
-    bar.style.display = "block";
-    bar.style.background = (styles[type] || styles.info).background;
-    bar.style.border = (styles[type] || styles.info).border;
+    if (inlineStatus) {
+      inlineStatus.textContent = message;
+      inlineStatus.style.display = "block";
+      inlineStatus.style.background = (styles[type] || styles.info).background;
+      inlineStatus.style.border = (styles[type] || styles.info).border;
+      inlineStatus.style.color = "#fff";
+    } else {
+      bar.textContent = message;
+      bar.style.display = "block";
+      bar.style.background = (styles[type] || styles.info).background;
+      bar.style.border = (styles[type] || styles.info).border;
+    }
 
     if (state.statusTimer) clearTimeout(state.statusTimer);
     state.statusTimer = window.setTimeout(() => {
-      bar.style.display = "none";
+      if (inlineStatus) {
+        inlineStatus.style.display = "none";
+      } else {
+        bar.style.display = "none";
+      }
     }, 3500);
   };
 

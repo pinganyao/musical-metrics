@@ -102,6 +102,17 @@
       color: rgba(255, 255, 255, 0.9);
       font-size: 13px;
     }
+    .inline-status {
+      display: none;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(110, 151, 255, 0.45);
+      background: rgba(74, 121, 255, 0.15);
+      color: #fff;
+      padding: 9px 10px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -155,6 +166,7 @@
 
         <button class="auth-submit" type="submit">Log in</button>
       </form>
+      <div id="mm-inline-status" class="inline-status" aria-live="polite"></div>
 
       <form id="panel-signup" class="auth-panel">
         <label class="auth-label" for="signup-email">Email</label>
