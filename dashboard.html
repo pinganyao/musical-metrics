@@ -81,6 +81,7 @@
                 <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Pitch I</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
                 <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Rhythm I</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
             </div>
+            <div id="statsPanel" style="display:none;margin-top:16px;padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.04);color:#fff;"></div>
         </div>
     </main>
 
@@ -104,6 +105,7 @@
         </div>
     </footer>
 
+    <script defer src="supabase-auth.js"></script>
     <script>
         lucide.createIcons();
         document.addEventListener('DOMContentLoaded', function() {
@@ -136,9 +138,47 @@
                 if (testNames[index]) window.location.href = testNames[index];
             });
         });
-        document.querySelectorAll('.stats-button').forEach((button) => {
-            button.addEventListener('click', () => {
-                alert('Stats feature coming soon!');
+        const gameKeys = ['melody1', 'melody2', 'melody3', 'interval1', 'interval2', 'harmony1', 'harmony2', 'harmony3', 'tempo1', 'tempo2', 'pitch1', 'rhythm1'];
+        const statsPanel = document.getElementById('statsPanel');
+        document.querySelectorAll('.stats-button').forEach((button, index) => {
+            button.addEventListener('click', async () => {
+                if (!window.MMAuth) {
+                    return;
+                }
+
+                const showPanel = (content) => {
+                    if (!statsPanel) return;
+                    statsPanel.style.display = 'block';
+                    statsPanel.innerHTML = content;
+                };
+
+                await window.MMAuth.init();
+                const session = window.MMAuth.getSession();
+                if (!session?.user) {
+                    if (window.MMAuth.showStatus) {
+                        window.MMAuth.showStatus('Log in first to view your saved stats.', 'info');
+                    }
+                    return;
+                }
+
+                const gameKey = gameKeys[index];
+                const stats = await window.MMAuth.fetchHighScoreForGame(gameKey);
+                const gameName = window.MMAuth.gameNameForKey(gameKey);
+
+                if (!stats) {
+                    showPanel(`<strong>${gameName}</strong><br>No saved score yet.`);
+                    return;
+                }
+
+                const lastPlayedDate = stats.last_played_at
+                    ? new Date(stats.last_played_at).toLocaleString()
+                    : 'Unknown';
+                showPanel(
+                    `<strong>${gameName}</strong><br>` +
+                    `High score: ${stats.high_score}<br>` +
+                    `Attempts: ${stats.attempts}<br>` +
+                    `Last played: ${lastPlayedDate}`
+                );
             });
         });
     </script>

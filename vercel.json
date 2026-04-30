@@ -3,6 +3,7 @@
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
     { "source": "/about", "destination": "/about.html" },
+    { "source": "/login", "destination": "/login.html" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/melody1", "destination": "/melody1.html" },
     { "source": "/melody2", "destination": "/melody2.html" },
@@ -20,6 +21,7 @@
   "redirects": [
     { "source": "/index.html", "destination": "/", "permanent": true },
     { "source": "/about.html", "destination": "/about", "permanent": true },
+    { "source": "/login.html", "destination": "/login", "permanent": true },
     { "source": "/dashboard.html", "destination": "/dashboard", "permanent": true },
     { "source": "/melody1.html", "destination": "/melody1", "permanent": true },
     { "source": "/melody2.html", "destination": "/melody2", "permanent": true },

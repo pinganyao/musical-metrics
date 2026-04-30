@@ -1,4 +1,25 @@
 (() => {
+  const ensureAuthScript = () =>
+    new Promise((resolve) => {
+      if (window.MMAuth) {
+        resolve(window.MMAuth);
+        return;
+      }
+
+      const existing = document.querySelector('script[data-mm-auth-script="true"]');
+      if (existing) {
+        existing.addEventListener("load", () => resolve(window.MMAuth), { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "supabase-auth.js";
+      script.defer = true;
+      script.dataset.mmAuthScript = "true";
+      script.addEventListener("load", () => resolve(window.MMAuth), { once: true });
+      document.head.appendChild(script);
+    });
+
   const rulesDiv = document.querySelector('.rules');
   if (!rulesDiv) return;
 
@@ -90,6 +111,77 @@
   observer.observe(rulesDiv, { attributes: true, attributeFilter: ['style', 'class'] });
 
   syncFabVisibility();
+
+  const scoreEl = document.getElementById('finalScore');
+  const gameOverEl = document.querySelector('.game-over');
+  const gameKey = (() => {
+    const path = window.location.pathname || '';
+    const segments = path.split('/').filter(Boolean);
+    const last = segments.length ? segments[segments.length - 1] : path;
+    return last.replace(/\.html$/i, '');
+  })();
+  let wasGameOverVisible = false;
+  let scoreReportedForCurrentGameOver = false;
+
+  const isVisible = (element) => {
+    if (!element) return false;
+    const styles = window.getComputedStyle(element);
+    return styles.display !== 'none' && styles.visibility !== 'hidden' && styles.opacity !== '0';
+  };
+
+  const parseScore = (scoreText) => {
+    const match = scoreText.match(/-?\d+(\.\d+)?/);
+    if (!match) return null;
+    const value = Number(match[0]);
+    return Number.isFinite(value) ? value : null;
+  };
+
+  const maybeReportScore = async () => {
+    if (!scoreEl || !gameOverEl || !gameKey) return;
+    const isGameOverVisible = isVisible(gameOverEl);
+
+    if (isGameOverVisible && !wasGameOverVisible) {
+      scoreReportedForCurrentGameOver = false;
+    }
+    wasGameOverVisible = isGameOverVisible;
+
+    if (!isGameOverVisible || scoreReportedForCurrentGameOver) return;
+
+    const scoreText = scoreEl.textContent ? scoreEl.textContent.trim() : '';
+    const scoreValue = parseScore(scoreText);
+    if (scoreValue === null) return;
+
+    const mmAuth = await ensureAuthScript();
+    if (!mmAuth || typeof mmAuth.reportScore !== 'function') return;
+
+    const result = await mmAuth.reportScore(gameKey, scoreValue, scoreText);
+    if (result && result.saved) {
+      scoreReportedForCurrentGameOver = true;
+    }
+  };
+
+  const scoreObserver = new MutationObserver(() => {
+    maybeReportScore();
+  });
+
+  if (scoreEl) {
+    scoreObserver.observe(scoreEl, { characterData: true, childList: true, subtree: true });
+  }
+
+  if (gameOverEl) {
+    scoreObserver.observe(gameOverEl, { attributes: true, attributeFilter: ['style', 'class'] });
+  }
+
+  maybeReportScore();
+
+  const continueBtnForSession = document.getElementById('continueBtn');
+  if (continueBtnForSession) {
+    continueBtnForSession.addEventListener('click', async () => {
+      const mmAuth = await ensureAuthScript();
+      if (!mmAuth || typeof mmAuth.startGameSession !== 'function') return;
+      await mmAuth.startGameSession(gameKey);
+    });
+  }
 
   if (window.lucide && typeof window.lucide.createIcons === 'function') {
     window.lucide.createIcons();
