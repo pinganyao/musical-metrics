@@ -176,16 +176,17 @@
                     .replace(/"/g, "&quot;");
             }
 
+            /** Globe when country unknown — avoids 🏳️ looking blank in some fonts. */
             function countryCodeToFlag(cc) {
                 if (!cc || typeof cc !== "string" || cc.length !== 2) {
-                    return "🏳️";
+                    return "🌍";
                 }
                 var up = cc.toUpperCase();
                 var A = 0x1f1e6;
                 var parts = [];
                 for (var i = 0; i < 2; i++) {
                     var c = up.charCodeAt(i);
-                    if (c < 65 || c > 90) return "🏳️";
+                    if (c < 65 || c > 90) return "🌍";
                     parts.push(String.fromCodePoint(A + (c - 65)));
                 }
                 return parts.join("");
@@ -263,8 +264,12 @@
                             '<td class="leaderboard-col-rank">' +
                             escapeHtml(rk) +
                             "</td>" +
-                            '<td class="leaderboard-col-flag" title="' +
-                            escapeHtml(row.country_code || "") +
+                            '<td class="leaderboard-col-flag' +
+                            (row.country_code ? "" : " leaderboard-col-flag--unknown") +
+                            '" title="' +
+                            escapeHtml(
+                                row.country_code ? row.country_code : "Country not set yet"
+                            ) +
                             '">' +
                             flag +
                             "</td>" +
@@ -393,6 +398,10 @@
                     if (document.visibilityState === "visible") {
                         loadAll();
                     }
+                });
+
+                window.addEventListener("mm-country-synced", function () {
+                    loadAll();
                 });
             });
         })();

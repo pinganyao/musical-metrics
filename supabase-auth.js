@@ -364,6 +364,31 @@
     state.profile = insertedProfile;
   };
 
+  /** Sets profiles.country_code from Vercel/edge headers when visiting the site (backfill if missing). */
+  const syncCountryFromEdge = async () => {
+    if (!state.client || !state.session?.user) return;
+    try {
+      const geoRes = await fetch("/api/geo");
+      if (!geoRes.ok) return;
+      const geo = await geoRes.json();
+      const raw = geo && geo.country;
+      if (typeof raw !== "string" || !/^[A-Za-z]{2}$/.test(raw.trim())) return;
+      const code = raw.trim().toUpperCase();
+      const { error } = await state.client
+        .from("profiles")
+        .update({ country_code: code })
+        .eq("user_id", state.session.user.id);
+      if (!error && state.profile) {
+        state.profile = { ...state.profile, country_code: code };
+      }
+      if (!error && typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("mm-country-synced"));
+      }
+    } catch (_) {
+      /* optional */
+    }
+  };
+
   const init = async () => {
     if (state.initialized) return;
     if (state.initPromise) {
@@ -393,6 +418,7 @@
         const sessionResult = await state.client.auth.getSession();
         state.session = sessionResult.data.session;
         await ensureProfileForSession();
+        void syncCountryFromEdge();
 
         ensureAuthNav();
         updateAuthUi();
@@ -400,6 +426,7 @@
         state.client.auth.onAuthStateChange(async (_event, session) => {
           state.session = session;
           await ensureProfileForSession();
+          void syncCountryFromEdge();
           ensureAuthNav();
           updateAuthUi();
           if (typeof window !== "undefined") {

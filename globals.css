@@ -1339,6 +1339,11 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
     width: 2.75rem;
     font-size: 1.35rem;
     line-height: 1;
+    text-align: center;
+}
+
+.leaderboard-col-flag--unknown {
+    opacity: 0.85;
 }
 
 .leaderboard-col-user {
