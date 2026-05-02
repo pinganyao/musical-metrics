@@ -536,10 +536,7 @@
       };
     }
 
-    return {
-      ok: true,
-      successMessage: "Account created. Check your email if confirmation is enabled."
-    };
+    return { ok: true };
   };
 
   const reportScore = async (gameKey, scoreValue, scoreLabel) => {

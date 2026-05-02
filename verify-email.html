@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, follow">
+  <title>Verify your email | Musical Metrics</title>
+  <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg?v=2">
+  <link rel="icon" type="image/png" href="assets/images/logo.png?v=2">
+  <link rel="apple-touch-icon" href="assets/images/logo.png?v=2">
+  <link rel="stylesheet" href="globals.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .login-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .login-card {
+      width: min(520px, 100%);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(12, 14, 26, 0.85);
+      padding: 28px 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+    .login-heading {
+      margin: 0 0 10px;
+      font-size: 26px;
+      color: #fff;
+      text-align: center;
+    }
+    .verify-email-body {
+      margin: 0 0 18px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+    .verify-email-body strong {
+      color: #fff;
+      font-weight: 600;
+      word-break: break-all;
+    }
+    .verify-email-hint {
+      margin: 0 0 22px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .auth-submit {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 8px;
+      border: 1px solid rgba(120, 145, 255, 0.45);
+      background: rgba(92, 120, 255, 0.24);
+      color: #fff;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .auth-submit:hover {
+      background: rgba(92, 120, 255, 0.38);
+      border-color: rgba(140, 165, 255, 0.55);
+      color: #fff;
+    }
+    .verify-email-secondary {
+      display: block;
+      margin-top: 14px;
+      text-align: center;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.65);
+      text-decoration: none;
+    }
+    .verify-email-secondary:hover {
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <div class="header-content">
+        <div class="logo-container">
+          <a href="/" class="logo-link">
+            <img src="assets/images/music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+            <span class="logo">MUSICAL METRICS</span>
+          </a>
+        </div>
+        <nav class="nav">
+          <a href="/dashboard" class="nav-link">DASHBOARD</a>
+          <a href="/about" class="nav-link">ABOUT</a>
+        </nav>
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button">
+          <i data-lucide="menu" class="hamburger-icon"></i>
+        </button>
+        <div class="mobile-menu" id="mobile-menu">
+          <div class="mobile-menu-links">
+            <a href="/dashboard" class="mobile-menu-link">DASHBOARD</a>
+            <a href="/about" class="mobile-menu-link">ABOUT</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="login-main">
+    <section class="login-card">
+      <h1 class="login-heading">Check your email</h1>
+      <p id="verify-email-body" class="verify-email-body"></p>
+      <p class="verify-email-hint">If you do not see the message within a few minutes, check your spam folder.</p>
+      <a href="/login" class="auth-submit">Continue to log in</a>
+      <a href="/" class="verify-email-secondary">Back to home</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="assets/images/music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img">
+          <span class="footer-brand">Musical Metrics</span>
+        </div>
+        <div class="footer-info">
+          <div class="footer-links">
+            <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+              <img src="assets/images/amtf.png" alt="Athens Music Technology Forum" class="amtf-logo">
+              <span class="amtf-text">Athens Music Technology Forum</span>
+            </a>
+          </div>
+          <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script defer src="supabase-auth.js"></script>
+  <script>
+    lucide.createIcons();
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+      const mobileMenu = document.getElementById("mobile-menu");
+      if (mobileMenuToggle && mobileMenu) {
+        mobileMenuToggle.addEventListener("click", function () {
+          mobileMenu.classList.toggle("active");
+          mobileMenuToggle.classList.toggle("active");
+        });
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const email = params.get("email");
+      const bodyEl = document.getElementById("verify-email-body");
+      if (!bodyEl) return;
+
+      if (email) {
+        bodyEl.textContent = "";
+        bodyEl.appendChild(document.createTextNode("We sent a verification link to "));
+        const strong = document.createElement("strong");
+        strong.textContent = email;
+        bodyEl.appendChild(strong);
+        bodyEl.appendChild(document.createTextNode(
+          ". Open that email and click the link to confirm your account. After that, you can sign in below."
+        ));
+      } else {
+        bodyEl.textContent =
+          "We sent a verification link to the address you used at signup. Open that email and click the link to confirm your account. After that, you can sign in.";
+      }
+    });
+  </script>
+</body>
+</html>

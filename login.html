@@ -415,13 +415,9 @@
           document.getElementById("signup-password-confirm").value || ""
         );
         if (result.ok) {
-          clearSignupFormErrors();
-          setTab("login");
-          const loginSummary = document.getElementById("login-form-summary");
-          if (loginSummary && result.successMessage) {
-            loginSummary.textContent = result.successMessage;
-            loginSummary.classList.add("is-visible", "auth-form-summary--success");
-          }
+          const signupEmail = (document.getElementById("signup-email").value || "").trim();
+          window.location.href =
+            "/verify-email?email=" + encodeURIComponent(signupEmail);
           return;
         }
         const fe = result.fieldErrors || {};
