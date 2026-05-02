@@ -112,6 +112,11 @@ body {
     color: #ffffff;
 }
 
+html.mm-auth-pending #mm-auth-slot,
+html.mm-auth-pending #mm-auth-slot-mobile {
+    visibility: hidden;
+}
+
 .mm-nav-login-btn {
     display: inline-flex;
     align-items: center;

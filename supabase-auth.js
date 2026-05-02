@@ -1,4 +1,10 @@
 (() => {
+  const markAuthUiReady = () => {
+    if (typeof document === "undefined") return;
+    document.documentElement.classList.remove("mm-auth-pending");
+    document.documentElement.classList.add("mm-auth-ready");
+  };
+
   const SUPABASE_URL = "https://akjqnoftnvnbzycsdipl.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_stGW2I7dATan2pWJLFs55g_vIX8b-pZ";
   const REMEMBER_ME_KEY = "mm_remember_me";
@@ -366,39 +372,48 @@
     }
 
     state.initPromise = (async () => {
-      await loadSupabaseLib();
+      try {
+        await loadSupabaseLib();
 
-      if (!window.supabase || typeof window.supabase.createClient !== "function") {
-        showStatus("Supabase SDK is unavailable.", "error");
-        return;
-      }
-
-      state.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-          storage: getPreferredAuthStorage()
+        if (!window.supabase || typeof window.supabase.createClient !== "function") {
+          showStatus("Supabase SDK is unavailable.", "error");
+          ensureAuthNav();
+          updateAuthUi();
+          return;
         }
-      });
-      const sessionResult = await state.client.auth.getSession();
-      state.session = sessionResult.data.session;
-      await ensureProfileForSession();
 
-      ensureAuthNav();
-      updateAuthUi();
-
-      state.client.auth.onAuthStateChange(async (_event, session) => {
-        state.session = session;
+        state.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true,
+            storage: getPreferredAuthStorage()
+          }
+        });
+        const sessionResult = await state.client.auth.getSession();
+        state.session = sessionResult.data.session;
         await ensureProfileForSession();
+
         ensureAuthNav();
         updateAuthUi();
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("mm-auth-changed"));
-        }
-      });
 
-      state.initialized = true;
+        state.client.auth.onAuthStateChange(async (_event, session) => {
+          state.session = session;
+          await ensureProfileForSession();
+          ensureAuthNav();
+          updateAuthUi();
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("mm-auth-changed"));
+          }
+        });
+
+        state.initialized = true;
+      } catch (_err) {
+        ensureAuthNav();
+        updateAuthUi();
+      } finally {
+        markAuthUiReady();
+      }
     })();
 
     try {
@@ -732,6 +747,7 @@
     isRememberMeEnabled
   };
 
+  ensureAuthNav();
   bindLogoutClickDelegation();
   init();
 })();

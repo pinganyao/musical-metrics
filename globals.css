@@ -901,6 +901,17 @@ html {
     margin: 0;
 }
 
+/* Hide auth UI until Supabase session + nav render (avoids flash of wrong account state) */
+html.mm-auth-pending #mm-auth-slot,
+html.mm-auth-pending #mm-auth-slot-mobile {
+    visibility: hidden;
+}
+
+html.mm-auth-pending .dashboard-main > .dashboard-summary-card,
+html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
+    visibility: hidden;
+}
+
 .dashboard-tests-table {
     display: flex;
     flex-direction: column;
