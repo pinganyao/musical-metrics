@@ -1410,7 +1410,7 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
 }
 
 .leaderboard-error {
-    color: rgba(248, 113, 113, 0.95);
+    color: var(--text-2);
 }
 
 @media (max-width: 768px) {

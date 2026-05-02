@@ -291,6 +291,14 @@
                     .join("");
             }
 
+            function hideError(gameKey) {
+                var errEl = document.getElementById("leaderboard-error-" + gameKey);
+                if (errEl) {
+                    errEl.hidden = true;
+                    errEl.textContent = "";
+                }
+            }
+
             function showError(gameKey, msg) {
                 var body = document.getElementById("leaderboard-body-" + gameKey);
                 var emptyEl = document.getElementById("leaderboard-empty-" + gameKey);
@@ -303,10 +311,18 @@
                 }
             }
 
-            async function loadGame(gameKey) {
+            var LB_UNAVAILABLE =
+                "Leaderboard data is temporarily unavailable. Please try again in a moment.";
+
+            /**
+             * @param {boolean} silent — background refresh: keep existing rows, no error UI.
+             * @returns {boolean} success
+             */
+            async function loadGame(gameKey, silent) {
+                silent = silent === true;
                 if (!client) {
-                    showError(gameKey, "Could not initialize leaderboard.");
-                    return;
+                    if (!silent) showError(gameKey, LB_UNAVAILABLE);
+                    return false;
                 }
                 try {
                     var result = await client.rpc("leaderboard_melody", {
@@ -314,23 +330,32 @@
                         p_limit: LIMIT
                     });
                     if (result.error) {
-                        showError(
-                            gameKey,
-                            "Could not load leaderboard: " + (result.error.message || "Unknown error")
-                        );
-                        return;
+                        if (!silent) showError(gameKey, LB_UNAVAILABLE);
+                        else if (typeof console !== "undefined" && console.warn)
+                            console.warn("[leaderboard]", gameKey, result.error.message || result.error);
+                        return false;
                     }
                     renderRows(gameKey, result.data || []);
+                    hideError(gameKey);
+                    return true;
                 } catch (e) {
-                    showError(gameKey, "Could not load leaderboard.");
+                    if (!silent) showError(gameKey, LB_UNAVAILABLE);
+                    else if (typeof console !== "undefined" && console.warn) console.warn("[leaderboard]", gameKey, e);
+                    return false;
                 }
             }
 
-            async function loadAll() {
-                await Promise.all(gameKeys.map(function (k) {
-                    return loadGame(k);
-                }));
-                setLastUpdated();
+            async function loadAll(silent) {
+                silent = silent === true;
+                var outcomes = await Promise.all(
+                    gameKeys.map(function (k) {
+                        return loadGame(k, silent);
+                    })
+                );
+                var anyOk = outcomes.some(function (ok) {
+                    return ok;
+                });
+                if (anyOk) setLastUpdated();
             }
 
             var refreshTimer = null;
@@ -339,7 +364,7 @@
                 if (refreshTimer) clearInterval(refreshTimer);
                 refreshTimer = setInterval(function () {
                     if (document.visibilityState === "visible") {
-                        loadAll();
+                        loadAll(true);
                     }
                 }, REFRESH_MS);
             }
@@ -394,17 +419,17 @@
                     });
                 });
 
-                loadAll();
+                loadAll(false);
                 startRefreshTimer();
 
                 document.addEventListener("visibilitychange", function () {
                     if (document.visibilityState === "visible") {
-                        loadAll();
+                        loadAll(true);
                     }
                 });
 
                 window.addEventListener("mm-country-synced", function () {
-                    loadAll();
+                    loadAll(true);
                 });
             });
         })();
