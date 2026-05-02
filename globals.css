@@ -1216,15 +1216,18 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
     max-width: 42rem;
 }
 
-.leaderboard-meta {
-    margin-top: 0.75rem;
-    font-size: 0.75rem;
-    color: var(--text-2);
-    letter-spacing: 0.02em;
+.leaderboard-page-body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-.leaderboard-meta span {
-    color: rgba(148, 163, 184, 0.85);
+.leaderboard-page-body .leaderboard-main {
+    flex: 1;
+}
+
+.leaderboard-page-body .footer {
+    margin-top: 0;
 }
 
 .leaderboard-tabs {

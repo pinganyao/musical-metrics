@@ -23,7 +23,7 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body class="leaderboard-page-body">
     <header class="header">
         <div class="header-container">
             <div class="header-content">
@@ -56,11 +56,7 @@
         <div class="leaderboard-hero">
             <h1 class="leaderboard-title">Leaderboard</h1>
             <p class="leaderboard-lede">
-                All-time best scores per player for the Melody games. Rankings update automatically.
-                Flags reflect the country detected when each player last submitted a score on this site (via your host edge region).
-            </p>
-            <p class="leaderboard-meta" id="leaderboard-updated" aria-live="polite">
-                <span>Last updated —</span>
+                All-time best scores per player for the Melody games.
             </p>
         </div>
 
@@ -162,7 +158,7 @@
             var SUPABASE_URL = "https://akjqnoftnvnbzycsdipl.supabase.co";
             var SUPABASE_ANON_KEY = "sb_publishable_stGW2I7dATan2pWJLFs55g_vIX8b-pZ";
 
-            var REFRESH_MS = 60000;
+            var REFRESH_MS = 300000;
             var LIMIT = 100;
 
             var sbGlobal = typeof supabase !== "undefined" ? supabase : window.supabase;
@@ -217,22 +213,6 @@
 
             var gameKeys = ["melody1", "melody2", "melody3"];
 
-            function setUpdatedNote() {
-                var el = document.getElementById("leaderboard-updated");
-                if (!el) return;
-                var now = new Date();
-                var t = now.toLocaleTimeString(undefined, {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                });
-                el.innerHTML =
-                    '<span>Last updated ' +
-                    escapeHtml(t) +
-                    " · Refreshes every " +
-                    Math.round(REFRESH_MS / 1000) +
-                    "s</span>";
-            }
-
             function renderRows(gameKey, rows) {
                 var body = document.getElementById("leaderboard-body-" + gameKey);
                 var emptyEl = document.getElementById("leaderboard-empty-" + gameKey);
@@ -255,7 +235,12 @@
                         var name = escapeHtml(row.username || "—");
                         var score = formatScore(row.score);
                         var when = escapeHtml(formatWhen(row.achieved_at));
-                        var rk = row.rank != null ? String(row.rank) : "—";
+                        var rk =
+                            row.leaderboard_rank != null
+                                ? String(row.leaderboard_rank)
+                                : row.rank != null
+                                  ? String(row.rank)
+                                  : "—";
                         return (
                             "<tr>" +
                             '<td class="leaderboard-col-rank">' +
@@ -320,7 +305,6 @@
                 await Promise.all(gameKeys.map(function (k) {
                     return loadGame(k);
                 }));
-                setUpdatedNote();
             }
 
             var refreshTimer = null;
