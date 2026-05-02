@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="mm-auth-boot.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <meta name="description" content="All-time public leaderboard for Melody I, Melody II, and Melody III on Musical Metrics.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Musical Metrics">
+    <meta property="og:title" content="Leaderboard — Musical Metrics">
+    <meta property="og:description" content="Top Melody game scores worldwide.">
+    <meta property="og:image" content="https://musicalmetrics.xyz/assets/images/amtf.png">
+    <meta property="og:url" content="https://musicalmetrics.xyz/leaderboard">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>Leaderboard | Musical Metrics</title>
+    <link rel="canonical" href="https://musicalmetrics.xyz/leaderboard">
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg?v=2">
+    <link rel="icon" type="image/png" href="assets/images/logo.png?v=2">
+    <link rel="apple-touch-icon" href="assets/images/logo.png?v=2">
+    <meta name="msapplication-TileImage" content="assets/images/logo.png?v=2">
+    <link rel="stylesheet" href="globals.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <a href="/" class="logo-link">
+                        <img src="assets/images/music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+                        <span class="logo">MUSICAL METRICS</span>
+                    </a>
+                </div>
+                <nav class="nav">
+                    <a href="/dashboard" class="nav-link">DASHBOARD</a>
+                    <a href="/leaderboard" class="nav-link active">LEADERBOARD</a>
+                    <a href="/about" class="nav-link">ABOUT</a>
+                </nav>
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button">
+                    <i data-lucide="menu" class="hamburger-icon"></i>
+                </button>
+                <div class="mobile-menu" id="mobile-menu">
+                    <div class="mobile-menu-links">
+                        <a href="/dashboard" class="mobile-menu-link">DASHBOARD</a>
+                        <a href="/leaderboard" class="mobile-menu-link active">LEADERBOARD</a>
+                        <a href="/about" class="mobile-menu-link">ABOUT</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="leaderboard-main">
+        <div class="leaderboard-hero">
+            <h1 class="leaderboard-title">Leaderboard</h1>
+            <p class="leaderboard-lede">
+                All-time best scores per player for the Melody games. Rankings update automatically.
+                Flags reflect the country detected when each player last submitted a score on this site (via your host edge region).
+            </p>
+            <p class="leaderboard-meta" id="leaderboard-updated" aria-live="polite">
+                <span>Last updated —</span>
+            </p>
+        </div>
+
+        <div class="leaderboard-tabs" role="tablist" aria-label="Melody leaderboard">
+            <button type="button" class="leaderboard-tab is-active" role="tab" aria-selected="true" data-game-key="melody1" id="tab-melody1">Melody I</button>
+            <button type="button" class="leaderboard-tab" role="tab" aria-selected="false" data-game-key="melody2" id="tab-melody2">Melody II</button>
+            <button type="button" class="leaderboard-tab" role="tab" aria-selected="false" data-game-key="melody3" id="tab-melody3">Melody III</button>
+        </div>
+
+        <section class="leaderboard-panel is-active" role="tabpanel" id="panel-melody1" aria-labelledby="tab-melody1">
+            <div class="leaderboard-card">
+                <div class="leaderboard-table-wrap">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th class="leaderboard-col-rank">#</th>
+                                <th class="leaderboard-col-flag" aria-label="Country"></th>
+                                <th class="leaderboard-col-user">User</th>
+                                <th class="leaderboard-col-score">Score</th>
+                                <th class="leaderboard-col-date">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body-melody1"></tbody>
+                    </table>
+                </div>
+                <div id="leaderboard-empty-melody1" class="leaderboard-empty" hidden>No entries yet.</div>
+                <div id="leaderboard-error-melody1" class="leaderboard-error" hidden></div>
+            </div>
+        </section>
+
+        <section class="leaderboard-panel" role="tabpanel" id="panel-melody2" aria-labelledby="tab-melody2">
+            <div class="leaderboard-card">
+                <div class="leaderboard-table-wrap">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th class="leaderboard-col-rank">#</th>
+                                <th class="leaderboard-col-flag" aria-label="Country"></th>
+                                <th class="leaderboard-col-user">User</th>
+                                <th class="leaderboard-col-score">Score</th>
+                                <th class="leaderboard-col-date">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body-melody2"></tbody>
+                    </table>
+                </div>
+                <div id="leaderboard-empty-melody2" class="leaderboard-empty" hidden>No entries yet.</div>
+                <div id="leaderboard-error-melody2" class="leaderboard-error" hidden></div>
+            </div>
+        </section>
+
+        <section class="leaderboard-panel" role="tabpanel" id="panel-melody3" aria-labelledby="tab-melody3">
+            <div class="leaderboard-card">
+                <div class="leaderboard-table-wrap">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th class="leaderboard-col-rank">#</th>
+                                <th class="leaderboard-col-flag" aria-label="Country"></th>
+                                <th class="leaderboard-col-user">User</th>
+                                <th class="leaderboard-col-score">Score</th>
+                                <th class="leaderboard-col-date">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body-melody3"></tbody>
+                    </table>
+                </div>
+                <div id="leaderboard-empty-melody3" class="leaderboard-empty" hidden>No entries yet.</div>
+                <div id="leaderboard-error-melody3" class="leaderboard-error" hidden></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="assets/images/music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img">
+                    <span class="footer-brand">Musical Metrics</span>
+                </div>
+                <div class="footer-info">
+                    <div class="footer-links">
+                        <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+                            <img src="assets/images/amtf.png" alt="Athens Music Technology Forum" class="amtf-logo">
+                            <span class="amtf-text">Athens Music Technology Forum</span>
+                        </a>
+                    </div>
+                    <p class="footer-copyright">© 2025 Musical Metrics. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script defer src="supabase-auth.js"></script>
+    <script>
+        lucide.createIcons();
+
+        (function () {
+            var SUPABASE_URL = "https://akjqnoftnvnbzycsdipl.supabase.co";
+            var SUPABASE_ANON_KEY = "sb_publishable_stGW2I7dATan2pWJLFs55g_vIX8b-pZ";
+
+            var REFRESH_MS = 60000;
+            var LIMIT = 100;
+
+            var sbGlobal = typeof supabase !== "undefined" ? supabase : window.supabase;
+            var client =
+                sbGlobal && typeof sbGlobal.createClient === "function"
+                    ? sbGlobal.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+                    : null;
+
+            function escapeHtml(str) {
+                return String(str)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;");
+            }
+
+            function countryCodeToFlag(cc) {
+                if (!cc || typeof cc !== "string" || cc.length !== 2) {
+                    return "🏳️";
+                }
+                var up = cc.toUpperCase();
+                var A = 0x1f1e6;
+                var parts = [];
+                for (var i = 0; i < 2; i++) {
+                    var c = up.charCodeAt(i);
+                    if (c < 65 || c > 90) return "🏳️";
+                    parts.push(String.fromCodePoint(A + (c - 65)));
+                }
+                return parts.join("");
+            }
+
+            function formatScore(n) {
+                var x = Number(n);
+                if (!Number.isFinite(x)) return "—";
+                var r = Math.round(x * 10) / 10;
+                return r.toFixed(1);
+            }
+
+            function formatWhen(iso) {
+                if (!iso) return "—";
+                var d = new Date(iso);
+                if (Number.isNaN(d.getTime())) return "—";
+                try {
+                    return d.toLocaleString(undefined, {
+                        dateStyle: "medium",
+                        timeStyle: "short"
+                    });
+                } catch (e) {
+                    return d.toISOString();
+                }
+            }
+
+            var gameKeys = ["melody1", "melody2", "melody3"];
+
+            function setUpdatedNote() {
+                var el = document.getElementById("leaderboard-updated");
+                if (!el) return;
+                var now = new Date();
+                var t = now.toLocaleTimeString(undefined, {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                });
+                el.innerHTML =
+                    '<span>Last updated ' +
+                    escapeHtml(t) +
+                    " · Refreshes every " +
+                    Math.round(REFRESH_MS / 1000) +
+                    "s</span>";
+            }
+
+            function renderRows(gameKey, rows) {
+                var body = document.getElementById("leaderboard-body-" + gameKey);
+                var emptyEl = document.getElementById("leaderboard-empty-" + gameKey);
+                var errEl = document.getElementById("leaderboard-error-" + gameKey);
+                if (!body || !emptyEl || !errEl) return;
+
+                errEl.hidden = true;
+                errEl.textContent = "";
+
+                if (!rows || !rows.length) {
+                    body.innerHTML = "";
+                    emptyEl.hidden = false;
+                    return;
+                }
+
+                emptyEl.hidden = true;
+                body.innerHTML = rows
+                    .map(function (row) {
+                        var flag = countryCodeToFlag(row.country_code);
+                        var name = escapeHtml(row.username || "—");
+                        var score = formatScore(row.score);
+                        var when = escapeHtml(formatWhen(row.achieved_at));
+                        var rk = row.rank != null ? String(row.rank) : "—";
+                        return (
+                            "<tr>" +
+                            '<td class="leaderboard-col-rank">' +
+                            escapeHtml(rk) +
+                            "</td>" +
+                            '<td class="leaderboard-col-flag" title="' +
+                            escapeHtml(row.country_code || "") +
+                            '">' +
+                            flag +
+                            "</td>" +
+                            '<td class="leaderboard-col-user">' +
+                            name +
+                            "</td>" +
+                            '<td class="leaderboard-col-score">' +
+                            escapeHtml(score) +
+                            "</td>" +
+                            '<td class="leaderboard-col-date">' +
+                            when +
+                            "</td>" +
+                            "</tr>"
+                        );
+                    })
+                    .join("");
+            }
+
+            function showError(gameKey, msg) {
+                var body = document.getElementById("leaderboard-body-" + gameKey);
+                var emptyEl = document.getElementById("leaderboard-empty-" + gameKey);
+                var errEl = document.getElementById("leaderboard-error-" + gameKey);
+                if (body) body.innerHTML = "";
+                if (emptyEl) emptyEl.hidden = true;
+                if (errEl) {
+                    errEl.hidden = false;
+                    errEl.textContent = msg;
+                }
+            }
+
+            async function loadGame(gameKey) {
+                if (!client) {
+                    showError(gameKey, "Could not initialize leaderboard.");
+                    return;
+                }
+                try {
+                    var result = await client.rpc("leaderboard_melody", {
+                        p_game_key: gameKey,
+                        p_limit: LIMIT
+                    });
+                    if (result.error) {
+                        showError(
+                            gameKey,
+                            "Could not load leaderboard: " + (result.error.message || "Unknown error")
+                        );
+                        return;
+                    }
+                    renderRows(gameKey, result.data || []);
+                } catch (e) {
+                    showError(gameKey, "Could not load leaderboard.");
+                }
+            }
+
+            async function loadAll() {
+                await Promise.all(gameKeys.map(function (k) {
+                    return loadGame(k);
+                }));
+                setUpdatedNote();
+            }
+
+            var refreshTimer = null;
+
+            function startRefreshTimer() {
+                if (refreshTimer) clearInterval(refreshTimer);
+                refreshTimer = setInterval(function () {
+                    if (document.visibilityState === "visible") {
+                        loadAll();
+                    }
+                }, REFRESH_MS);
+            }
+
+            function activateTab(gameKey) {
+                var tabs = document.querySelectorAll(".leaderboard-tab");
+                var panels = document.querySelectorAll(".leaderboard-panel");
+                tabs.forEach(function (tab) {
+                    var active = tab.getAttribute("data-game-key") === gameKey;
+                    tab.classList.toggle("is-active", active);
+                    tab.setAttribute("aria-selected", active ? "true" : "false");
+                });
+                panels.forEach(function (panel) {
+                    var id = panel.id;
+                    var match =
+                        (gameKey === "melody1" && id === "panel-melody1") ||
+                        (gameKey === "melody2" && id === "panel-melody2") ||
+                        (gameKey === "melody3" && id === "panel-melody3");
+                    panel.classList.toggle("is-active", match);
+                });
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                var mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+                var mobileMenu = document.getElementById("mobile-menu");
+                if (mobileMenuToggle && mobileMenu) {
+                    mobileMenuToggle.addEventListener("click", function () {
+                        mobileMenu.classList.toggle("active");
+                        mobileMenuToggle.classList.toggle("active");
+                    });
+                    mobileMenu.querySelectorAll(".mobile-menu-link").forEach(function (link) {
+                        link.addEventListener("click", function () {
+                            mobileMenu.classList.remove("active");
+                            mobileMenuToggle.classList.remove("active");
+                        });
+                    });
+                    document.addEventListener("click", function (event) {
+                        if (
+                            !mobileMenuToggle.contains(event.target) &&
+                            !mobileMenu.contains(event.target)
+                        ) {
+                            mobileMenu.classList.remove("active");
+                            mobileMenuToggle.classList.remove("active");
+                        }
+                    });
+                }
+
+                document.querySelectorAll(".leaderboard-tab").forEach(function (tab) {
+                    tab.addEventListener("click", function () {
+                        var key = tab.getAttribute("data-game-key");
+                        if (key) activateTab(key);
+                    });
+                });
+
+                loadAll();
+                startRefreshTimer();
+
+                document.addEventListener("visibilitychange", function () {
+                    if (document.visibilityState === "visible") {
+                        loadAll();
+                    }
+                });
+            });
+        })();
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

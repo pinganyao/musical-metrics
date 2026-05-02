@@ -585,11 +585,26 @@
       Math.floor((Date.now() - gameSession.startedAtMs) / 1000)
     );
 
+    let countryCode = null;
+    try {
+      const geoRes = await fetch("/api/geo");
+      if (geoRes.ok) {
+        const geo = await geoRes.json();
+        const c = geo && geo.country;
+        if (typeof c === "string" && /^[A-Za-z]{2}$/.test(c.trim())) {
+          countryCode = c.trim().toUpperCase();
+        }
+      }
+    } catch (_) {
+      /* geo optional */
+    }
+
     const { error } = await state.client.rpc("submit_game_score", {
       p_session_id: gameSession.id,
       p_score: numericScore,
       p_score_label: scoreLabel || String(scoreValue),
-      p_duration_seconds: durationSeconds
+      p_duration_seconds: durationSeconds,
+      p_country_code: countryCode
     });
     if (error) {
       showStatus(`Score save failed: ${error.message}`, "error");

@@ -1188,6 +1188,182 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
     line-height: 1.2;
 }
 
+/* --- Leaderboard (public Melody I–III) --- */
+.leaderboard-main {
+    width: 100%;
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 3rem;
+}
+
+.leaderboard-hero {
+    margin-bottom: 1.75rem;
+}
+
+.leaderboard-title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 700;
+    color: var(--text-0);
+    margin: 0 0 0.35rem;
+    letter-spacing: -0.02em;
+}
+
+.leaderboard-lede {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--text-2);
+    line-height: 1.55;
+    max-width: 42rem;
+}
+
+.leaderboard-meta {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-2);
+    letter-spacing: 0.02em;
+}
+
+.leaderboard-meta span {
+    color: rgba(148, 163, 184, 0.85);
+}
+
+.leaderboard-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.leaderboard-tab {
+    appearance: none;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    background: rgba(148, 163, 184, 0.08);
+    color: var(--text-1);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.leaderboard-tab:hover {
+    background: rgba(148, 163, 184, 0.14);
+    color: var(--text-0);
+}
+
+.leaderboard-tab.is-active {
+    background: rgba(251, 191, 36, 0.14);
+    border-color: rgba(251, 191, 36, 0.45);
+    color: var(--brand);
+}
+
+.leaderboard-panel {
+    display: none;
+}
+
+.leaderboard-panel.is-active {
+    display: block;
+}
+
+.leaderboard-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.leaderboard-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.leaderboard-table thead {
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.leaderboard-table th {
+    text-align: left;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    white-space: nowrap;
+}
+
+.leaderboard-table td {
+    padding: 0.55rem 0.75rem;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    color: var(--text-1);
+}
+
+.leaderboard-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.leaderboard-table tbody tr:hover td {
+    background: rgba(59, 130, 246, 0.06);
+}
+
+.leaderboard-col-rank {
+    width: 3rem;
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.8125rem;
+    color: var(--text-2);
+}
+
+.leaderboard-col-flag {
+    width: 2.75rem;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.leaderboard-col-user {
+    font-weight: 550;
+    color: var(--text-0);
+}
+
+.leaderboard-col-score {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-weight: 650;
+    color: var(--brand);
+    font-size: 0.9375rem;
+}
+
+.leaderboard-col-date {
+    text-align: right;
+    font-size: 0.8125rem;
+    color: var(--text-2);
+    white-space: nowrap;
+}
+
+.leaderboard-empty,
+.leaderboard-error {
+    padding: 2rem 1.25rem;
+    text-align: center;
+    color: var(--text-2);
+    font-size: 0.9375rem;
+}
+
+.leaderboard-error {
+    color: rgba(248, 113, 113, 0.95);
+}
+
 @media (max-width: 768px) {
     .dashboard-main {
         padding: 1rem;
@@ -1287,6 +1463,14 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
 
     .dashboard-recent-col--score {
         padding-top: 0.15rem;
+    }
+
+    .leaderboard-main {
+        padding: 1.25rem 0.75rem 2rem;
+    }
+
+    .leaderboard-col-date {
+        display: none;
     }
 }
 
