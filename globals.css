@@ -89,6 +89,29 @@ html {
     color: #ffffff;
 }
 
+.mm-nav-login-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(120, 145, 255, 0.45);
+    background: rgba(92, 120, 255, 0.24);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    line-height: 1;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.mm-nav-login-btn:hover {
+    background: rgba(92, 120, 255, 0.38);
+    border-color: rgba(140, 165, 255, 0.55);
+    color: #fff;
+}
+
 .mobile-menu-toggle {
     display: none;
     background: none;

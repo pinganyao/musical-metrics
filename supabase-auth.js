@@ -9,8 +9,10 @@
     session: null,
     profile: null,
     initialized: false,
+    initPromise: null,
     statusTimer: null,
     authMenuOutsideListenerBound: false,
+    logoutClickDelegationBound: false,
     activeGameSessions: {}
   };
 
@@ -152,9 +154,7 @@
   };
 
   const authDesktopLoggedOutMarkup = () => `
-    <a href="/login" id="mm-auth-link" class="nav-link mm-user-link" aria-label="Log in" style="display:inline-flex;align-items:center;justify-content:center;line-height:1;">
-      <i data-lucide="user" class="action-icon" style="display:block;"></i>
-    </a>
+    <a href="/login" id="mm-auth-link" class="mm-nav-login-btn">Log in</a>
   `;
 
   const authDesktopLoggedInMarkup = (usernameOrEmail) => `
@@ -171,6 +171,42 @@
       </div>
     </div>
   `;
+
+  const performLogout = async () => {
+    await init();
+    if (!state.client) {
+      window.location.reload();
+      return;
+    }
+    const { error } = await state.client.auth.signOut();
+    if (error) {
+      showStatus(error.message, "error");
+      return;
+    }
+    window.location.reload();
+  };
+
+  const bindLogoutClickDelegation = () => {
+    if (state.logoutClickDelegationBound) return;
+    state.logoutClickDelegationBound = true;
+    document.addEventListener(
+      "click",
+      async (event) => {
+        const t = event.target;
+        if (!(t instanceof Element)) return;
+        const signOutEl = t.closest("#mm-auth-signout-button, #mm-auth-logout-button-mobile");
+        if (!signOutEl) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const menu = document.getElementById("mm-auth-menu");
+        const trigger = document.getElementById("mm-auth-menu-trigger");
+        if (menu) menu.style.display = "none";
+        if (trigger) trigger.setAttribute("aria-expanded", "false");
+        await performLogout();
+      },
+      true
+    );
+  };
 
   const ensureAuthNav = () => {
     const nav = document.querySelector(".nav");
@@ -199,19 +235,6 @@
     const username = state.profile?.username || null;
     const displayName = username || email || "User";
 
-    const logout = async () => {
-      if (!state.client) return;
-      const { error } = await state.client.auth.signOut();
-      if (error) {
-        showStatus(error.message, "error");
-        return;
-      }
-      showStatus("Logged out successfully.", "success");
-      if (window.location.pathname === "/login" || window.location.pathname.endsWith("/login.html")) {
-        window.location.href = "/dashboard";
-      }
-    };
-
     if (email) {
       if (desktopSlot) {
         desktopSlot.innerHTML = authDesktopLoggedInMarkup(displayName);
@@ -219,7 +242,6 @@
         const menu = document.getElementById("mm-auth-menu");
         const profileBtn = document.getElementById("mm-auth-profile-button");
         const settingsBtn = document.getElementById("mm-auth-settings-button");
-        const signoutBtn = document.getElementById("mm-auth-signout-button");
 
         const closeMenu = () => {
           if (!menu || !trigger) return;
@@ -243,11 +265,6 @@
         settingsBtn?.addEventListener("click", () => {
           closeMenu();
           showStatus("Settings page is coming soon.", "info");
-        });
-
-        signoutBtn?.addEventListener("click", async () => {
-          closeMenu();
-          await logout();
         });
 
         if (!state.authMenuOutsideListenerBound) {
@@ -276,7 +293,6 @@
         document.getElementById("mm-auth-settings-button-mobile")?.addEventListener("click", () => {
           showStatus("Settings page is coming soon.", "info");
         });
-        document.getElementById("mm-auth-logout-button-mobile")?.addEventListener("click", logout);
       }
       if (window.lucide?.createIcons) window.lucide.createIcons();
       return;
@@ -344,47 +360,111 @@
 
   const init = async () => {
     if (state.initialized) return;
-    await loadSupabaseLib();
-
-    if (!window.supabase || typeof window.supabase.createClient !== "function") {
-      showStatus("Supabase SDK is unavailable.", "error");
+    if (state.initPromise) {
+      await state.initPromise;
       return;
     }
 
-    state.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        storage: getPreferredAuthStorage()
+    state.initPromise = (async () => {
+      await loadSupabaseLib();
+
+      if (!window.supabase || typeof window.supabase.createClient !== "function") {
+        showStatus("Supabase SDK is unavailable.", "error");
+        return;
       }
-    });
-    const sessionResult = await state.client.auth.getSession();
-    state.session = sessionResult.data.session;
-    await ensureProfileForSession();
 
-    ensureAuthNav();
-    updateAuthUi();
-
-    state.client.auth.onAuthStateChange(async (_event, session) => {
-      state.session = session;
+      state.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+          storage: getPreferredAuthStorage()
+        }
+      });
+      const sessionResult = await state.client.auth.getSession();
+      state.session = sessionResult.data.session;
       await ensureProfileForSession();
+
       ensureAuthNav();
       updateAuthUi();
-    });
 
-    state.initialized = true;
+      state.client.auth.onAuthStateChange(async (_event, session) => {
+        state.session = session;
+        await ensureProfileForSession();
+        ensureAuthNav();
+        updateAuthUi();
+      });
+
+      state.initialized = true;
+    })();
+
+    try {
+      await state.initPromise;
+    } finally {
+      state.initPromise = null;
+    }
+  };
+
+  const normalizeLoginFailure = (error) => {
+    const raw = (error && error.message) || String(error || "");
+    const looksLikeBadCredentials =
+      /invalid login credentials/i.test(raw) ||
+      /invalid email or password/i.test(raw) ||
+      raw.toLowerCase().includes("invalid credentials");
+    if (looksLikeBadCredentials) {
+      return {
+        message: "Invalid email or password",
+        fieldErrors: { email: "", password: "" }
+      };
+    }
+    return { message: raw || "Could not sign in.", fieldErrors: {} };
+  };
+
+  const normalizeSignUpFailure = (error) => {
+    const raw = (error && error.message) || String(error || "");
+    const lower = raw.toLowerCase();
+    if (
+      lower.includes("profiles_username") ||
+      lower.includes("profiles_username_key") ||
+      (lower.includes("duplicate key") && lower.includes("username")) ||
+      (lower.includes("unique constraint") && lower.includes("username"))
+    ) {
+      return {
+        message: "This username is already taken.",
+        fieldErrors: { username: "This username is already taken." }
+      };
+    }
+    if (
+      lower.includes("already registered") ||
+      lower.includes("user already") ||
+      lower.includes("email") && lower.includes("already")
+    ) {
+      return {
+        message: "An account with this email already exists.",
+        fieldErrors: { email: "An account with this email already exists." }
+      };
+    }
+    return { message: raw || "Signup failed.", fieldErrors: {} };
   };
 
   const loginWithPassword = async (email, password) => {
     await init();
-    if (!state.client) return { ok: false, error: "Client unavailable." };
-    if (!email || !password) return { ok: false, error: "Email and password are required." };
+    if (!state.client) return { ok: false, error: "Client unavailable.", fieldErrors: {} };
+    if (!email || !password) {
+      const fieldErrors = {};
+      if (!email) fieldErrors.email = "Email is required.";
+      if (!password) fieldErrors.password = "Password is required.";
+      return {
+        ok: false,
+        error: "Email and password are required.",
+        fieldErrors
+      };
+    }
 
     const { error } = await state.client.auth.signInWithPassword({ email, password });
     if (error) {
-      showStatus(error.message, "error");
-      return { ok: false, error: error.message };
+      const normalized = normalizeLoginFailure(error);
+      return { ok: false, error: normalized.message, fieldErrors: normalized.fieldErrors };
     }
 
     if (isRememberMeEnabled()) {
@@ -393,21 +473,41 @@
       window.localStorage.removeItem(SUPABASE_AUTH_STORAGE_KEY);
     }
 
-    showStatus("Logged in successfully.", "success");
     return { ok: true };
   };
 
   const signUpWithUsername = async (email, username, password, confirmPassword) => {
     await init();
-    if (!state.client) return { ok: false, error: "Client unavailable." };
-    if (!email || !username || !password || !confirmPassword) {
-      return { ok: false, error: "All signup fields are required." };
+    if (!state.client) return { ok: false, error: "Client unavailable.", fieldErrors: {} };
+
+    const fieldErrors = {};
+    if (!email) fieldErrors.email = "Email is required.";
+    if (!username) fieldErrors.username = "Username is required.";
+    if (!password) fieldErrors.password = "Password is required.";
+    if (!confirmPassword) fieldErrors.confirmPassword = "Please confirm your password.";
+    if (Object.keys(fieldErrors).length) {
+      return { ok: false, error: "Please fill in all fields.", fieldErrors };
     }
+
     if (password !== confirmPassword) {
-      return { ok: false, error: "Passwords do not match." };
+      return {
+        ok: false,
+        error: "Passwords do not match.",
+        fieldErrors: {
+          password: "",
+          confirmPassword: "Passwords do not match."
+        }
+      };
     }
+
     if (!isValidUsername(username)) {
-      return { ok: false, error: "Username must be 3-24 chars (letters, numbers, underscore)." };
+      return {
+        ok: false,
+        error: "Username must be 3-24 characters (letters, numbers, underscore).",
+        fieldErrors: {
+          username: "Use 3–24 characters: letters, numbers, and underscores only."
+        }
+      };
     }
 
     const { data, error } = await state.client.auth.signUp({
@@ -419,19 +519,27 @@
     });
 
     if (error) {
-      showStatus(error.message, "error");
-      return { ok: false, error: error.message };
+      const normalized = normalizeSignUpFailure(error);
+      const merged = { ...normalized.fieldErrors };
+      if (!Object.keys(merged).length && normalized.message) {
+        return { ok: false, error: normalized.message, fieldErrors: {} };
+      }
+      return { ok: false, error: normalized.message, fieldErrors: merged };
     }
 
     if (data.user?.identities && data.user.identities.length === 0) {
-      const message = "Account already exists for this email. Try logging in.";
-      showStatus(message, "error");
-      return { ok: false, error: message };
+      const message = "An account with this email already exists. Try logging in.";
+      return {
+        ok: false,
+        error: message,
+        fieldErrors: { email: message }
+      };
     }
 
-    const message = "Signup successful. Check your email if confirmation is enabled.";
-    showStatus(message, "success");
-    return { ok: true };
+    return {
+      ok: true,
+      successMessage: "Account created. Check your email if confirmation is enabled."
+    };
   };
 
   const reportScore = async (gameKey, scoreValue, scoreLabel) => {
@@ -551,5 +659,6 @@
     isRememberMeEnabled
   };
 
+  bindLogoutClickDelegation();
   init();
 })();

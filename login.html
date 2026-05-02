@@ -104,16 +104,33 @@
       color: rgba(255, 255, 255, 0.9);
       font-size: 13px;
     }
-    .inline-status {
+    .auth-field-msg {
+      margin: 6px 0 0;
+      min-height: 0;
+      font-size: 12px;
+      line-height: 1.35;
+      color: #f87171;
       display: none;
-      margin-top: 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(110, 151, 255, 0.45);
-      background: rgba(74, 121, 255, 0.15);
-      color: #fff;
-      padding: 9px 10px;
+    }
+    .auth-field-msg:not(:empty) {
+      display: block;
+    }
+    .auth-input.auth-input--error {
+      border-color: rgba(248, 113, 113, 0.85);
+      box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.25);
+    }
+    .auth-form-summary {
+      display: none;
+      margin-bottom: 12px;
       font-size: 13px;
-      line-height: 1.4;
+      line-height: 1.45;
+      color: #f87171;
+    }
+    .auth-form-summary.is-visible {
+      display: block;
+    }
+    .auth-form-summary.auth-form-summary--success {
+      color: #86efac;
     }
   </style>
 </head>
@@ -156,33 +173,40 @@
 
       <form id="panel-login" class="auth-panel active">
         <label class="auth-label" for="login-email">Email</label>
-        <input class="auth-input" id="login-email" type="email" autocomplete="email" required>
+        <input class="auth-input" id="login-email" type="email" autocomplete="email" required aria-invalid="false">
+        <p class="auth-field-msg" id="login-email-error" role="alert"></p>
 
         <label class="auth-label" for="login-password">Password</label>
-        <input class="auth-input" id="login-password" type="password" autocomplete="current-password" required>
+        <input class="auth-input" id="login-password" type="password" autocomplete="current-password" required aria-invalid="false">
+        <p class="auth-field-msg" id="login-password-error" role="alert"></p>
 
         <label class="remember-row" for="remember-me-checkbox">
           <input id="remember-me-checkbox" type="checkbox" checked>
           <span>Remember me</span>
         </label>
 
+        <div id="login-form-summary" class="auth-form-summary" aria-live="polite"></div>
         <button class="auth-submit" type="submit">Log in</button>
       </form>
-      <div id="mm-inline-status" class="inline-status" aria-live="polite"></div>
 
       <form id="panel-signup" class="auth-panel">
         <label class="auth-label" for="signup-email">Email</label>
-        <input class="auth-input" id="signup-email" type="email" autocomplete="email" required>
+        <input class="auth-input" id="signup-email" type="email" autocomplete="email" required aria-invalid="false">
+        <p class="auth-field-msg" id="signup-email-error" role="alert"></p>
 
         <label class="auth-label" for="signup-username">Username</label>
-        <input class="auth-input" id="signup-username" type="text" autocomplete="username" required>
+        <input class="auth-input" id="signup-username" type="text" autocomplete="username" required aria-invalid="false">
+        <p class="auth-field-msg" id="signup-username-error" role="alert"></p>
 
         <label class="auth-label" for="signup-password">Password</label>
-        <input class="auth-input" id="signup-password" type="password" autocomplete="new-password" required>
+        <input class="auth-input" id="signup-password" type="password" autocomplete="new-password" required aria-invalid="false">
+        <p class="auth-field-msg" id="signup-password-error" role="alert"></p>
 
         <label class="auth-label" for="signup-password-confirm">Confirm Password</label>
-        <input class="auth-input" id="signup-password-confirm" type="password" autocomplete="new-password" required>
+        <input class="auth-input" id="signup-password-confirm" type="password" autocomplete="new-password" required aria-invalid="false">
+        <p class="auth-field-msg" id="signup-password-confirm-error" role="alert"></p>
 
+        <div id="signup-form-summary" class="auth-form-summary" aria-live="polite"></div>
         <button class="auth-submit" type="submit">Create account</button>
       </form>
     </section>
@@ -228,6 +252,123 @@
       const panelSignup = document.getElementById("panel-signup");
       const rememberMeCheckbox = document.getElementById("remember-me-checkbox");
 
+      const LOGIN_FIELDS = {
+        email: { input: "login-email", msg: "login-email-error" },
+        password: { input: "login-password", msg: "login-password-error" }
+      };
+
+      const SIGNUP_FIELDS = {
+        email: { input: "signup-email", msg: "signup-email-error" },
+        username: { input: "signup-username", msg: "signup-username-error" },
+        password: { input: "signup-password", msg: "signup-password-error" },
+        confirmPassword: { input: "signup-password-confirm", msg: "signup-password-confirm-error" }
+      };
+
+      function clearLoginFormErrors() {
+        Object.values(LOGIN_FIELDS).forEach(({ input, msg }) => {
+          const inp = document.getElementById(input);
+          const m = document.getElementById(msg);
+          if (inp) {
+            inp.classList.remove("auth-input--error");
+            inp.setAttribute("aria-invalid", "false");
+          }
+          if (m) m.textContent = "";
+        });
+        const summary = document.getElementById("login-form-summary");
+        if (summary) {
+          summary.textContent = "";
+          summary.classList.remove("is-visible", "auth-form-summary--success");
+        }
+      }
+
+      function clearSignupFormErrors() {
+        Object.values(SIGNUP_FIELDS).forEach(({ input, msg }) => {
+          const inp = document.getElementById(input);
+          const m = document.getElementById(msg);
+          if (inp) {
+            inp.classList.remove("auth-input--error");
+            inp.setAttribute("aria-invalid", "false");
+          }
+          if (m) m.textContent = "";
+        });
+        const summary = document.getElementById("signup-form-summary");
+        if (summary) {
+          summary.textContent = "";
+          summary.classList.remove("is-visible", "auth-form-summary--success");
+        }
+      }
+
+      function applyLoginErrors(fieldErrors, summaryText) {
+        const summary = document.getElementById("login-form-summary");
+        if (summary) {
+          summary.textContent = summaryText || "";
+          summary.classList.toggle("is-visible", Boolean(summaryText && summaryText.trim()));
+          summary.classList.remove("auth-form-summary--success");
+        }
+        for (const key of Object.keys(LOGIN_FIELDS)) {
+          const { input, msg } = LOGIN_FIELDS[key];
+          const inp = document.getElementById(input);
+          const msgEl = document.getElementById(msg);
+          if (!inp || !msgEl) continue;
+          if (!fieldErrors || !Object.prototype.hasOwnProperty.call(fieldErrors, key)) {
+            inp.classList.remove("auth-input--error");
+            inp.setAttribute("aria-invalid", "false");
+            msgEl.textContent = "";
+            continue;
+          }
+          const text = fieldErrors[key];
+          inp.classList.add("auth-input--error");
+          inp.setAttribute("aria-invalid", "true");
+          msgEl.textContent = typeof text === "string" ? text.trim() : "";
+        }
+      }
+
+      function applySignupErrors(fieldErrors, summaryText) {
+        const summary = document.getElementById("signup-form-summary");
+        if (summary) {
+          summary.textContent = summaryText || "";
+          summary.classList.toggle("is-visible", Boolean(summaryText && summaryText.trim()));
+          summary.classList.remove("auth-form-summary--success");
+        }
+        for (const key of Object.keys(SIGNUP_FIELDS)) {
+          const { input, msg } = SIGNUP_FIELDS[key];
+          const inp = document.getElementById(input);
+          const msgEl = document.getElementById(msg);
+          if (!inp || !msgEl) continue;
+          if (!fieldErrors || !Object.prototype.hasOwnProperty.call(fieldErrors, key)) {
+            inp.classList.remove("auth-input--error");
+            inp.setAttribute("aria-invalid", "false");
+            msgEl.textContent = "";
+            continue;
+          }
+          const text = fieldErrors[key];
+          inp.classList.add("auth-input--error");
+          inp.setAttribute("aria-invalid", "true");
+          msgEl.textContent = typeof text === "string" ? text.trim() : "";
+        }
+      }
+
+      function attachClearOnInput(fieldMap, summaryId) {
+        Object.values(fieldMap).forEach(({ input, msg }) => {
+          const el = document.getElementById(input);
+          if (!el) return;
+          el.addEventListener("input", () => {
+            el.classList.remove("auth-input--error");
+            el.setAttribute("aria-invalid", "false");
+            const m = document.getElementById(msg);
+            if (m) m.textContent = "";
+            const summary = document.getElementById(summaryId);
+            if (summary) {
+              summary.textContent = "";
+              summary.classList.remove("is-visible", "auth-form-summary--success");
+            }
+          });
+        });
+      }
+
+      attachClearOnInput(LOGIN_FIELDS, "login-form-summary");
+      attachClearOnInput(SIGNUP_FIELDS, "signup-form-summary");
+
       if (window.MMAuth && rememberMeCheckbox) {
         rememberMeCheckbox.checked = window.MMAuth.isRememberMeEnabled();
       }
@@ -238,6 +379,8 @@
         tabSignup.classList.toggle("active", !isLogin);
         panelLogin.classList.toggle("active", isLogin);
         panelSignup.classList.toggle("active", !isLogin);
+        if (isLogin) clearSignupFormErrors();
+        else clearLoginFormErrors();
       };
 
       tabLogin.addEventListener("click", () => setTab("login"));
@@ -246,6 +389,7 @@
       panelLogin.addEventListener("submit", async (event) => {
         event.preventDefault();
         if (!window.MMAuth) return;
+        clearLoginFormErrors();
         if (rememberMeCheckbox) {
           window.MMAuth.setRememberMe(rememberMeCheckbox.checked);
         }
@@ -255,12 +399,15 @@
         );
         if (result.ok) {
           window.location.href = "/dashboard";
+          return;
         }
+        applyLoginErrors(result.fieldErrors || {}, result.error || "");
       });
 
       panelSignup.addEventListener("submit", async (event) => {
         event.preventDefault();
         if (!window.MMAuth) return;
+        clearSignupFormErrors();
         const result = await window.MMAuth.signUpWithUsername(
           (document.getElementById("signup-email").value || "").trim(),
           (document.getElementById("signup-username").value || "").trim(),
@@ -268,10 +415,25 @@
           document.getElementById("signup-password-confirm").value || ""
         );
         if (result.ok) {
+          clearSignupFormErrors();
           setTab("login");
-        } else if (result.error && window.MMAuth.showStatus) {
-          window.MMAuth.showStatus(result.error, "error");
+          const loginSummary = document.getElementById("login-form-summary");
+          if (loginSummary && result.successMessage) {
+            loginSummary.textContent = result.successMessage;
+            loginSummary.classList.add("is-visible", "auth-form-summary--success");
+          }
+          return;
         }
+        const fe = result.fieldErrors || {};
+        let summaryText = result.error || "";
+        const fieldMsgs = Object.values(fe).filter((v) => v && String(v).trim());
+        if (
+          fieldMsgs.length === 1 &&
+          fieldMsgs[0].trim() === summaryText.trim()
+        ) {
+          summaryText = "";
+        }
+        applySignupErrors(fe, summaryText);
       });
     });
   </script>
