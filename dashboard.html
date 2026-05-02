@@ -234,18 +234,20 @@
                 rhythm1: { kind: "outOf", max: 100 }
             };
 
-            function formatScoreParts(value, meta) {
+            function formatScoreParts(value, meta, options) {
+                const opts = options || {};
+                const forAverage = opts.forAverage === true;
                 if (value == null || Number.isNaN(Number(value))) return null;
                 const n = Number(value);
+                const rounded = Math.round(n * 10) / 10;
+                const main = forAverage
+                    ? rounded.toFixed(1)
+                    : rounded % 1 === 0
+                      ? String(Math.round(rounded))
+                      : rounded.toFixed(1);
                 if (meta.kind === "outOf") {
-                    const rounded = Math.round(n * 10) / 10;
-                    const main =
-                        rounded % 1 === 0 ? String(Math.round(rounded)) : rounded.toFixed(1);
                     return { main, suffix: "/" + meta.max };
                 }
-                const rounded = Math.round(n * 10) / 10;
-                const main =
-                    rounded % 1 === 0 ? String(Math.round(rounded)) : rounded.toFixed(1);
                 return { main, suffix: "points" };
             }
 
@@ -315,7 +317,7 @@
                             : null;
                     const avgParts =
                         loggedIn && row
-                            ? formatScoreParts(row.avg_score, meta)
+                            ? formatScoreParts(row.avg_score, meta, { forAverage: true })
                             : null;
                     return (
                         '<div class="dashboard-tests-table-row">' +
@@ -394,9 +396,7 @@
                     if (avg12 == null) {
                         avgEl.textContent = "N/A";
                     } else {
-                        const rounded = Math.round(avg12 * 10) / 10;
-                        avgEl.textContent =
-                            rounded % 1 === 0 ? String(Math.round(rounded)) : rounded.toFixed(1);
+                        avgEl.textContent = (Math.round(avg12 * 10) / 10).toFixed(1);
                     }
                 }
 
