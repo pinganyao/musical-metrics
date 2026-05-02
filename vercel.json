@@ -19,6 +19,12 @@
     { "source": "/tempo2", "destination": "/tempo2.html" }
   ],
   "redirects": [
+    { "source": "/music-logo.svg", "destination": "/assets/images/music-logo.svg", "permanent": true },
+    { "source": "/music-logo-white.svg", "destination": "/assets/images/music-logo-white.svg", "permanent": true },
+    { "source": "/amtf.png", "destination": "/assets/images/amtf.png", "permanent": true },
+    { "source": "/instagram.svg", "destination": "/assets/images/instagram.svg", "permanent": true },
+    { "source": "/youtube.svg", "destination": "/assets/images/youtube.svg", "permanent": true },
+    { "source": "/linkedin.svg", "destination": "/assets/images/linkedin.svg", "permanent": true },
     { "source": "/index.html", "destination": "/", "permanent": true },
     { "source": "/about.html", "destination": "/about", "permanent": true },
     { "source": "/login.html", "destination": "/login", "permanent": true },
