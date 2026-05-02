@@ -1293,6 +1293,7 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
 
 .leaderboard-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     font-size: 0.875rem;
 }
@@ -1302,7 +1303,6 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
 }
 
 .leaderboard-table th {
-    text-align: left;
     padding: 0.65rem 0.75rem;
     font-size: 0.6875rem;
     font-weight: 650;
@@ -1310,6 +1310,20 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
     text-transform: uppercase;
     color: var(--text-2);
     white-space: nowrap;
+}
+
+.leaderboard-table th.leaderboard-col-rank,
+.leaderboard-table th.leaderboard-col-user {
+    text-align: left;
+}
+
+.leaderboard-table th.leaderboard-col-flag {
+    text-align: center;
+}
+
+.leaderboard-table th.leaderboard-col-score,
+.leaderboard-table th.leaderboard-col-date {
+    text-align: right;
 }
 
 .leaderboard-table td {
@@ -1328,7 +1342,8 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
 }
 
 .leaderboard-col-rank {
-    width: 3rem;
+    width: 6%;
+    max-width: 3.25rem;
     font-variant-numeric: tabular-nums;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.8125rem;
@@ -1336,22 +1351,46 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
 }
 
 .leaderboard-col-flag {
-    width: 2.75rem;
+    width: 10%;
+    max-width: 3.5rem;
     font-size: 1.35rem;
     line-height: 1;
     text-align: center;
+    vertical-align: middle;
+}
+
+.leaderboard-flag-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.875rem;
+    height: 1.875rem;
+    border-radius: 50%;
+    overflow: hidden;
+    font-size: 1.2rem;
+    line-height: 1;
+    background: rgba(148, 163, 184, 0.1);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    box-sizing: border-box;
+    vertical-align: middle;
 }
 
 .leaderboard-col-flag--unknown {
     opacity: 0.85;
 }
 
+.leaderboard-col-flag--unknown .leaderboard-flag-circle {
+    background: rgba(148, 163, 184, 0.06);
+}
+
 .leaderboard-col-user {
+    width: 44%;
     font-weight: 550;
     color: var(--text-0);
 }
 
 .leaderboard-col-score {
+    width: 12%;
     text-align: right;
     font-variant-numeric: tabular-nums;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -1361,6 +1400,7 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
 }
 
 .leaderboard-col-date {
+    width: 28%;
     text-align: right;
     font-size: 0.8125rem;
     color: var(--text-2);
