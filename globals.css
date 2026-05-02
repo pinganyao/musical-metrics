@@ -1073,14 +1073,11 @@ html.mm-auth-pending .dashboard-main > .dashboard-recent-card {
     align-self: center;
 }
 
-.dashboard-recent-head {
-    margin-bottom: 1.25rem;
-}
-
-.dashboard-recent-subtitle {
-    margin: 0.35rem 0 0;
+.dashboard-recent-header .dashboard-recent-subtitle {
+    margin: 0.4rem 0 0;
     font-size: 0.875rem;
     color: #9ca3af;
+    line-height: 1.5;
 }
 
 .dashboard-recent-empty {
@@ -1121,39 +1118,46 @@ html.mm-auth-pending .dashboard-main > .dashboard-recent-card {
     margin: 0 -0.5rem;
     border-bottom: 1px solid #262626;
     align-items: center;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
 }
 
 .dashboard-recent-row:last-child {
     border-bottom: none;
 }
 
-#dashboard-recent-rows .dashboard-recent-row:nth-child(even) {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 6px;
-    border-bottom-color: transparent;
+.dashboard-recent-row:hover {
+    background-color: #303030;
 }
 
 .dashboard-recent-test-link {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    color: #60a5fa;
+    color: #ffffff;
     text-decoration: none;
     font-weight: 500;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     max-width: 100%;
 }
 
 .dashboard-recent-test-link:hover {
-    color: #93c5fd;
-    text-decoration: underline;
+    color: #ffffff;
 }
 
-.dashboard-recent-icon {
-    width: 1.125rem;
-    height: 1.125rem;
+/* Same Lucide symbols as homepage game cards (.game-card-icon); sized for table rows */
+.dashboard-recent-test-link .game-card-icon.dashboard-recent-icon {
+    width: 1.35rem;
+    height: 1.35rem;
+    margin: 0;
     flex-shrink: 0;
     stroke-width: 2;
+    color: #fbbf24;
+    transition: color 0.2s;
+}
+
+.dashboard-recent-test-link:hover .game-card-icon.dashboard-recent-icon {
+    color: #fcd34d;
 }
 
 .dashboard-recent-col--date {

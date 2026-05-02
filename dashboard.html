@@ -105,8 +105,8 @@
         </div>
 
         <section id="dashboard-recent-section" class="dashboard-recent-card" hidden>
-            <div class="dashboard-recent-head">
-                <h2 class="dashboard-tests-title">Recent attempts</h2>
+            <div class="dashboard-tests-header dashboard-recent-header">
+                <h2 class="dashboard-tests-title">Activity Feed</h2>
                 <p class="dashboard-recent-subtitle">Your last 20 saved scores</p>
             </div>
             <div id="dashboard-recent-empty" class="dashboard-recent-empty" hidden>
@@ -166,18 +166,18 @@
             const GAME_KEYS = GAMES.map((g) => g.key);
 
             const GAME_ICONS = {
-                melody1: "music",
-                melody2: "music",
-                melody3: "music",
-                interval1: "git-branch",
-                interval2: "git-branch",
-                harmony1: "layers",
-                harmony2: "layers",
-                harmony3: "layers",
-                tempo1: "timer",
-                tempo2: "timer",
-                pitch1: "mic",
-                rhythm1: "activity"
+                melody1: "music-2",
+                melody2: "music-2",
+                melody3: "music-2",
+                interval1: "waves",
+                interval2: "waves",
+                harmony1: "piano",
+                harmony2: "piano",
+                harmony3: "piano",
+                tempo1: "clock",
+                tempo2: "clock",
+                pitch1: "music",
+                rhythm1: "drum"
             };
 
             function escapeHtml(str) {
@@ -456,7 +456,7 @@
                             '">' +
                             '<i data-lucide="' +
                             escapeHtml(icon) +
-                            '" class="dashboard-recent-icon" aria-hidden="true"></i>' +
+                            '" class="game-card-icon dashboard-recent-icon" aria-hidden="true"></i>' +
                             "<span>" +
                             escapeHtml(title) +
                             "</span>" +
