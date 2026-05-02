@@ -124,6 +124,7 @@
         </div>
     </footer>
 
+    <script defer src="verified-rng.js"></script>
     <script defer src="supabase-auth.js"></script>
     <script>
         const audioFiles = {
@@ -186,7 +187,19 @@
                           'c5'];
 
         const inversionChords = ['major', 'minor', 'dominant7', 'major7', 'minor7', 'diminished', 'diminished7'];
-        
+
+        const H3_UI = {
+            major: 0,
+            minor: 1,
+            diminished: 2,
+            augmented: 3,
+            sus2: 4,
+            sus4: 5,
+            dominant: 6,
+            'half-diminished': 7
+        };
+        const H3_EXT = { none: 0, '7th': 1, '6th': 2, '9th': 3, add9th: 4 };
+
         const inversions = {
             0: [0, 0, 0, 0],
             1: [12, 0, 0, 0],
@@ -206,14 +219,26 @@
                 roundCounter.style.display = 'block';
                 
                 const chordTypeNames = Object.keys(chordTypes);
-                const randomChordType = chordTypeNames[Math.floor(Math.random() * chordTypeNames.length)];
+                const seed = window.mmChallengeSeed;
+                const rng = window.MMVerifiedRng;
+                let ti;
+                if (seed != null && rng) {
+                    ti = await rng.rngMod(seed, `harmony3:t:${level}`, chordTypeNames.length);
+                } else {
+                    ti = Math.floor(Math.random() * chordTypeNames.length);
+                }
+                const randomChordType = chordTypeNames[ti];
                 
                 const chordIntervals = chordTypes[randomChordType];
                 const maxInterval = Math.max(...chordIntervals);
                 
                 let inversion = 0;
                 if (inversionChords.includes(randomChordType)) {
-                    inversion = Math.floor(Math.random() * 4);
+                    if (seed != null && rng) {
+                        inversion = await rng.rngMod(seed, `harmony3:inv:${level}`, 4);
+                    } else {
+                        inversion = Math.floor(Math.random() * 4);
+                    }
                 }
                 
                 const inversionPattern = inversions[inversion];
@@ -250,6 +275,9 @@
 
         function checkAnswer() {
             if (!selectedChordType || !selectedExtension) return;
+
+            if (!window.mmVerifyTranscript) window.mmVerifyTranscript = [];
+            window.mmVerifyTranscript.push(H3_UI[selectedChordType], H3_EXT[selectedExtension]);
 
             chordTypeButtons.forEach(btn => btn.classList.remove('active'));
             extensionButtons.forEach(btn => btn.classList.remove('active'));

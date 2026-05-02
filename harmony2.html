@@ -122,6 +122,7 @@
         </div>
     </footer>
 
+    <script defer src="verified-rng.js"></script>
     <script defer src="supabase-auth.js"></script>
     <script>
         const audioFiles = {
@@ -170,6 +171,18 @@
         const noteNames = ['c3', 'c#3', 'd3', 'd#3', 'e3', 'f3', 'f#3', 'g3', 'g#3', 'a3', 'a#3', 'b3',
                           'c4', 'c#4', 'd4', 'd#4', 'e4', 'f4', 'f#4', 'g4', 'g#4', 'a4', 'a#4', 'b4'];
 
+        const H2_UI = {
+            major: 0,
+            minor: 1,
+            diminished: 2,
+            augmented: 3,
+            sus2: 4,
+            sus4: 5,
+            dominant: 6,
+            'half-diminished': 7
+        };
+        const H2_EXT = { none: 0, '7th': 1 };
+
         async function playChord() {
             buttonsContainer.style.display = 'none';
             levelDisplay.style.display = 'block';
@@ -182,7 +195,15 @@
                 roundCounter.style.display = 'block';
                 
                 const chordTypeNames = Object.keys(chordTypes);
-                const randomChordType = chordTypeNames[Math.floor(Math.random() * chordTypeNames.length)];
+                const seed = window.mmChallengeSeed;
+                const rng = window.MMVerifiedRng;
+                let ti;
+                if (seed != null && rng) {
+                    ti = await rng.rngMod(seed, `harmony2:t:${level}`, chordTypeNames.length);
+                } else {
+                    ti = Math.floor(Math.random() * chordTypeNames.length);
+                }
+                const randomChordType = chordTypeNames[ti];
                 
                 const chordIntervals = chordTypes[randomChordType];
                 const maxInterval = Math.max(...chordIntervals);
@@ -210,6 +231,9 @@
 
         function checkAnswer() {
             if (!selectedChordType || !selectedExtension) return;
+
+            if (!window.mmVerifyTranscript) window.mmVerifyTranscript = [];
+            window.mmVerifyTranscript.push(H2_UI[selectedChordType], H2_EXT[selectedExtension]);
 
             chordTypeButtons.forEach(btn => btn.classList.remove('active'));
             extensionButtons.forEach(btn => btn.classList.remove('active'));

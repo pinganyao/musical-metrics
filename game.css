@@ -1498,6 +1498,12 @@ body {
     color: var(--text-0);
 }
 
+@media (max-width: 768px) {
+    body {
+        background: var(--bg-0);
+    }
+}
+
 .header {
     position: sticky;
     top: 0;

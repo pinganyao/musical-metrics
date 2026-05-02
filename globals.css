@@ -1884,11 +1884,10 @@ body {
     color: var(--text-0);
 }
 
-/* Long pages stretch body backgrounds to document height; on a narrow viewport that
-   reads as a flat wash. Fixed attachment ties the gradient to the viewport on small screens only. */
+/* Phones: flat background; gradient stays on wider viewports only. */
 @media (max-width: 768px) {
     body {
-        background-attachment: fixed;
+        background: var(--bg-0);
     }
 }
 

@@ -165,7 +165,13 @@
             var sbGlobal = typeof supabase !== "undefined" ? supabase : window.supabase;
             var client =
                 sbGlobal && typeof sbGlobal.createClient === "function"
-                    ? sbGlobal.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+                    ? sbGlobal.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                          auth: {
+                              lock: async function (_name, _acquireTimeout, fn) {
+                                  return fn();
+                              }
+                          }
+                      })
                     : null;
 
             function escapeHtml(str) {

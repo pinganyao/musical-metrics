@@ -115,6 +115,7 @@
     </div>
   </footer>
 
+  <script defer src="verified-rng.js"></script>
   <script defer src="supabase-auth.js"></script>
   <script>
     const metronomeAudio = new Audio('sounds/metronome.mp3');
@@ -146,12 +147,18 @@
       document.getElementById('levelNum').textContent = level;
       document.getElementById('roundNum').textContent = level;
 
-      setTimeout(() => {
+      setTimeout(async () => {
         levelDisplay.style.display = 'none';
         inputContainer.style.display = 'flex';
         roundCounter.style.display = 'block';
 
-        currentTempo = Math.floor(Math.random() * 201) + 40;
+        const seed = window.mmChallengeSeed;
+        const rng = window.MMVerifiedRng;
+        if (seed != null && rng) {
+          currentTempo = 40 + (await rng.rngMod(seed, `tempo1:${level}`, 201));
+        } else {
+          currentTempo = Math.floor(Math.random() * 201) + 40;
+        }
 
         const beatInterval = 60000 / currentTempo;
 
@@ -196,6 +203,9 @@
       const userBPM = parseInt(userInput, 10);
       const difference = Math.abs(userBPM - currentTempo);
       const roundScore = Math.max(0, 100 - difference);
+
+      if (!window.mmVerifyTranscript) window.mmVerifyTranscript = [];
+      window.mmVerifyTranscript.push(userBPM);
 
       roundScores.push(roundScore);
 

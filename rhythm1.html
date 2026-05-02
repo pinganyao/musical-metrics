@@ -122,6 +122,7 @@
     </div>
   </footer>
 
+  <script defer src="verified-rng.js"></script>
   <script defer src="supabase-auth.js"></script>
   <script>
     const metronomeAudio = new Audio('sounds/metronome.mp3');
@@ -157,11 +158,19 @@
     const beatIndicator = document.getElementById('beatIndicator');
     const homeBtn = document.getElementById('homeBtn');
 
-    function generateRandomPattern() {
+    async function generateRandomPattern() {
       const pattern = [];
+      const seed = window.mmChallengeSeed;
+      const rng = window.MMVerifiedRng;
       for (let beat = 0; beat < 4; beat++) {
-        const randomType = RHYTHM_TYPES[Math.floor(Math.random() * RHYTHM_TYPES.length)];
-        pattern.push({ type: randomType, beat: beat + 1 });
+        let ti;
+        if (seed != null && rng) {
+          ti = await rng.rngMod(seed, `rhythm1:b${beat}:${currentRound}`, RHYTHM_TYPES.length);
+        } else {
+          ti = Math.floor(Math.random() * RHYTHM_TYPES.length);
+        }
+        const randomType = RHYTHM_TYPES[ti];
+        pattern.push({ type: randomType, typeIndex: ti, beat: beat + 1 });
       }
       return pattern;
     }
@@ -170,14 +179,14 @@
       return pattern.reduce((sum, beat) => sum + beat.type.subdivisions, 0);
     }
 
-    function playPattern() {
+    async function playPattern() {
       tapContainer.style.display = 'none';
       readyDisplay.style.display = 'none';
       levelDisplay.style.display = 'block';
       document.getElementById('levelNum').textContent = currentRound;
       document.getElementById('roundNum').textContent = currentRound;
 
-      currentPattern = generateRandomPattern();
+      currentPattern = await generateRandomPattern();
 
       setTimeout(() => {
         levelDisplay.style.display = 'none';
@@ -306,6 +315,15 @@
 
       const score = calculateRhythmScore();
       roundScores.push(score.accuracy);
+
+      if (currentPattern && tapTimes.length) {
+        const row = [];
+        for (const b of currentPattern) row.push(b.typeIndex);
+        row.push(tapTimes.length);
+        for (let i = 1; i < tapTimes.length; i++) row.push(tapTimes[i] - tapTimes[i - 1]);
+        if (!window.mmVerifyTranscript) window.mmVerifyTranscript = [];
+        window.mmVerifyTranscript.push(...row);
+      }
 
       currentRound++;
       level = currentRound;

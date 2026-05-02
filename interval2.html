@@ -123,6 +123,7 @@
     </div>
   </footer>
 
+  <script defer src="verified-rng.js"></script>
   <script defer src="supabase-auth.js"></script>
   <script>
     const audioFiles = {
@@ -182,6 +183,8 @@
       12: { quality: 'perfect', distance: 8 }
     };
 
+    const QUALITY_CODE = { major: 1, minor: 2, perfect: 3, diminished: 4, augmented: 5, unknown: 0 };
+
     async function playInterval() {
       buttonsContainer.style.display = 'none';
       levelDisplay.style.display = 'block';
@@ -194,9 +197,20 @@
         roundCounter.style.display = 'block';
 
         const allNoteNames = Object.keys(audioFiles);
-        firstNote = allNoteNames[Math.floor(Math.random() * allNoteNames.length)];
+        const seed = window.mmChallengeSeed;
+        const rng = window.MMVerifiedRng;
+        let fi;
+        let si;
+        if (seed != null && rng) {
+          fi = await rng.rngMod(seed, `interval2:f:${level}`, allNoteNames.length);
+          si = await rng.rngMod(seed, `interval2:s:${level}`, allNoteNames.length - 1);
+        } else {
+          fi = Math.floor(Math.random() * allNoteNames.length);
+          si = Math.floor(Math.random() * (allNoteNames.length - 1));
+        }
+        firstNote = allNoteNames[fi];
         const otherNotes = allNoteNames.filter(n => n !== firstNote);
-        secondNote = otherNotes[Math.floor(Math.random() * otherNotes.length)];
+        secondNote = otherNotes[si];
 
         AudioEngine.playNote(firstNote);
         await new Promise(r => setTimeout(r, 1000));
@@ -209,6 +223,12 @@
 
     function checkAnswer() {
       if (!selectedQuality || !selectedDistance) return;
+
+      if (!window.mmVerifyTranscript) window.mmVerifyTranscript = [];
+      window.mmVerifyTranscript.push(
+        QUALITY_CODE[selectedQuality] ?? 0,
+        parseInt(selectedDistance, 10)
+      );
 
       qualityButtons.forEach(btn => btn.classList.remove('active'));
       distanceButtons.forEach(btn => btn.classList.remove('active'));

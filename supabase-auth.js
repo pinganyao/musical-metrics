@@ -214,6 +214,15 @@
     );
   };
 
+  /** Label shown next to the avatar; prefers DB profile, then signup metadata, then email. */
+  const navDisplayName = () => {
+    const email = state.session?.user?.email || null;
+    const fromProfile = state.profile?.username || null;
+    const metaRaw = normalizeUsername(state.session?.user?.user_metadata?.username || "");
+    const fromMeta = isValidUsername(metaRaw) ? metaRaw : null;
+    return fromProfile || fromMeta || email || "User";
+  };
+
   const ensureAuthNav = () => {
     const nav = document.querySelector(".nav");
     if (nav && !document.getElementById("mm-auth-slot")) {
@@ -237,11 +246,9 @@
     const mobileSlot = document.getElementById("mm-auth-slot-mobile");
     if (!desktopSlot && !mobileSlot) return;
 
-    const email = state.session?.user?.email || null;
-    const username = state.profile?.username || null;
-    const displayName = username || email || "User";
+    const displayName = navDisplayName();
 
-    if (email) {
+    if (state.session?.user?.email) {
       if (desktopSlot) {
         desktopSlot.innerHTML = authDesktopLoggedInMarkup(displayName);
         const trigger = document.getElementById("mm-auth-menu-trigger");
@@ -319,13 +326,23 @@
       return;
     }
 
+    const uid = state.session.user.id;
+    if (state.profile && state.profile.user_id !== uid) {
+      state.profile = null;
+    }
+
     const { data, error } = await state.client
       .from("profiles")
       .select("user_id, username")
-      .eq("user_id", state.session.user.id)
+      .eq("user_id", uid)
       .maybeSingle();
 
     if (error) {
+      // TOKEN_REFRESHED and other events refetch often; a transient error must not
+      // clear profile or the nav falls back to email until the next successful fetch.
+      if (state.profile?.user_id === uid) {
+        return;
+      }
       showStatus(`Could not load profile: ${error.message}`, "error");
       state.profile = null;
       return;
@@ -412,7 +429,12 @@
             persistSession: true,
             autoRefreshToken: true,
             detectSessionInUrl: true,
-            storage: getPreferredAuthStorage()
+            storage: getPreferredAuthStorage(),
+            // Skip navigator.locks (Web Locks API). Default cross-tab locks can race with
+            // concurrent getSession / refresh / onAuthStateChange and emit AbortError:
+            // "Lock broken by another request with the 'steal' option." In-tab serialization
+            // via gotrue's internal queue is enough for this site.
+            lock: async (_name, _acquireTimeout, fn) => fn()
           }
         });
         const sessionResult = await state.client.auth.getSession();
@@ -584,7 +606,7 @@
     return { ok: true };
   };
 
-  const reportScore = async (gameKey, scoreValue, scoreLabel) => {
+  const reportScore = async (gameKey, scoreValue, scoreLabel, extras = {}) => {
     await init();
     if (!state.client) return { saved: false, reason: "client_unavailable" };
     if (!state.session?.user) {
@@ -626,13 +648,24 @@
       /* geo optional */
     }
 
-    const { error } = await state.client.rpc("submit_game_score", {
+    const rpcArgs = {
       p_session_id: gameSession.id,
       p_score: numericScore,
       p_score_label: scoreLabel || String(scoreValue),
       p_duration_seconds: durationSeconds,
       p_country_code: countryCode
-    });
+    };
+    if (Array.isArray(extras.verifyTranscript)) {
+      rpcArgs.p_verify_transcript = extras.verifyTranscript;
+    }
+    if (
+      ["melody1", "melody2", "melody3"].includes(normalizedGameKey) &&
+      Array.isArray(extras.melodyTranscript)
+    ) {
+      rpcArgs.p_melody_transcript = extras.melodyTranscript;
+    }
+
+    const { error } = await state.client.rpc("submit_game_score", rpcArgs);
     if (error) {
       showStatus(`Score save failed: ${error.message}`, "error");
       return { saved: false, reason: "insert_failed", error };
@@ -662,12 +695,32 @@
       return { ok: false, reason: "rpc_failed", error };
     }
 
+    let seed = null;
+    const { data: sessionRow, error: sessionFetchError } = await state.client
+      .from("game_sessions")
+      .select("challenge_seed")
+      .eq("id", data)
+      .maybeSingle();
+
+    if (!sessionFetchError && sessionRow && sessionRow.challenge_seed != null) {
+      const raw = sessionRow.challenge_seed;
+      seed = typeof raw === "bigint" ? raw.toString() : raw;
+    }
+
     state.activeGameSessions[normalizedGameKey] = {
       id: data,
-      startedAtMs: Date.now()
+      startedAtMs: Date.now(),
+      seed
     };
 
-    return { ok: true };
+    return { ok: true, seed };
+  };
+
+  const peekGameSession = (gameKey) => {
+    const k = normalizeGameKey(gameKey);
+    const s = state.activeGameSessions[k];
+    if (!s?.id) return null;
+    return { sessionId: s.id, seed: s.seed ?? null, startedAtMs: s.startedAtMs };
   };
 
   const aggregateScoresByGame = (rows) => {
@@ -794,6 +847,7 @@
     fetchTotalCompletedTests,
     fetchRecentGameScores,
     startGameSession,
+    peekGameSession,
     loginWithPassword,
     signUpWithUsername,
     signOutAndReload: performLogout,

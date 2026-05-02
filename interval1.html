@@ -125,6 +125,7 @@
         </div>
     </footer>
 
+  <script defer src="verified-rng.js"></script>
   <script defer src="supabase-auth.js"></script>
   <script>
         const audioFiles = {
@@ -163,6 +164,8 @@
         const roundCounter = document.querySelector('.round-counter');
         const homeBtn = document.getElementById('homeBtn');
 
+        const QUALITY_CODE = { major: 1, minor: 2, perfect: 3, diminished: 4, augmented: 5 };
+
         async function playInterval() {
             buttonsContainer.style.display = 'none';
             levelDisplay.style.display = 'block';
@@ -179,7 +182,15 @@
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
                 const noteNames = Object.keys(audioFiles).filter(note => note !== 'c4');
-                const randomNote = noteNames[Math.floor(Math.random() * noteNames.length)];
+                const seed = window.mmChallengeSeed;
+                const rng = window.MMVerifiedRng;
+                let randomNote;
+                if (seed != null && rng) {
+                    const ni = await rng.rngMod(seed, `interval1:${level}`, noteNames.length);
+                    randomNote = noteNames[ni];
+                } else {
+                    randomNote = noteNames[Math.floor(Math.random() * noteNames.length)];
+                }
                 currentInterval = randomNote;
                 AudioEngine.playNote(randomNote);
 
@@ -190,6 +201,9 @@
 
         function checkAnswer() {
             if (!selectedQuality || !selectedDistance) return;
+
+            if (!window.mmVerifyTranscript) window.mmVerifyTranscript = [];
+            window.mmVerifyTranscript.push(QUALITY_CODE[selectedQuality], parseInt(selectedDistance, 10));
 
             qualityButtons.forEach(btn => btn.classList.remove('active'));
             distanceButtons.forEach(btn => btn.classList.remove('active'));

@@ -112,6 +112,7 @@
         </div>
     </footer>
 
+    <script defer src="verified-rng.js"></script>
     <script defer src="supabase-auth.js"></script>
     <script>
         const audioFiles = {
@@ -165,7 +166,15 @@
                 roundCounter.style.display = 'block';
                 
                 const chordTypeNames = Object.keys(chordTypes);
-                const randomChordType = chordTypeNames[Math.floor(Math.random() * chordTypeNames.length)];
+                const seed = window.mmChallengeSeed;
+                const rng = window.MMVerifiedRng;
+                let ti;
+                if (seed != null && rng) {
+                    ti = await rng.rngMod(seed, `harmony1:t:${level}`, chordTypeNames.length);
+                } else {
+                    ti = Math.floor(Math.random() * chordTypeNames.length);
+                }
+                const randomChordType = chordTypeNames[ti];
                 
                 const chordIntervals = chordTypes[randomChordType];
                 const maxInterval = Math.max(...chordIntervals);
@@ -192,6 +201,10 @@
 
         function checkAnswer() {
             if (!selectedChordType) return;
+
+            const chordTypeNames = Object.keys(chordTypes);
+            if (!window.mmVerifyTranscript) window.mmVerifyTranscript = [];
+            window.mmVerifyTranscript.push(chordTypeNames.indexOf(selectedChordType));
 
             chordTypeButtons.forEach(btn => btn.classList.remove('active'));
             

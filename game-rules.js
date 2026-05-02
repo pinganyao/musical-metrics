@@ -154,7 +154,15 @@
     const mmAuth = await ensureAuthScript();
     if (!mmAuth || typeof mmAuth.reportScore !== 'function') return;
 
-    const result = await mmAuth.reportScore(gameKey, scoreValue, scoreText);
+    const melodyGames = ["melody1", "melody2", "melody3"];
+    const extras = {};
+    if (Array.isArray(window.mmVerifyTranscript) && window.mmVerifyTranscript.length > 0) {
+      extras.verifyTranscript = window.mmVerifyTranscript.slice();
+    } else if (melodyGames.includes(gameKey) && Array.isArray(window.mmMelodyTranscript)) {
+      extras.melodyTranscript = window.mmMelodyTranscript.slice();
+    }
+
+    const result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
     if (result && result.saved) {
       scoreReportedForCurrentGameOver = true;
     }
@@ -179,7 +187,12 @@
     continueBtnForSession.addEventListener('click', async () => {
       const mmAuth = await ensureAuthScript();
       if (!mmAuth || typeof mmAuth.startGameSession !== 'function') return;
-      await mmAuth.startGameSession(gameKey);
+      const sessionResult = await mmAuth.startGameSession(gameKey);
+      if (sessionResult?.ok && sessionResult.seed != null) {
+        const s = sessionResult.seed;
+        window.mmChallengeSeed = typeof s === 'bigint' ? s.toString() : s;
+      }
+      window.mmVerifyTranscript = [];
     });
   }
 

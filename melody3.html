@@ -133,6 +133,14 @@
 
   <script defer src="supabase-auth.js"></script>
   <script>
+    window.mmMelodyTranscript = [];
+
+    async function melodyNoteFromSeed(seed, index, span) {
+      const msg = `${String(seed)}:${index}`;
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+      return 1 + (new Uint8Array(buf)[0] % span);
+    }
+
     const audioFiles = {
       1: 'sounds/C4.mp3',
       2: 'sounds/C%234.mp3',
@@ -189,7 +197,7 @@
         } else {
           clearInterval(demo);
           demonstrating = false;
-          setTimeout(playRound, 1000);
+          setTimeout(() => void playRound(), 1000);
         }
       }, 700);
     }
@@ -210,8 +218,23 @@
       }, 700);
     }
 
-    function playRound() {
-      sequence = Array.from({ length: level }, () => Math.floor(Math.random() * 13) + 1);
+    async function playRound() {
+      let seed = null;
+      if (window.MMAuth && typeof window.MMAuth.peekGameSession === 'function') {
+        const meta = window.MMAuth.peekGameSession('melody3');
+        seed = meta && meta.seed != null ? meta.seed : null;
+      }
+
+      const L = level;
+      const dStart = (L * (L - 1)) / 2;
+      sequence = [];
+      for (let i = 0; i < L; i++) {
+        if (seed != null) {
+          sequence.push(await melodyNoteFromSeed(seed, dStart + i, 13));
+        } else {
+          sequence.push(Math.floor(Math.random() * 13) + 1);
+        }
+      }
       playerSequence = [];
 
       buttonsContainer.style.display = 'none';
@@ -231,7 +254,7 @@
 
       if (playerSequence.join('') === sequence.join('')) {
         level++;
-        setTimeout(playRound, 1000);
+        setTimeout(() => void playRound(), 1000);
       } else {
         gameActive = false;
         gameOver = true;
@@ -246,6 +269,7 @@
       level = 1;
       sequence = [];
       playerSequence = [];
+      window.mmMelodyTranscript = [];
       waitingForInput = false;
       gameActive = true;
       gameOver = false;
@@ -275,6 +299,7 @@
           const noteNum = parseInt(button.dataset.note, 10);
           playNote(noteNum, true);
           playerSequence.push(noteNum);
+          window.mmMelodyTranscript.push(noteNum);
           if (playerSequence.length === sequence.length) {
             setTimeout(checkSequence, 500);
           }
@@ -290,6 +315,7 @@
           const noteNum = parseInt(button.dataset.note, 10);
           playNote(noteNum, true);
           playerSequence.push(noteNum);
+          window.mmMelodyTranscript.push(noteNum);
           if (playerSequence.length === sequence.length) {
             setTimeout(checkSequence, 500);
           }

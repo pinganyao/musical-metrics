@@ -121,6 +121,7 @@
     </div>
   </footer>
 
+  <script defer src="verified-rng.js"></script>
   <script defer src="supabase-auth.js"></script>
   <script>
     let currentReferencePlayer = null;
@@ -261,17 +262,26 @@
       noteDisplay.style.display = 'none';
       noteDisplay.classList.remove('show', 'playing');
 
-      setTimeout(() => {
+      setTimeout(async () => {
         levelDisplay.style.display = 'none';
         roundCounter.style.display = 'block';
 
-        currentNote = noteNames[Math.floor(Math.random() * noteNames.length)];
-
-        const isDownward = Math.random() < 0.5;
-        if (isDownward) {
-          actualCentsDeviation = Math.floor(Math.random() * 50) - 50;
+        const seed = window.mmChallengeSeed;
+        const rng = window.MMVerifiedRng;
+        if (seed != null && rng) {
+          const ni = await rng.rngMod(seed, `pitch1:n:${level}`, noteNames.length);
+          currentNote = noteNames[ni];
+          const downward = await rng.rngBool(seed, `pitch1:dir:${level}`);
+          const b = await rng.rngMod(seed, `pitch1:c:${level}`, 50);
+          actualCentsDeviation = downward ? -1 - b : 1 + b;
         } else {
-          actualCentsDeviation = Math.floor(Math.random() * 50) + 1;
+          currentNote = noteNames[Math.floor(Math.random() * noteNames.length)];
+          const isDownward = Math.random() < 0.5;
+          if (isDownward) {
+            actualCentsDeviation = Math.floor(Math.random() * 50) - 50;
+          } else {
+            actualCentsDeviation = Math.floor(Math.random() * 50) + 1;
+          }
         }
 
         noteDisplay.textContent = `Reference Note: ${currentNote}`;
@@ -311,6 +321,9 @@
       const userCents = parseInt(userInput, 10);
       const difference = Math.abs(actualCentsDeviation - userCents);
       const roundScore = Math.max(0, 100 - difference);
+
+      if (!window.mmVerifyTranscript) window.mmVerifyTranscript = [];
+      window.mmVerifyTranscript.push(userCents);
 
       roundScores.push(roundScore);
 
