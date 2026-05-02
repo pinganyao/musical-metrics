@@ -176,20 +176,23 @@
                     .replace(/"/g, "&quot;");
             }
 
-            /** Globe when country unknown — avoids 🏳️ looking blank in some fonts. */
-            function countryCodeToFlag(cc) {
-                if (!cc || typeof cc !== "string" || cc.length !== 2) {
-                    return "🌍";
+            /** HatScripts circle-flags (MIT) via jsDelivr — circular SVGs per ISO 3166-1 alpha-2. */
+            var CIRCLE_FLAGS_SVG_BASE =
+                "https://cdn.jsdelivr.net/npm/circle-flags@2.8.3/flags/";
+
+            function flagCellInnerHtml(countryCode) {
+                var cc =
+                    typeof countryCode === "string" ? countryCode.trim() : "";
+                if (!/^[A-Za-z]{2}$/.test(cc)) {
+                    return '<span class="leaderboard-flag-fallback" aria-hidden="true">🌍</span>';
                 }
-                var up = cc.toUpperCase();
-                var A = 0x1f1e6;
-                var parts = [];
-                for (var i = 0; i < 2; i++) {
-                    var c = up.charCodeAt(i);
-                    if (c < 65 || c > 90) return "🌍";
-                    parts.push(String.fromCodePoint(A + (c - 65)));
-                }
-                return parts.join("");
+                var lower = cc.toLowerCase();
+                var src = CIRCLE_FLAGS_SVG_BASE + encodeURIComponent(lower) + ".svg";
+                return (
+                    '<img class="leaderboard-flag-img" src="' +
+                    escapeHtml(src) +
+                    '" alt="" width="28" height="28" loading="lazy" decoding="async" />'
+                );
             }
 
             function formatScore(n) {
@@ -249,7 +252,7 @@
                 emptyEl.hidden = true;
                 body.innerHTML = rows
                     .map(function (row) {
-                        var flag = countryCodeToFlag(row.country_code);
+                        var flagHtml = flagCellInnerHtml(row.country_code);
                         var name = escapeHtml(row.username || "—");
                         var score = formatScore(row.score);
                         var when = escapeHtml(formatWhen(row.achieved_at));
@@ -271,9 +274,8 @@
                                 row.country_code ? row.country_code : "Country not set yet"
                             ) +
                             '">' +
-                            '<span class="leaderboard-flag-circle" aria-hidden="true"><span class="leaderboard-flag-circle-inner">' +
-                            flag +
-                            "</span></span></td>" +
+                            flagHtml +
+                            "</td>" +
                             '<td class="leaderboard-col-user">' +
                             name +
                             "</td>" +
