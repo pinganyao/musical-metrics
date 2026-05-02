@@ -47,7 +47,7 @@
                     <a href="/dashboard" class="nav-link active">DASHBOARD</a>
                     <a href="/about" class="nav-link">ABOUT</a>
                 </nav>
-                <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button">
                     <i data-lucide="menu" class="hamburger-icon"></i>
                 </button>
                 <div class="mobile-menu" id="mobile-menu">
@@ -61,29 +61,46 @@
     </header>
 
     <main class="dashboard-main">
-        <div class="dashboard-tests-card">
+        <section id="dashboard-summary-guest" class="dashboard-summary-card">
+            <div class="dashboard-summary-guest-inner">
+                <p class="dashboard-summary-guest-text">Log in to save scores, track your best and average results on each test, and see your progress across all twelve games.</p>
+                <a href="/login" class="mm-nav-login-btn">Log in</a>
+            </div>
+        </section>
+
+        <section id="dashboard-summary-user" class="dashboard-summary-card" hidden>
+            <div class="dashboard-summary-user-inner">
+                <div class="dashboard-summary-metrics">
+                    <div class="dashboard-summary-metric">
+                        <span class="dashboard-summary-label">Days as a user</span>
+                        <span class="dashboard-summary-value" id="dashboard-metric-days">—</span>
+                    </div>
+                    <div class="dashboard-summary-metric">
+                        <span class="dashboard-summary-label">Tests completed</span>
+                        <span class="dashboard-summary-value" id="dashboard-metric-tests">—</span>
+                    </div>
+                    <div class="dashboard-summary-metric">
+                        <span class="dashboard-summary-label">Avg. score (12 tests)</span>
+                        <span class="dashboard-summary-value" id="dashboard-metric-avg">—</span>
+                    </div>
+                </div>
+                <button type="button" class="dashboard-summary-signout" id="dashboard-sign-out">Sign out</button>
+            </div>
+        </section>
+
+        <div class="dashboard-tests-card dashboard-tests-card--wide">
             <div class="dashboard-tests-header">
                 <h2 class="dashboard-tests-title">Musical Tests</h2>
             </div>
-            <div class="dashboard-tests-table">
+            <div class="dashboard-tests-table" id="dashboard-tests-table">
                 <div class="dashboard-tests-table-header">
                     <div class="dashboard-tests-table-cell header-cell">Test</div>
                     <div class="dashboard-tests-table-cell header-cell">Actions</div>
+                    <div class="dashboard-tests-table-cell header-cell dashboard-score-header">Best</div>
+                    <div class="dashboard-tests-table-cell header-cell dashboard-score-header">Avg</div>
                 </div>
-                <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Melody I</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
-                <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Melody II</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
-                <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Melody III</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
-                <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Interval I</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
-                <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Interval II</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
-                <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Harmony I</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
-                <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Harmony II</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
-                <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Harmony III</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
-                <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Tempo I</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
-                <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Tempo II</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
-                <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Pitch I</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
-                <div class="dashboard-tests-table-row"><div class="dashboard-tests-table-cell test-name">Rhythm I</div><div class="dashboard-tests-table-cell actions-cell"><button class="dashboard-action-button play-button"><i data-lucide="play" class="action-icon"></i>Play</button><button class="dashboard-action-button stats-button"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button></div></div>
+                <div id="dashboard-tests-rows"></div>
             </div>
-            <div id="statsPanel" style="display:none;margin-top:16px;padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.04);color:#fff;"></div>
         </div>
     </main>
 
@@ -110,79 +127,249 @@
     <script defer src="supabase-auth.js"></script>
     <script>
         lucide.createIcons();
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-            const mobileMenu = document.getElementById('mobile-menu');
-            if (mobileMenuToggle && mobileMenu) {
-                mobileMenuToggle.addEventListener('click', function() {
-                    mobileMenu.classList.toggle('active');
-                    mobileMenuToggle.classList.toggle('active');
-                });
-                const mobileMenuLinks = mobileMenu.querySelectorAll('.mobile-menu-link');
-                mobileMenuLinks.forEach(link => {
-                    link.addEventListener('click', function() {
-                        mobileMenu.classList.remove('active');
-                        mobileMenuToggle.classList.remove('active');
-                    });
-                });
-                document.addEventListener('click', function(event) {
-                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
-                        mobileMenu.classList.remove('active');
-                        mobileMenuToggle.classList.remove('active');
-                    }
-                });
-            }
-        });
 
-        document.querySelectorAll('.play-button').forEach((button, index) => {
-            button.addEventListener('click', () => {
-                const testNames = ['/melody1', '/melody2', '/melody3', '/interval1', '/interval2', '/harmony1', '/harmony2', '/harmony3', '/tempo1', '/tempo2', '/pitch1', '/rhythm1'];
-                if (testNames[index]) window.location.href = testNames[index];
-            });
-        });
-        const gameKeys = ['melody1', 'melody2', 'melody3', 'interval1', 'interval2', 'harmony1', 'harmony2', 'harmony3', 'tempo1', 'tempo2', 'pitch1', 'rhythm1'];
-        const statsPanel = document.getElementById('statsPanel');
-        document.querySelectorAll('.stats-button').forEach((button, index) => {
-            button.addEventListener('click', async () => {
-                if (!window.MMAuth) {
-                    return;
+        (function () {
+            const GAMES = [
+                { key: "melody1", path: "/melody1", title: "Melody I" },
+                { key: "melody2", path: "/melody2", title: "Melody II" },
+                { key: "melody3", path: "/melody3", title: "Melody III" },
+                { key: "interval1", path: "/interval1", title: "Interval I" },
+                { key: "interval2", path: "/interval2", title: "Interval II" },
+                { key: "harmony1", path: "/harmony1", title: "Harmony I" },
+                { key: "harmony2", path: "/harmony2", title: "Harmony II" },
+                { key: "harmony3", path: "/harmony3", title: "Harmony III" },
+                { key: "tempo1", path: "/tempo1", title: "Tempo I" },
+                { key: "tempo2", path: "/tempo2", title: "Tempo II" },
+                { key: "pitch1", path: "/pitch1", title: "Pitch I" },
+                { key: "rhythm1", path: "/rhythm1", title: "Rhythm I" }
+            ];
+
+            const GAME_KEYS = GAMES.map((g) => g.key);
+
+            const GAME_SCORE_META = {
+                melody1: { kind: "points" },
+                melody2: { kind: "points" },
+                melody3: { kind: "points" },
+                interval1: { kind: "outOf", max: 10 },
+                interval2: { kind: "outOf", max: 10 },
+                harmony1: { kind: "outOf", max: 10 },
+                harmony2: { kind: "outOf", max: 10 },
+                harmony3: { kind: "outOf", max: 10 },
+                tempo1: { kind: "outOf", max: 100 },
+                tempo2: { kind: "outOf", max: 100 },
+                pitch1: { kind: "outOf", max: 100 },
+                rhythm1: { kind: "outOf", max: 100 }
+            };
+
+            function formatScoreParts(value, meta) {
+                if (value == null || Number.isNaN(Number(value))) return null;
+                const n = Number(value);
+                if (meta.kind === "outOf") {
+                    const rounded = Math.round(n * 10) / 10;
+                    const main =
+                        rounded % 1 === 0 ? String(Math.round(rounded)) : rounded.toFixed(1);
+                    return { main, suffix: "/" + meta.max };
+                }
+                const rounded = Math.round(n * 10) / 10;
+                const main =
+                    rounded % 1 === 0 ? String(Math.round(rounded)) : rounded.toFixed(1);
+                return { main, suffix: "points" };
+            }
+
+            function scoreDisplayHtml(parts) {
+                if (!parts) {
+                    return '<span class="dashboard-score-placeholder" aria-hidden="true">?</span>';
+                }
+                return (
+                    '<span class="dashboard-score-display"><span class="dashboard-score-num">' +
+                    parts.main +
+                    '</span><span class="dashboard-score-suffix">' +
+                    parts.suffix +
+                    "</span></span>"
+                );
+            }
+
+            function daysAsMember(user) {
+                const raw = user && user.created_at;
+                if (!raw) return "—";
+                const start = new Date(raw);
+                if (Number.isNaN(start.getTime())) return "—";
+                const days = Math.floor((Date.now() - start.getTime()) / 86400000);
+                return String(Math.max(1, days));
+            }
+
+            function bestScoreToHundredScale(bestScore, meta) {
+                const raw = Number(bestScore);
+                if (!Number.isFinite(raw) || raw < 0) return 0;
+
+                if (meta.kind === "points") {
+                    return Math.min(raw * 10, 100);
                 }
 
-                const showPanel = (content) => {
-                    if (!statsPanel) return;
-                    statsPanel.style.display = 'block';
-                    statsPanel.innerHTML = content;
-                };
+                if (meta.kind === "outOf") {
+                    if (meta.max === 100) {
+                        return Math.min(Math.max(raw, 0), 100);
+                    }
+                    if (meta.max === 10) {
+                        const scaled = (raw / 10) * 100;
+                        return Math.min(Math.max(scaled, 0), 100);
+                    }
+                }
+
+                return Math.min(Math.max(raw, 0), 100);
+            }
+
+            function twelveGameAverageOnHundredScale(byKey) {
+                let sum = 0;
+                for (const k of GAME_KEYS) {
+                    const row = byKey[k];
+                    if (!row || row.attempts < 1) return null;
+                    const meta = GAME_SCORE_META[k];
+                    sum += bestScoreToHundredScale(row.high_score, meta);
+                }
+                return sum / 12;
+            }
+
+            function renderRows(byKey, loggedIn) {
+                const host = document.getElementById("dashboard-tests-rows");
+                if (!host) return;
+                host.innerHTML = GAMES.map(function (game) {
+                    const meta = GAME_SCORE_META[game.key];
+                    const row = loggedIn ? byKey[game.key] : null;
+                    const bestParts =
+                        loggedIn && row
+                            ? formatScoreParts(row.high_score, meta)
+                            : null;
+                    const avgParts =
+                        loggedIn && row
+                            ? formatScoreParts(row.avg_score, meta)
+                            : null;
+                    return (
+                        '<div class="dashboard-tests-table-row">' +
+                        '<div class="dashboard-tests-table-cell test-name">' +
+                        game.title +
+                        "</div>" +
+                        '<div class="dashboard-tests-table-cell actions-cell">' +
+                        '<button type="button" class="dashboard-action-button play-button" data-play-href="' +
+                        game.path +
+                        '"><i data-lucide="play" class="action-icon"></i>Play</button>' +
+                        '<button type="button" class="dashboard-action-button stats-button stats-button--disabled" disabled title="Coming soon">' +
+                        '<i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button>' +
+                        "</div>" +
+                        '<div class="dashboard-tests-table-cell score-cell score-best">' +
+                        scoreDisplayHtml(bestParts) +
+                        "</div>" +
+                        '<div class="dashboard-tests-table-cell score-cell score-avg">' +
+                        scoreDisplayHtml(avgParts) +
+                        "</div>" +
+                        "</div>"
+                    );
+                }).join("");
+                if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+
+                host.querySelectorAll("[data-play-href]").forEach(function (btn) {
+                    btn.addEventListener("click", function () {
+                        const href = btn.getAttribute("data-play-href");
+                        if (href) window.location.href = href;
+                    });
+                });
+            }
+
+            async function refreshDashboard() {
+                const guestEl = document.getElementById("dashboard-summary-guest");
+                const userEl = document.getElementById("dashboard-summary-user");
+                if (!window.MMAuth) {
+                    if (guestEl) guestEl.hidden = false;
+                    if (userEl) userEl.hidden = true;
+                    renderRows({}, false);
+                    return;
+                }
 
                 await window.MMAuth.init();
                 const session = window.MMAuth.getSession();
-                if (!session?.user) {
-                    if (window.MMAuth.showStatus) {
-                        window.MMAuth.showStatus('Log in first to view your saved stats.', 'info');
+
+                if (!session || !session.user) {
+                    if (guestEl) guestEl.hidden = false;
+                    if (userEl) userEl.hidden = true;
+                    renderRows({}, false);
+                    return;
+                }
+
+                if (guestEl) guestEl.hidden = true;
+                if (userEl) userEl.hidden = false;
+
+                const summaryRows = await window.MMAuth.fetchMyHighScores();
+                const totalTests = await window.MMAuth.fetchTotalCompletedTests();
+
+                const byKey = {};
+                (summaryRows || []).forEach(function (r) {
+                    byKey[r.game_key] = r;
+                });
+
+                const daysEl = document.getElementById("dashboard-metric-days");
+                const testsEl = document.getElementById("dashboard-metric-tests");
+                const avgEl = document.getElementById("dashboard-metric-avg");
+                if (daysEl) daysEl.textContent = daysAsMember(session.user);
+                if (testsEl) testsEl.textContent = String(totalTests);
+
+                const avg12 = twelveGameAverageOnHundredScale(byKey);
+                if (avgEl) {
+                    if (avg12 == null) {
+                        avgEl.textContent = "N/A";
+                    } else {
+                        const rounded = Math.round(avg12 * 10) / 10;
+                        avgEl.textContent =
+                            rounded % 1 === 0 ? String(Math.round(rounded)) : rounded.toFixed(1);
                     }
-                    return;
                 }
 
-                const gameKey = gameKeys[index];
-                const stats = await window.MMAuth.fetchHighScoreForGame(gameKey);
-                const gameName = window.MMAuth.gameNameForKey(gameKey);
+                renderRows(byKey, true);
+            }
 
-                if (!stats) {
-                    showPanel(`<strong>${gameName}</strong><br>No saved score yet.`);
-                    return;
+            document.addEventListener("DOMContentLoaded", function () {
+                const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+                const mobileMenu = document.getElementById("mobile-menu");
+                if (mobileMenuToggle && mobileMenu) {
+                    mobileMenuToggle.addEventListener("click", function () {
+                        mobileMenu.classList.toggle("active");
+                        mobileMenuToggle.classList.toggle("active");
+                    });
+                    mobileMenu.querySelectorAll(".mobile-menu-link").forEach(function (link) {
+                        link.addEventListener("click", function () {
+                            mobileMenu.classList.remove("active");
+                            mobileMenuToggle.classList.remove("active");
+                        });
+                    });
+                    document.addEventListener("click", function (event) {
+                        if (
+                            !mobileMenuToggle.contains(event.target) &&
+                            !mobileMenu.contains(event.target)
+                        ) {
+                            mobileMenu.classList.remove("active");
+                            mobileMenuToggle.classList.remove("active");
+                        }
+                    });
                 }
 
-                const lastPlayedDate = stats.last_played_at
-                    ? new Date(stats.last_played_at).toLocaleString()
-                    : 'Unknown';
-                showPanel(
-                    `<strong>${gameName}</strong><br>` +
-                    `High score: ${stats.high_score}<br>` +
-                    `Attempts: ${stats.attempts}<br>` +
-                    `Last played: ${lastPlayedDate}`
-                );
+                document.getElementById("dashboard-sign-out")?.addEventListener("click", function () {
+                    if (window.MMAuth && window.MMAuth.signOutAndReload) {
+                        window.MMAuth.signOutAndReload();
+                    }
+                });
+
+                refreshDashboard();
             });
-        });
+
+            window.addEventListener("focus", function () {
+                if (window.MMAuth && window.MMAuth.getSession && window.MMAuth.getSession()?.user) {
+                    refreshDashboard();
+                }
+            });
+
+            window.addEventListener("mm-auth-changed", function () {
+                refreshDashboard();
+            });
+        })();
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
     <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>

@@ -393,6 +393,9 @@
         await ensureProfileForSession();
         ensureAuthNav();
         updateAuthUi();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("mm-auth-changed"));
+        }
       });
 
       state.initialized = true;
@@ -610,33 +613,104 @@
     return { ok: true };
   };
 
+  const aggregateScoresByGame = (rows) => {
+    const map = new Map();
+    for (const row of rows) {
+      const key = row.game_key;
+      const score = Number(row.score);
+      if (!Number.isFinite(score)) continue;
+      let agg = map.get(key);
+      if (!agg) {
+        agg = { scores: [], lastPlayedAt: null, lastMs: 0 };
+        map.set(key, agg);
+      }
+      agg.scores.push(score);
+      if (row.created_at) {
+        const t = new Date(row.created_at).getTime();
+        if (!Number.isNaN(t) && t >= agg.lastMs) {
+          agg.lastMs = t;
+          agg.lastPlayedAt = row.created_at;
+        }
+      }
+    }
+    const out = [];
+    for (const [game_key, agg] of map) {
+      const scores = agg.scores;
+      const high_score = Math.max(...scores);
+      const avg_score = scores.reduce((a, b) => a + b, 0) / scores.length;
+      out.push({
+        game_key,
+        high_score,
+        avg_score,
+        attempts: scores.length,
+        last_played_at: agg.lastPlayedAt
+      });
+    }
+    out.sort((a, b) => a.game_key.localeCompare(b.game_key));
+    return out;
+  };
+
   const fetchMyHighScores = async () => {
     await init();
     if (!state.client || !state.session?.user) return [];
     const { data, error } = await state.client
-      .from("my_game_high_scores")
-      .select("game_key, high_score, attempts, last_played_at")
-      .order("game_key");
+      .from("game_scores")
+      .select("game_key, score, created_at");
     if (error) {
       showStatus(`Could not load high scores: ${error.message}`, "error");
       return [];
     }
-    return data || [];
+    return aggregateScoresByGame(data || []);
   };
 
   const fetchHighScoreForGame = async (gameKey) => {
     await init();
     if (!state.client || !state.session?.user) return null;
+    const key = normalizeGameKey(gameKey);
     const { data, error } = await state.client
-      .from("my_game_high_scores")
-      .select("game_key, high_score, attempts, last_played_at")
-      .eq("game_key", gameKey)
-      .maybeSingle();
+      .from("game_scores")
+      .select("score, created_at")
+      .eq("game_key", key);
     if (error) {
       showStatus(`Could not load high score: ${error.message}`, "error");
       return null;
     }
-    return data;
+    if (!data?.length) return null;
+    const scores = [];
+    let lastPlayedAt = null;
+    let lastMs = 0;
+    for (const row of data) {
+      const score = Number(row.score);
+      if (Number.isFinite(score)) scores.push(score);
+      if (row.created_at) {
+        const t = new Date(row.created_at).getTime();
+        if (!Number.isNaN(t) && t >= lastMs) {
+          lastMs = t;
+          lastPlayedAt = row.created_at;
+        }
+      }
+    }
+    if (!scores.length) return null;
+    return {
+      game_key: key,
+      high_score: Math.max(...scores),
+      avg_score: scores.reduce((a, b) => a + b, 0) / scores.length,
+      attempts: scores.length,
+      last_played_at: lastPlayedAt
+    };
+  };
+
+  const fetchTotalCompletedTests = async () => {
+    await init();
+    if (!state.client || !state.session?.user) return 0;
+    const { count, error } = await state.client
+      .from("game_scores")
+      .select("id", { count: "exact", head: true });
+    if (error) {
+      showStatus(`Could not load stats: ${error.message}`, "error");
+      return 0;
+    }
+    return count ?? 0;
   };
 
   window.MMAuth = {
@@ -644,9 +718,11 @@
     reportScore,
     fetchMyHighScores,
     fetchHighScoreForGame,
+    fetchTotalCompletedTests,
     startGameSession,
     loginWithPassword,
     signUpWithUsername,
+    signOutAndReload: performLogout,
     gameNameForKey: (key) => GAME_NAMES[normalizeGameKey(key)] || normalizeGameKey(key) || key,
     gameKeyFromPath: () => normalizeGameKey(window.location.pathname),
     getSession: () => state.session,
