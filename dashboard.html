@@ -103,6 +103,24 @@
                 <div id="dashboard-tests-rows"></div>
             </div>
         </div>
+
+        <section id="dashboard-recent-section" class="dashboard-recent-card" hidden>
+            <div class="dashboard-recent-head">
+                <h2 class="dashboard-tests-title">Recent attempts</h2>
+                <p class="dashboard-recent-subtitle">Your last 20 saved scores</p>
+            </div>
+            <div id="dashboard-recent-empty" class="dashboard-recent-empty" hidden>
+                No saved attempts yet. Play a game to see your history here.
+            </div>
+            <div id="dashboard-recent-table-wrap" class="dashboard-recent-table-wrap" hidden>
+                <div class="dashboard-recent-grid dashboard-recent-grid--head">
+                    <div class="dashboard-recent-col dashboard-recent-col--test">Test</div>
+                    <div class="dashboard-recent-col dashboard-recent-col--date">Date</div>
+                    <div class="dashboard-recent-col dashboard-recent-col--score">Score</div>
+                </div>
+                <div id="dashboard-recent-rows"></div>
+            </div>
+        </section>
     </main>
 
     <footer class="footer">
@@ -146,6 +164,60 @@
             ];
 
             const GAME_KEYS = GAMES.map((g) => g.key);
+
+            const GAME_ICONS = {
+                melody1: "music",
+                melody2: "music",
+                melody3: "music",
+                interval1: "git-branch",
+                interval2: "git-branch",
+                harmony1: "layers",
+                harmony2: "layers",
+                harmony3: "layers",
+                tempo1: "timer",
+                tempo2: "timer",
+                pitch1: "mic",
+                rhythm1: "activity"
+            };
+
+            function escapeHtml(str) {
+                return String(str)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;");
+            }
+
+            function formatAttemptDate(iso) {
+                if (!iso) return { line1: "—", line2: "" };
+                const d = new Date(iso);
+                if (Number.isNaN(d.getTime())) return { line1: "—", line2: "" };
+                const months = [
+                    "January",
+                    "February",
+                    "March",
+                    "April",
+                    "May",
+                    "June",
+                    "July",
+                    "August",
+                    "September",
+                    "October",
+                    "November",
+                    "December"
+                ];
+                const line1 = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+                const hh = String(d.getHours()).padStart(2, "0");
+                const mm = String(d.getMinutes()).padStart(2, "0");
+                return { line1, line2: `${hh}:${mm}` };
+            }
+
+            function gamePathByKey(key) {
+                const found = GAMES.find(function (g) {
+                    return g.key === key;
+                });
+                return found ? found.path : "/dashboard";
+            }
 
             const GAME_SCORE_META = {
                 melody1: { kind: "points" },
@@ -279,9 +351,12 @@
             async function refreshDashboard() {
                 const guestEl = document.getElementById("dashboard-summary-guest");
                 const userEl = document.getElementById("dashboard-summary-user");
+                const recentSection = document.getElementById("dashboard-recent-section");
+
                 if (!window.MMAuth) {
                     if (guestEl) guestEl.hidden = false;
                     if (userEl) userEl.hidden = true;
+                    if (recentSection) recentSection.hidden = true;
                     renderRows({}, false);
                     return;
                 }
@@ -292,6 +367,7 @@
                 if (!session || !session.user) {
                     if (guestEl) guestEl.hidden = false;
                     if (userEl) userEl.hidden = true;
+                    if (recentSection) recentSection.hidden = true;
                     renderRows({}, false);
                     return;
                 }
@@ -325,6 +401,84 @@
                 }
 
                 renderRows(byKey, true);
+
+                const recent = await window.MMAuth.fetchRecentGameScores(20);
+                renderRecentAttempts(recent || []);
+            }
+
+            function renderRecentAttempts(recentRows) {
+                const section = document.getElementById("dashboard-recent-section");
+                const host = document.getElementById("dashboard-recent-rows");
+                const emptyEl = document.getElementById("dashboard-recent-empty");
+                const wrap = document.getElementById("dashboard-recent-table-wrap");
+                if (!section || !host || !emptyEl || !wrap) return;
+
+                section.hidden = false;
+
+                if (!recentRows || !recentRows.length) {
+                    emptyEl.hidden = false;
+                    wrap.hidden = true;
+                    host.innerHTML = "";
+                    return;
+                }
+
+                emptyEl.hidden = true;
+                wrap.hidden = false;
+
+                host.innerHTML = recentRows
+                    .map(function (row) {
+                        const meta = GAME_SCORE_META[row.game_key] || { kind: "points" };
+                        const parts = formatScoreParts(Number(row.score), meta);
+                        const title =
+                            window.MMAuth && window.MMAuth.gameNameForKey
+                                ? window.MMAuth.gameNameForKey(row.game_key)
+                                : row.game_key;
+                        const icon = GAME_ICONS[row.game_key] || "circle-dot";
+                        const href = gamePathByKey(row.game_key);
+                        const dateFmt = formatAttemptDate(row.created_at);
+                        const scoreInner = parts
+                            ? '<span class="dashboard-recent-score-num">' +
+                              escapeHtml(parts.main) +
+                              '</span><span class="dashboard-recent-score-suffix">' +
+                              escapeHtml(parts.suffix) +
+                              "</span>"
+                            : row.score_label
+                              ? '<span class="dashboard-recent-score-num">' +
+                                escapeHtml(String(row.score_label)) +
+                                "</span>"
+                              : '<span class="dashboard-recent-score-num">—</span>';
+
+                        return (
+                            '<div class="dashboard-recent-row">' +
+                            '<div class="dashboard-recent-col dashboard-recent-col--test">' +
+                            '<a class="dashboard-recent-test-link" href="' +
+                            escapeHtml(href) +
+                            '">' +
+                            '<i data-lucide="' +
+                            escapeHtml(icon) +
+                            '" class="dashboard-recent-icon" aria-hidden="true"></i>' +
+                            "<span>" +
+                            escapeHtml(title) +
+                            "</span>" +
+                            "</a>" +
+                            "</div>" +
+                            '<div class="dashboard-recent-col dashboard-recent-col--date">' +
+                            '<div class="dashboard-recent-date-line1">' +
+                            escapeHtml(dateFmt.line1) +
+                            "</div>" +
+                            '<div class="dashboard-recent-date-line2">' +
+                            escapeHtml(dateFmt.line2) +
+                            "</div>" +
+                            "</div>" +
+                            '<div class="dashboard-recent-col dashboard-recent-col--score">' +
+                            scoreInner +
+                            "</div>" +
+                            "</div>"
+                        );
+                    })
+                    .join("");
+
+                if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
             }
 
             document.addEventListener("DOMContentLoaded", function () {

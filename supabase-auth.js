@@ -728,12 +728,29 @@
     return count ?? 0;
   };
 
+  const fetchRecentGameScores = async (limit = 20) => {
+    await init();
+    if (!state.client || !state.session?.user) return [];
+    const cap = Math.min(Math.max(1, Number(limit) || 20), 50);
+    const { data, error } = await state.client
+      .from("game_scores")
+      .select("game_key, score, score_label, created_at")
+      .order("created_at", { ascending: false })
+      .limit(cap);
+    if (error) {
+      showStatus(`Could not load recent attempts: ${error.message}`, "error");
+      return [];
+    }
+    return data || [];
+  };
+
   window.MMAuth = {
     init,
     reportScore,
     fetchMyHighScores,
     fetchHighScoreForGame,
     fetchTotalCompletedTests,
+    fetchRecentGameScores,
     startGameSession,
     loginWithPassword,
     signUpWithUsername,
