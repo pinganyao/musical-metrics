@@ -58,6 +58,7 @@
             <p class="leaderboard-lede">
                 All-time best scores per player for the Melody games.
             </p>
+            <p class="leaderboard-meta" id="leaderboard-updated" aria-live="polite"></p>
         </div>
 
         <div class="leaderboard-tabs" role="tablist" aria-label="Melody leaderboard">
@@ -213,6 +214,22 @@
 
             var gameKeys = ["melody1", "melody2", "melody3"];
 
+            function setLastUpdated() {
+                var el = document.getElementById("leaderboard-updated");
+                if (!el) return;
+                var now = new Date();
+                var formatted;
+                try {
+                    formatted = now.toLocaleString(undefined, {
+                        dateStyle: "medium",
+                        timeStyle: "short"
+                    });
+                } catch (e) {
+                    formatted = now.toISOString();
+                }
+                el.textContent = "Last updated " + formatted;
+            }
+
             function renderRows(gameKey, rows) {
                 var body = document.getElementById("leaderboard-body-" + gameKey);
                 var emptyEl = document.getElementById("leaderboard-empty-" + gameKey);
@@ -305,6 +322,7 @@
                 await Promise.all(gameKeys.map(function (k) {
                     return loadGame(k);
                 }));
+                setLastUpdated();
             }
 
             var refreshTimer = null;
