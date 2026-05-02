@@ -908,8 +908,7 @@ html.mm-auth-pending #mm-auth-slot-mobile {
 }
 
 html.mm-auth-pending .dashboard-main > .dashboard-summary-card,
-html.mm-auth-pending .dashboard-main > .dashboard-tests-card,
-html.mm-auth-pending .dashboard-main > .dashboard-recent-card {
+html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
     visibility: hidden;
 }
 
@@ -1060,17 +1059,6 @@ html.mm-auth-pending .dashboard-main > .dashboard-recent-card {
 
 .dashboard-action-button.stats-button.stats-button--disabled:hover {
     background-color: #6b7280;
-}
-
-.dashboard-recent-card {
-    background-color: #171717;
-    border: 1px solid #303030;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    max-width: 56rem;
-    width: 100%;
-    align-self: center;
 }
 
 .dashboard-recent-header .dashboard-recent-subtitle {
