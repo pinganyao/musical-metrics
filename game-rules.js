@@ -144,6 +144,9 @@
 
   enqueueScoreReport();
 
+  window.addEventListener('online', () => enqueueScoreReport());
+  window.addEventListener('mm-try-score-sync', () => enqueueScoreReport());
+
   const rulesDiv = document.querySelector('.rules');
   const titleEl = document.querySelector('.main-content h1');
   const titleText = titleEl ? `${titleEl.textContent.trim()} Rules` : 'Game Rules';
