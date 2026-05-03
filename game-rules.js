@@ -183,17 +183,45 @@
   maybeReportScore();
 
   const continueBtnForSession = document.getElementById('continueBtn');
+  const playAgainBtnForSession = document.getElementById('playAgainBtn');
+  let replayArmed = false;
+  let replaySessionKickoffInFlight = false;
+
+  const beginSecureSession = async () => {
+    const mmAuth = await ensureAuthScript();
+    if (!mmAuth || typeof mmAuth.startGameSession !== 'function') return;
+    const sessionResult = await mmAuth.startGameSession(gameKey);
+    if (sessionResult?.ok && sessionResult.seed != null) {
+      const s = sessionResult.seed;
+      window.mmChallengeSeed = typeof s === 'bigint' ? s.toString() : s;
+    }
+    window.mmVerifyTranscript = [];
+  };
+
   if (continueBtnForSession) {
     continueBtnForSession.addEventListener('click', async () => {
-      const mmAuth = await ensureAuthScript();
-      if (!mmAuth || typeof mmAuth.startGameSession !== 'function') return;
-      const sessionResult = await mmAuth.startGameSession(gameKey);
-      if (sessionResult?.ok && sessionResult.seed != null) {
-        const s = sessionResult.seed;
-        window.mmChallengeSeed = typeof s === 'bigint' ? s.toString() : s;
-      }
-      window.mmVerifyTranscript = [];
+      await beginSecureSession();
     });
+  }
+
+  if (playAgainBtnForSession) {
+    playAgainBtnForSession.addEventListener('click', async (event) => {
+      if (replayArmed) {
+        replayArmed = false;
+        return;
+      }
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (replaySessionKickoffInFlight) return;
+      replaySessionKickoffInFlight = true;
+      try {
+        await beginSecureSession();
+      } finally {
+        replaySessionKickoffInFlight = false;
+      }
+      replayArmed = true;
+      playAgainBtnForSession.click();
+    }, true);
   }
 
   if (window.lucide && typeof window.lucide.createIcons === 'function') {

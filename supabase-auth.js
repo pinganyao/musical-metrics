@@ -19,6 +19,7 @@
     statusTimer: null,
     authMenuOutsideListenerBound: false,
     logoutClickDelegationBound: false,
+    logoutInFlight: null,
     activeGameSessions: {}
   };
 
@@ -46,6 +47,10 @@
 
       const existing = document.querySelector('script[data-mm-supabase-lib="true"]');
       if (existing) {
+        if (window.supabase && typeof window.supabase.createClient === "function") {
+          resolve();
+          return;
+        }
         existing.addEventListener("load", () => resolve(), { once: true });
         existing.addEventListener("error", () => reject(new Error("Supabase library failed to load.")), { once: true });
         return;
@@ -173,23 +178,69 @@
         <div style="padding:8px 10px;color:rgba(255,255,255,0.72);font-size:12px;word-break:break-word;">${usernameOrEmail}</div>
         <button type="button" id="mm-auth-profile-button" style="width:100%;text-align:left;border:0;background:none;color:#fff;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:14px;">Profile</button>
         <button type="button" id="mm-auth-settings-button" style="width:100%;text-align:left;border:0;background:none;color:#fff;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:14px;">Settings</button>
-        <button type="button" id="mm-auth-signout-button" style="width:100%;text-align:left;border:0;background:none;color:#fff;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:14px;">Sign out</button>
+        <a href="/signout" id="mm-auth-signout-button" style="display:block;width:100%;text-align:left;border:0;background:none;color:#fff;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:14px;text-decoration:none;">Sign out</a>
       </div>
     </div>
   `;
 
-  const performLogout = async () => {
-    await init();
-    if (!state.client) {
-      window.location.reload();
-      return;
+  const clearStoredAuthTokens = () => {
+    const clearFromStorage = (storageObj) => {
+      if (!storageObj) return;
+      try {
+        storageObj.removeItem(SUPABASE_AUTH_STORAGE_KEY);
+        const toDelete = [];
+        for (let i = 0; i < storageObj.length; i += 1) {
+          const key = storageObj.key(i);
+          if (!key) continue;
+          if (/^sb-.*-auth-token$/.test(key)) {
+            toDelete.push(key);
+          }
+        }
+        toDelete.forEach((key) => storageObj.removeItem(key));
+      } catch (_) {
+        /* noop */
+      }
+    };
+    clearFromStorage(window.localStorage);
+    clearFromStorage(window.sessionStorage);
+  };
+
+  const performLogout = async (options = {}) => {
+    const redirectTo = typeof options.redirectTo === "string" && options.redirectTo ? options.redirectTo : null;
+    if (state.logoutInFlight) return state.logoutInFlight;
+
+    state.logoutInFlight = (async () => {
+      await init();
+      if (state.client) {
+        const { error } = await state.client.auth.signOut();
+        if (error) {
+          showStatus(error.message, "error");
+        }
+      }
+
+      clearStoredAuthTokens();
+      state.session = null;
+      state.profile = null;
+      ensureAuthNav();
+      updateAuthUi();
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("mm-auth-changed"));
+      }
+
+      if (redirectTo) {
+        window.location.assign(redirectTo);
+      } else {
+        window.location.reload();
+      }
+
+      return { ok: true };
+    })();
+
+    try {
+      return await state.logoutInFlight;
+    } finally {
+      state.logoutInFlight = null;
     }
-    const { error } = await state.client.auth.signOut();
-    if (error) {
-      showStatus(error.message, "error");
-      return;
-    }
-    window.location.reload();
   };
 
   const bindLogoutClickDelegation = () => {
@@ -210,7 +261,7 @@
         const trigger = document.getElementById("mm-auth-menu-trigger");
         if (menu) menu.style.display = "none";
         if (trigger) trigger.setAttribute("aria-expanded", "false");
-        await performLogout();
+        window.location.assign("/signout");
       },
       true
     );
@@ -300,7 +351,7 @@
         mobileSlot.innerHTML = [
           '<button type="button" id="mm-auth-profile-button-mobile" class="mobile-menu-link" style="border:0;background:none;cursor:pointer;text-align:left;">PROFILE</button>',
           '<button type="button" id="mm-auth-settings-button-mobile" class="mobile-menu-link" style="border:0;background:none;cursor:pointer;text-align:left;">SETTINGS</button>',
-          '<button type="button" id="mm-auth-logout-button-mobile" class="mobile-menu-link" style="border:0;background:none;cursor:pointer;text-align:left;">SIGN OUT</button>'
+          '<a href="/signout" id="mm-auth-logout-button-mobile" class="mobile-menu-link" style="border:0;background:none;cursor:pointer;text-align:left;">SIGN OUT</a>'
         ].join("");
         document.getElementById("mm-auth-profile-button-mobile")?.addEventListener("click", () => {
           showStatus("Profile page is coming soon.", "info");
@@ -626,16 +677,6 @@
       return { saved: false, reason: "invalid_game_key" };
     }
 
-    const gameSession = state.activeGameSessions[normalizedGameKey];
-    if (!gameSession?.id) {
-      return { saved: false, reason: "missing_game_session" };
-    }
-
-    const durationSeconds = Math.max(
-      0,
-      Math.floor((Date.now() - gameSession.startedAtMs) / 1000)
-    );
-
     let countryCode = null;
     try {
       const geoRes = await fetch("/api/geo");
@@ -649,6 +690,35 @@
     } catch (_) {
       /* geo optional */
     }
+
+    const fallbackSave = async () => {
+      const { error } = await state.client.rpc("submit_game_score_display", {
+        p_game_key: normalizedGameKey,
+        p_score: numericScore,
+        p_score_label: scoreLabel || String(scoreValue),
+        p_country_code: countryCode
+      });
+      if (error) {
+        return { saved: false, error };
+      }
+      showStatus("Score saved.", "success");
+      return { saved: true, method: "display_fallback" };
+    };
+
+    const gameSession = state.activeGameSessions[normalizedGameKey];
+    if (!gameSession?.id) {
+      const fallback = await fallbackSave();
+      if (fallback.saved) {
+        return fallback;
+      }
+      showStatus(`Score save failed: ${fallback.error.message}`, "error");
+      return { saved: false, reason: "missing_game_session", error: fallback.error };
+    }
+
+    const durationSeconds = Math.max(
+      0,
+      Math.floor((Date.now() - gameSession.startedAtMs) / 1000)
+    );
 
     const rpcArgs = {
       p_session_id: gameSession.id,
@@ -669,6 +739,11 @@
 
     const { error } = await state.client.rpc("submit_game_score", rpcArgs);
     if (error) {
+      const fallback = await fallbackSave();
+      delete state.activeGameSessions[normalizedGameKey];
+      if (fallback.saved) {
+        return { saved: true, method: "verified_fallback", primaryError: error };
+      }
       showStatus(`Score save failed: ${error.message}`, "error");
       return { saved: false, reason: "insert_failed", error };
     }

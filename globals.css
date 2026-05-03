@@ -859,11 +859,13 @@ html {
 
 .dashboard-summary-signout {
     flex-shrink: 0;
+    display: inline-block;
     padding: 0.5rem 1rem;
     border-radius: 0.375rem;
     border: 1px solid #4b5563;
     background: #374151;
     color: #fff;
+    text-decoration: none;
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;

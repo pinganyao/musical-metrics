@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="mm-auth-boot.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Signing Out | Musical Metrics</title>
+  <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg?v=2">
+  <link rel="icon" type="image/png" href="assets/images/logo.png?v=2">
+  <link rel="apple-touch-icon" href="assets/images/logo.png?v=2">
+  <link rel="stylesheet" href="globals.css">
+  <style>
+    .signout-main {
+      min-height: calc(100vh - 220px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .signout-card {
+      width: min(520px, 100%);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(12, 14, 26, 0.9);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      padding: 22px;
+      text-align: center;
+      color: #fff;
+    }
+    .signout-subtitle {
+      margin: 8px 0 0;
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <main class="signout-main">
+    <section class="signout-card">
+      <h1>Signing you out...</h1>
+      <p class="signout-subtitle">Please wait a moment.</p>
+    </section>
+  </main>
+
+  <script defer src="supabase-auth.js"></script>
+  <script>
+    (function () {
+      const goHome = () => {
+        window.location.replace("/");
+      };
+
+      const signOut = async () => {
+        try {
+          if (!window.MMAuth || typeof window.MMAuth.signOutAndReload !== "function") {
+            goHome();
+            return;
+          }
+          await window.MMAuth.signOutAndReload({ redirectTo: "/" });
+        } catch (_) {
+          goHome();
+        }
+      };
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", signOut, { once: true });
+      } else {
+        signOut();
+      }
+    })();
+  </script>
+</body>
+</html>
