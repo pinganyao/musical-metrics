@@ -200,7 +200,9 @@
       async (event) => {
         const t = event.target;
         if (!(t instanceof Element)) return;
-        const signOutEl = t.closest("#mm-auth-signout-button, #mm-auth-logout-button-mobile");
+        const signOutEl = t.closest(
+          "#mm-auth-signout-button, #mm-auth-logout-button-mobile, #dashboard-sign-out"
+        );
         if (!signOutEl) return;
         event.preventDefault();
         event.stopPropagation();

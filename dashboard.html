@@ -508,12 +508,6 @@
                     });
                 }
 
-                document.getElementById("dashboard-sign-out")?.addEventListener("click", function () {
-                    if (window.MMAuth && window.MMAuth.signOutAndReload) {
-                        window.MMAuth.signOutAndReload();
-                    }
-                });
-
                 refreshDashboard();
             });
 
