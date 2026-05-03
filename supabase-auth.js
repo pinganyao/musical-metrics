@@ -792,7 +792,7 @@
   };
 
   /** Verified session create + score-submit RPC deadline (display fallback shares submit cap). */
-  const RPC_CREATE_SESSION_TIMEOUT_MS = 20000;
+  const RPC_CREATE_SESSION_TIMEOUT_MS = 30000;
   const SUBMIT_SCORE_RPC_MS = 28000;
 
   const reportScore = async (gameKey, scoreValue, scoreLabel, extras = {}) => {
@@ -1107,22 +1107,43 @@
     let entry = state.activeGameSessions[k];
     if (entry?.id && entry.seed != null && entry.seed !== "") return true;
 
-    if (entry?.id && state.client) {
+    const hydrateSeedForEntry = async (candidate) => {
+      if (!candidate?.id || !state.client) return false;
       const { data: row, error: rowErr } = await state.client
         .from("game_sessions")
         .select("challenge_seed")
-        .eq("id", entry.id)
+        .eq("id", candidate.id)
         .maybeSingle();
-      if (!rowErr && row && row.challenge_seed != null) {
-        const raw = row.challenge_seed;
-        const seedStr = typeof raw === "bigint" ? raw.toString() : raw;
-        state.activeGameSessions[k] = {
-          id: entry.id,
-          startedAtMs: typeof entry.startedAtMs === "number" ? entry.startedAtMs : Date.now(),
-          seed: seedStr
-        };
-        persistActiveSessions();
-        window.mmChallengeSeed = seedStr;
+      if (rowErr || !row || row.challenge_seed == null) return false;
+      const raw = row.challenge_seed;
+      const seedStr = typeof raw === "bigint" ? raw.toString() : raw;
+      state.activeGameSessions[k] = {
+        id: candidate.id,
+        startedAtMs: typeof candidate.startedAtMs === "number" ? candidate.startedAtMs : Date.now(),
+        seed: seedStr
+      };
+      persistActiveSessions();
+      window.mmChallengeSeed = seedStr;
+      return true;
+    };
+
+    if (await hydrateSeedForEntry(entry)) return true;
+
+    // A timed-out beginVerifiedSession can leave Continue blocked even though a retry would succeed.
+    // Self-heal by recreating/refreshing the secure session in-place.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const retry = await startGameSessionWithTimeout(k);
+      if (!retry?.ok) {
+        if (retry?.reason === "not_authenticated") break;
+        continue;
+      }
+      const retryEntry = state.activeGameSessions[k];
+      if (retry.seed != null && retry.seed !== "") {
+        const s = typeof retry.seed === "bigint" ? retry.seed.toString() : retry.seed;
+        window.mmChallengeSeed = s;
+        return true;
+      }
+      if (await hydrateSeedForEntry(retryEntry)) {
         return true;
       }
     }
