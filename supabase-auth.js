@@ -216,7 +216,7 @@
       }
 
       const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js";
+      script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.js";
       script.defer = true;
       script.dataset.mmSupabaseLib = "true";
       script.addEventListener("load", () => resolve(), { once: true });
@@ -645,6 +645,10 @@
         bindScorePersistenceHooks();
         void flushPendingScoreSubmits();
       } catch (_err) {
+        showStatus(
+          "Could not connect to the account service. Check your connection and refresh the page.",
+          "error"
+        );
         ensureAuthNav();
         updateAuthUi();
       } finally {

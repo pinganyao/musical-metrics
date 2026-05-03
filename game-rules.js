@@ -55,14 +55,9 @@
   let wasGameOverVisible = false;
   let scoreReportedForCurrentGameOver = false;
   let scoreReportTail = Promise.resolve();
+  let scoreSubmitInFlight = false;
 
-  const isVisible = (element) => {
-    if (!element) return false;
-    const styles = window.getComputedStyle(element);
-    return styles.display !== 'none' && styles.visibility !== 'hidden' && styles.opacity !== '0';
-  };
-
-  /** Game-over panel: do not treat opacity animation as “hidden” or we never submit scores. */
+  /** Used only for the MutationObserver fallback path (not for mm-game-over). */
   const isGameOverPanelShown = (element) => {
     if (!element) return false;
     if (typeof element.checkVisibility === 'function') {
@@ -79,9 +74,6 @@
     return styles.display !== 'none' && styles.visibility !== 'hidden';
   };
 
-  /** Games dispatch mm-game-over when the round ends — trust it even if visibility checks lag one frame. */
-  let gameOverJustSignaled = false;
-
   const parseScore = (scoreText) => {
     const match = scoreText.match(/-?\d+(\.\d+)?/);
     if (!match) return null;
@@ -89,28 +81,8 @@
     return Number.isFinite(value) ? value : null;
   };
 
-  const runMaybeReportScore = async () => {
-    if (!scoreEl || !gameOverEl || !gameKey) return;
-
-    const fromGameOverEvent = gameOverJustSignaled;
-    gameOverJustSignaled = false;
-
-    const isGameOverVisible =
-      isGameOverPanelShown(gameOverEl) || fromGameOverEvent;
-
-    if (isGameOverVisible && !wasGameOverVisible) {
-      scoreReportedForCurrentGameOver = false;
-    }
-    wasGameOverVisible = isGameOverVisible;
-
-    if (!isGameOverVisible || scoreReportedForCurrentGameOver) return;
-
-    const scoreText = scoreEl.textContent ? scoreEl.textContent.trim() : '';
-    const scoreValue = parseScore(scoreText);
-    if (scoreValue === null) return;
-
+  const buildExtras = () => {
     const melodyGames = ['melody1', 'melody2', 'melody3'];
-    /** Games whose server score uses verifyTranscript (must snapshot even when empty for consistent RPC args). */
     const verifyTranscriptGames = [
       'harmony1',
       'harmony2',
@@ -132,12 +104,30 @@
         ? window.mmVerifyTranscript.slice()
         : [];
     }
+    return extras;
+  };
+
+  /** Shared RPC path — visibility is handled by callers. */
+  const reportScoreNow = async () => {
+    if (!scoreEl || !gameKey) return;
+    if (scoreSubmitInFlight) return;
+    scoreSubmitInFlight = true;
+
+    const scoreText = scoreEl.textContent ? scoreEl.textContent.trim() : '';
+    const scoreValue = parseScore(scoreText);
+    if (scoreValue === null) {
+      scoreSubmitInFlight = false;
+      return;
+    }
+
+    const extras = buildExtras();
 
     const mmAuth = await ensureAuthScript();
     if (!mmAuth || typeof mmAuth.reportScore !== 'function') {
       showScoreSaveFailed(
         'Score not saved: account module did not load in time. Refresh the page and play once more.'
       );
+      scoreSubmitInFlight = false;
       return;
     }
 
@@ -160,7 +150,37 @@
       showScoreSaveFailed(
         `Score not saved: ${e && e.message ? e.message : 'network or server error'}. Try again.`
       );
+    } finally {
+      scoreSubmitInFlight = false;
     }
+  };
+
+  /**
+   * Primary path: every game dispatches `mm-game-over` when the round ends.
+   * Run after layout so `#finalScore` is committed; do not rely on MutationObserver order or checkVisibility.
+   */
+  const submitScoreAfterGameOverEvent = async () => {
+    if (!scoreEl || !gameKey) return;
+    await new Promise((r) => requestAnimationFrame(r));
+    await new Promise((r) => requestAnimationFrame(r));
+    if (scoreReportedForCurrentGameOver) return;
+    await reportScoreNow();
+  };
+
+  /** Fallback when observers fire without relying on the custom event. */
+  const runMaybeReportScore = async () => {
+    if (!scoreEl || !gameOverEl || !gameKey) return;
+
+    const isGameOverVisible = isGameOverPanelShown(gameOverEl);
+
+    if (isGameOverVisible && !wasGameOverVisible) {
+      scoreReportedForCurrentGameOver = false;
+    }
+    wasGameOverVisible = isGameOverVisible;
+
+    if (!isGameOverVisible || scoreReportedForCurrentGameOver) return;
+
+    await reportScoreNow();
   };
 
   const enqueueScoreReport = () => {
@@ -187,8 +207,7 @@
   window.addEventListener('online', () => enqueueScoreReport());
   window.addEventListener('mm-try-score-sync', () => enqueueScoreReport());
   window.addEventListener('mm-game-over', () => {
-    gameOverJustSignaled = true;
-    enqueueScoreReport();
+    void submitScoreAfterGameOverEvent();
   });
   window.addEventListener('mm-auth-changed', () => enqueueScoreReport());
 
