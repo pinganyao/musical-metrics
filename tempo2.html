@@ -293,6 +293,7 @@
         homeBtn.style.display = 'block';
         tapContainer.style.display = 'none';
         roundCounter.style.display = 'none';
+        window.dispatchEvent(new CustomEvent('mm-game-over'));
       } else {
         setTimeout(() => {
           playMetronome();
@@ -325,6 +326,7 @@
       readyDisplay.style.display = 'none';
       roundCounter.style.display = 'none';
       beatIndicator.style.display = 'none';
+      window.mmVerifyTranscript = [];
     }
 
     window.addEventListener('load', startGame);

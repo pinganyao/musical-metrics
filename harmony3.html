@@ -357,6 +357,7 @@
                         gameOverDiv.style.display = 'block';
                         playAgainBtn.style.display = 'block';
                         homeBtn.style.display = 'block';
+                        window.dispatchEvent(new CustomEvent('mm-game-over'));
                     } else {
                         playChord();
                     }
@@ -399,6 +400,7 @@
                         gameOverDiv.style.display = 'block';
                         playAgainBtn.style.display = 'block';
                         homeBtn.style.display = 'block';
+                        window.dispatchEvent(new CustomEvent('mm-game-over'));
                     } else {
                         playChord();
                     }
@@ -432,6 +434,7 @@
             continueBtn.style.display = 'block';
             buttonsContainer.style.display = 'none';
             roundCounter.style.display = 'none';
+            window.mmVerifyTranscript = [];
         }
 
         window.addEventListener('load', startGame);

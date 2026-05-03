@@ -244,6 +244,7 @@
         gameOverDiv.style.display = 'block';
         playAgainBtn.style.display = 'block';
         homeBtn.style.display = 'block';
+        window.dispatchEvent(new CustomEvent('mm-game-over'));
       }
     }
 

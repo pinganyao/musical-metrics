@@ -341,6 +341,7 @@
         homeBtn.style.display = 'block';
         tapContainer.style.display = 'none';
         roundCounter.style.display = 'none';
+        window.dispatchEvent(new CustomEvent('mm-game-over'));
       } else {
         setTimeout(() => {
           playPattern();
@@ -355,6 +356,7 @@
       gameActive = true;
       gameOver = false;
       currentPattern = null;
+      window.mmVerifyTranscript = [];
 
       rulesDiv.style.display = 'block';
       gameOverDiv.style.display = 'none';

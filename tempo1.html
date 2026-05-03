@@ -227,6 +227,7 @@
         homeBtn.style.display = 'block';
         inputContainer.style.display = 'none';
         roundCounter.style.display = 'none';
+        window.dispatchEvent(new CustomEvent('mm-game-over'));
       } else {
         playMetronome();
       }
@@ -246,6 +247,7 @@
 
       bpmInput.value = '';
       errorMessage.style.display = 'none';
+      window.mmVerifyTranscript = [];
 
       rulesDiv.style.display = 'block';
       playAgainBtn.style.display = 'none';

@@ -347,6 +347,7 @@
         roundCounter.style.display = 'none';
         noteDisplay.style.display = 'none';
         noteDisplay.classList.remove('show', 'playing');
+        window.dispatchEvent(new CustomEvent('mm-game-over'));
       } else {
         startRound();
       }
@@ -364,6 +365,7 @@
 
       centsInput.value = '';
       errorMessage.style.display = 'none';
+      window.mmVerifyTranscript = [];
 
       rulesDiv.style.display = 'block';
       playAgainBtn.style.display = 'none';

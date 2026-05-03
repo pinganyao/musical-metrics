@@ -85,18 +85,27 @@
     if (scoreValue === null) return;
 
     const melodyGames = ['melody1', 'melody2', 'melody3'];
-    const harmonyGames = ['harmony1', 'harmony2', 'harmony3'];
+    /** Games whose server score uses verifyTranscript (must snapshot even when empty for consistent RPC args). */
+    const verifyTranscriptGames = [
+      'harmony1',
+      'harmony2',
+      'harmony3',
+      'interval1',
+      'interval2',
+      'tempo1',
+      'tempo2',
+      'pitch1',
+      'rhythm1'
+    ];
     const extras = {};
     if (melodyGames.includes(gameKey)) {
       extras.melodyTranscript = Array.isArray(window.mmMelodyTranscript)
         ? window.mmMelodyTranscript.slice()
         : [];
-    } else if (harmonyGames.includes(gameKey)) {
+    } else if (verifyTranscriptGames.includes(gameKey)) {
       extras.verifyTranscript = Array.isArray(window.mmVerifyTranscript)
         ? window.mmVerifyTranscript.slice()
         : [];
-    } else if (Array.isArray(window.mmVerifyTranscript) && window.mmVerifyTranscript.length > 0) {
-      extras.verifyTranscript = window.mmVerifyTranscript.slice();
     }
 
     const mmAuth = await ensureAuthScript();
@@ -109,7 +118,13 @@
 
     try {
       let result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
-      if (result && !result.saved && result.reason === 'insert_failed') {
+      if (
+        result &&
+        !result.saved &&
+        (result.reason === 'insert_failed' ||
+          result.reason === 'display_failed' ||
+          result.reason === 'client_unavailable')
+      ) {
         await new Promise((r) => setTimeout(r, 700));
         result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
       }
@@ -146,6 +161,7 @@
 
   window.addEventListener('online', () => enqueueScoreReport());
   window.addEventListener('mm-try-score-sync', () => enqueueScoreReport());
+  window.addEventListener('mm-game-over', () => enqueueScoreReport());
 
   const rulesDiv = document.querySelector('.rules');
   const titleEl = document.querySelector('.main-content h1');
