@@ -6,9 +6,7 @@
   };
 
   const SUPABASE_URL = "https://akjqnoftnvnbzycsdipl.supabase.co";
-  /** Legacy anon (JWT) — use with supabase-js for reliable Auth + PostgREST `apikey` headers. Publishable `sb_*` keys have seen refresh/token requests without `apikey` on some CDN bundles. */
-  const SUPABASE_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFranFub2Z0bnZuYnp5Y3NkaXBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NzI3NjAsImV4cCI6MjA5MzE0ODc2MH0.ADcqC3yXUJfT1wLkk6Ez2f4bblTHhqqvtObFMnIroQE";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_stGW2I7dATan2pWJLFs55g_vIX8b-pZ";
   const REMEMBER_ME_KEY = "mm_remember_me";
   const SUPABASE_AUTH_STORAGE_KEY = "sb-akjqnoftnvnbzycsdipl-auth-token";
 
@@ -22,168 +20,6 @@
     authMenuOutsideListenerBound: false,
     logoutClickDelegationBound: false,
     activeGameSessions: {}
-  };
-
-  const ACTIVE_SESSIONS_KEY = "mm_active_sessions_v1";
-  const PENDING_SCORES_KEY = "mm_pending_score_submits_v1";
-
-  const persistActiveSessions = () => {
-    try {
-      sessionStorage.setItem(ACTIVE_SESSIONS_KEY, JSON.stringify(state.activeGameSessions));
-    } catch (_) {}
-  };
-
-  /** Recover session ids after reload / memory loss so submit_game_score can still run. */
-  const hydrateActiveSessions = () => {
-    try {
-      const raw = sessionStorage.getItem(ACTIVE_SESSIONS_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object") return;
-      for (const [k, v] of Object.entries(parsed)) {
-        if (!v || typeof v !== "object" || !v.id) continue;
-        const cur = state.activeGameSessions[k];
-        if (!cur?.id) {
-          state.activeGameSessions[k] = {
-            id: v.id,
-            startedAtMs: typeof v.startedAtMs === "number" ? v.startedAtMs : Date.now(),
-            seed: v.seed ?? null
-          };
-        }
-      }
-    } catch (_) {}
-  };
-
-  const clearScorePersistence = () => {
-    try {
-      sessionStorage.removeItem(ACTIVE_SESSIONS_KEY);
-      localStorage.removeItem(PENDING_SCORES_KEY);
-    } catch (_) {}
-    state.activeGameSessions = {};
-  };
-
-  const rpcErrorRetryable = (error) => {
-    const msg = ((error && error.message) || "").toLowerCase();
-    if (!msg) return true;
-    if (
-      /invalid transcript|session not found|already used|expired|authentication required|too quickly|does not exist|could not find the function|unknown api/i.test(
-        msg
-      )
-    )
-      return false;
-    if (/network|fetch|timeout|failed to fetch|502|503|504|429/i.test(msg)) return true;
-    return true;
-  };
-
-  const enqueuePendingScoreSubmit = (gameKey, entry) => {
-    try {
-      const raw = localStorage.getItem(PENDING_SCORES_KEY);
-      const queue = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(queue)) return;
-      const id =
-        typeof crypto !== "undefined" && crypto.randomUUID
-          ? crypto.randomUUID()
-          : `ps_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-      const kind = entry && entry.kind === "display" ? "display" : "verified";
-      queue.push({
-        id,
-        gameKey,
-        createdAt: Date.now(),
-        attempts: 0,
-        kind,
-        rpc: entry && entry.rpc ? entry.rpc : null,
-        display: entry && entry.display ? entry.display : null
-      });
-      localStorage.setItem(PENDING_SCORES_KEY, JSON.stringify(queue));
-    } catch (_) {}
-  };
-
-  const flushPendingScoreSubmits = async () => {
-    await init();
-    hydrateActiveSessions();
-    if (!state.client || !state.session?.user) return;
-    let raw;
-    try {
-      raw = localStorage.getItem(PENDING_SCORES_KEY);
-    } catch (_) {
-      return;
-    }
-    if (!raw) return;
-    let queue;
-    try {
-      queue = JSON.parse(raw);
-    } catch (_) {
-      localStorage.removeItem(PENDING_SCORES_KEY);
-      return;
-    }
-    if (!Array.isArray(queue) || !queue.length) return;
-
-    const kept = [];
-    let savedAny = false;
-    for (const item of queue) {
-      if (!item) continue;
-      let error = null;
-      if (item.kind === "display" && item.display) {
-        const res = await state.client.rpc("submit_game_score_display", item.display);
-        error = res.error;
-      } else if (item.rpc) {
-        const res = await state.client.rpc("submit_game_score", item.rpc);
-        error = res.error;
-      } else {
-        continue;
-      }
-      if (!error) {
-        savedAny = true;
-        const gk = item.gameKey;
-        if (gk && state.activeGameSessions[gk]) {
-          delete state.activeGameSessions[gk];
-          persistActiveSessions();
-        }
-        continue;
-      }
-      const msg = ((error && error.message) || "").toLowerCase();
-      if (
-        item.kind === "display" &&
-        /authentication required|invalid score|invalid game key/i.test(msg)
-      ) {
-        continue;
-      }
-      if (
-        item.kind !== "display" &&
-        /session not found|expired|already used|invalid transcript|authentication required/i.test(msg)
-      ) {
-        continue;
-      }
-      item.attempts = (item.attempts || 0) + 1;
-      if (item.attempts < 80) kept.push(item);
-    }
-    try {
-      if (kept.length) localStorage.setItem(PENDING_SCORES_KEY, JSON.stringify(kept));
-      else localStorage.removeItem(PENDING_SCORES_KEY);
-    } catch (_) {}
-    if (savedAny) {
-      showStatus("Score saved.", "success");
-    }
-  };
-
-  let persistenceHooksBound = false;
-  const bindScorePersistenceHooks = () => {
-    if (persistenceHooksBound || typeof window === "undefined") return;
-    persistenceHooksBound = true;
-    const onReconnect = () => {
-      dismissTransientConnectionStatus();
-      void flushPendingScoreSubmits();
-      try {
-        window.dispatchEvent(new CustomEvent("mm-try-score-sync"));
-      } catch (_) {}
-    };
-    window.addEventListener("online", onReconnect);
-    if (typeof document !== "undefined") {
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") onReconnect();
-      });
-    }
-    window.setInterval(() => void flushPendingScoreSubmits(), 45000);
   };
 
   const GAME_NAMES = {
@@ -216,7 +52,7 @@
       }
 
       const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.js";
+      script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
       script.defer = true;
       script.dataset.mmSupabaseLib = "true";
       script.addEventListener("load", () => resolve(), { once: true });
@@ -297,25 +133,6 @@
     }, 3500);
   };
 
-  /** Clears connection-delay toasts that otherwise linger after Wi‑Fi returns (timer auto-hide is unreliable when tabs throttle timeouts). */
-  const dismissTransientConnectionStatus = () => {
-    const inlineStatus = document.getElementById("mm-inline-status");
-    const bar = document.getElementById("mm-status-bar");
-    const inlineVisible = inlineStatus && inlineStatus.style.display !== "none";
-    const barVisible = bar && bar.style.display !== "none";
-    const text = (
-      (inlineVisible && inlineStatus.textContent) ||
-      (barVisible && bar.textContent) ||
-      ""
-    ).trim();
-    if (!text) return;
-    if (!/^(Still connecting|Waiting for network)/i.test(text)) return;
-    if (state.statusTimer) clearTimeout(state.statusTimer);
-    state.statusTimer = null;
-    if (inlineStatus) inlineStatus.style.display = "none";
-    if (bar) bar.style.display = "none";
-  };
-
   const normalizeUsername = (value) => (value || "").trim();
 
   const isValidUsername = (username) => /^[a-zA-Z0-9_]{3,24}$/.test(username);
@@ -363,7 +180,6 @@
 
   const performLogout = async () => {
     await init();
-    clearScorePersistence();
     if (!state.client) {
       window.location.reload();
       return;
@@ -608,7 +424,7 @@
           return;
         }
 
-        state.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        state.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
           auth: {
             persistSession: true,
             autoRefreshToken: true,
@@ -641,14 +457,7 @@
         });
 
         state.initialized = true;
-        hydrateActiveSessions();
-        bindScorePersistenceHooks();
-        void flushPendingScoreSubmits();
       } catch (_err) {
-        showStatus(
-          "Could not connect to the account service. Check your connection and refresh the page.",
-          "error"
-        );
         ensureAuthNav();
         updateAuthUi();
       } finally {
@@ -797,28 +606,9 @@
     return { ok: true };
   };
 
-  /** Verified session create + score-submit RPC deadline (display fallback shares submit cap). */
-  const RPC_CREATE_SESSION_TIMEOUT_MS = 30000;
-  const SUBMIT_SCORE_RPC_MS = 28000;
-
   const reportScore = async (gameKey, scoreValue, scoreLabel, extras = {}) => {
     await init();
-    hydrateActiveSessions();
-
-    if (!state.client) {
-      showStatus("Score not saved: app did not finish loading. Refresh and try again.", "error");
-      return { saved: false, reason: "client_unavailable" };
-    }
-
-    try {
-      const refreshed = await state.client.auth.getSession();
-      if (refreshed?.data?.session) state.session = refreshed.data.session;
-    } catch (_) {}
-
-    try {
-      await state.client.auth.refreshSession();
-    } catch (_) {}
-
+    if (!state.client) return { saved: false, reason: "client_unavailable" };
     if (!state.session?.user) {
       showStatus("Log in to save your score.", "info");
       return { saved: false, reason: "not_authenticated" };
@@ -826,29 +616,23 @@
 
     const numericScore = Number(scoreValue);
     if (!Number.isFinite(numericScore)) {
-      showStatus("Score not saved: could not read the score from the page.", "error");
       return { saved: false, reason: "invalid_score" };
     }
 
     const normalizedGameKey = normalizeGameKey(gameKey);
     if (!normalizedGameKey) {
-      showStatus("Score not saved: unknown game. Refresh and try again.", "error");
       return { saved: false, reason: "invalid_game_key" };
     }
 
-    hydrateActiveSessions();
-    let gameSession = state.activeGameSessions[normalizedGameKey];
+    const gameSession = state.activeGameSessions[normalizedGameKey];
     if (!gameSession?.id) {
-      hydrateActiveSessions();
-      gameSession = state.activeGameSessions[normalizedGameKey];
+      return { saved: false, reason: "missing_game_session" };
     }
 
-    let durationSeconds = 1;
-    if (gameSession?.startedAtMs != null && Number.isFinite(gameSession.startedAtMs)) {
-      durationSeconds = Math.floor((Date.now() - gameSession.startedAtMs) / 1000);
-      if (!Number.isFinite(durationSeconds)) durationSeconds = 1;
-      durationSeconds = Math.min(7200, Math.max(1, durationSeconds));
-    }
+    const durationSeconds = Math.max(
+      0,
+      Math.floor((Date.now() - gameSession.startedAtMs) / 1000)
+    );
 
     let countryCode = null;
     try {
@@ -864,109 +648,32 @@
       /* geo optional */
     }
 
-    const displayPayload = {
-      p_game_key: normalizedGameKey,
+    const rpcArgs = {
+      p_session_id: gameSession.id,
       p_score: numericScore,
       p_score_label: scoreLabel || String(scoreValue),
+      p_duration_seconds: durationSeconds,
       p_country_code: countryCode
     };
-
-    const submitDisplayOnce = () =>
-      Promise.race([
-        state.client.rpc("submit_game_score_display", displayPayload),
-        new Promise((resolve) =>
-          window.setTimeout(
-            () => resolve({ error: { message: "Score submit timed out." } }),
-            SUBMIT_SCORE_RPC_MS
-          )
-        )
-      ]);
-
-    showStatus("Saving score…", "info");
-
-    let lastError = null;
-
-    if (gameSession?.id) {
-      const rpcArgs = {
-        p_session_id: gameSession.id,
-        p_score: numericScore,
-        p_score_label: scoreLabel || String(scoreValue),
-        p_duration_seconds: durationSeconds,
-        p_country_code: countryCode
-      };
-      if (Array.isArray(extras.verifyTranscript)) {
-        rpcArgs.p_verify_transcript = extras.verifyTranscript;
-      }
-      if (
-        ["melody1", "melody2", "melody3"].includes(normalizedGameKey) &&
-        Array.isArray(extras.melodyTranscript)
-      ) {
-        rpcArgs.p_melody_transcript = extras.melodyTranscript;
-      }
-
-      for (let attempt = 0; attempt < 20; attempt++) {
-        if (attempt > 0) {
-          const delayMs = Math.min(400 + attempt * 280, 6500);
-          await new Promise((r) => setTimeout(r, delayMs));
-        }
-
-        const { error } = await Promise.race([
-          state.client.rpc("submit_game_score", rpcArgs),
-          new Promise((resolve) =>
-            window.setTimeout(
-              () => resolve({ error: { message: "Score submit timed out." } }),
-              SUBMIT_SCORE_RPC_MS
-            )
-          )
-        ]);
-
-        if (!error) {
-          delete state.activeGameSessions[normalizedGameKey];
-          persistActiveSessions();
-          showStatus("Score saved.", "success");
-          void flushPendingScoreSubmits();
-          return { saved: true };
-        }
-
-        lastError = error;
-        if (!rpcErrorRetryable(error)) {
-          break;
-        }
-      }
+    if (Array.isArray(extras.verifyTranscript)) {
+      rpcArgs.p_verify_transcript = extras.verifyTranscript;
+    }
+    if (
+      ["melody1", "melody2", "melody3"].includes(normalizedGameKey) &&
+      Array.isArray(extras.melodyTranscript)
+    ) {
+      rpcArgs.p_melody_transcript = extras.melodyTranscript;
     }
 
-    for (let attempt = 0; attempt < 15; attempt++) {
-      if (attempt > 0) {
-        const delayMs = Math.min(350 + attempt * 240, 5000);
-        await new Promise((r) => setTimeout(r, delayMs));
-      }
-
-      const { error } = await submitDisplayOnce();
-
-      if (!error) {
-        delete state.activeGameSessions[normalizedGameKey];
-        persistActiveSessions();
-        showStatus("Score saved.", "success");
-        void flushPendingScoreSubmits();
-        return { saved: true, viaDisplayFallback: true };
-      }
-
-      lastError = error;
-      if (!rpcErrorRetryable(error)) {
-        enqueuePendingScoreSubmit(normalizedGameKey, { kind: "display", display: displayPayload });
-        showStatus(`Score save failed: ${error.message}`, "error");
-        void flushPendingScoreSubmits();
-        return { saved: false, reason: "display_failed", error };
-      }
+    const { error } = await state.client.rpc("submit_game_score", rpcArgs);
+    if (error) {
+      showStatus(`Score save failed: ${error.message}`, "error");
+      return { saved: false, reason: "insert_failed", error };
     }
 
-    enqueuePendingScoreSubmit(normalizedGameKey, { kind: "display", display: displayPayload });
-    showStatus(
-      "Connection was unstable. Your score is saved on this device and will upload automatically — stay online or reopen this site.",
-      "info"
-    );
-    void flushPendingScoreSubmits();
-    return { saved: true, queued: true, error: lastError };
+    delete state.activeGameSessions[normalizedGameKey];
+    showStatus("Score saved.", "success");
+    return { saved: true };
   };
 
   const startGameSession = async (gameKey) => {
@@ -989,19 +696,15 @@
     }
 
     let seed = null;
-    for (let fetchAttempt = 0; fetchAttempt < 6; fetchAttempt++) {
-      const { data: sessionRow, error: sessionFetchError } = await state.client
-        .from("game_sessions")
-        .select("challenge_seed")
-        .eq("id", data)
-        .maybeSingle();
+    const { data: sessionRow, error: sessionFetchError } = await state.client
+      .from("game_sessions")
+      .select("challenge_seed")
+      .eq("id", data)
+      .maybeSingle();
 
-      if (!sessionFetchError && sessionRow && sessionRow.challenge_seed != null) {
-        const raw = sessionRow.challenge_seed;
-        seed = typeof raw === "bigint" ? raw.toString() : raw;
-        break;
-      }
-      await new Promise((r) => setTimeout(r, 60 + fetchAttempt * 90));
+    if (!sessionFetchError && sessionRow && sessionRow.challenge_seed != null) {
+      const raw = sessionRow.challenge_seed;
+      seed = typeof raw === "bigint" ? raw.toString() : raw;
     }
 
     state.activeGameSessions[normalizedGameKey] = {
@@ -1009,159 +712,9 @@
       startedAtMs: Date.now(),
       seed
     };
-    persistActiveSessions();
 
     return { ok: true, seed };
   };
-
-  /** Supabase fetch has no built-in deadline; a stalled TCP leave awaits hanging forever and blocks Continue. */
-  const startGameSessionWithTimeout = (gameKey) => {
-    const main = startGameSession(gameKey).then(
-      (r) => r,
-      (err) => ({ ok: false, reason: "rpc_threw", error: err })
-    );
-    const timeout = new Promise((resolve) =>
-      window.setTimeout(
-        () => resolve({ ok: false, reason: "rpc_timeout" }),
-        RPC_CREATE_SESSION_TIMEOUT_MS
-      )
-    );
-    return Promise.race([main, timeout]);
-  };
-
-  /** Wait until the browser reports connectivity (e.g. user turns Wi-Fi on after loading offline). */
-  const waitForOnline = (timeoutMs) =>
-    new Promise((resolve) => {
-      if (typeof navigator === "undefined" || navigator.onLine) {
-        resolve();
-        return;
-      }
-      const onDone = () => {
-        clearTimeout(timer);
-        window.removeEventListener("online", onOnline);
-        resolve();
-      };
-      const onOnline = () => onDone();
-      const timer = window.setTimeout(onDone, timeoutMs);
-      window.addEventListener("online", onOnline, { once: true });
-    });
-
-  /**
-   * Run before verified gameplay so challenge_seed matches the server.
-   * Lives here (not only game-rules.js) so it exists as soon as supabase-auth loads — Continue must not await heavy AudioEngine.init first.
-   */
-  const beginVerifiedSession = async (gameKey) => {
-    await init();
-    let slowHintTimer = null;
-    try {
-      if (typeof navigator !== "undefined" && !navigator.onLine) {
-        showStatus("Waiting for network…", "info");
-      }
-
-      slowHintTimer = window.setTimeout(() => {
-        showStatus("Still connecting…", "info");
-      }, 2500);
-
-      let sessionResult = null;
-      for (let attempt = 0; attempt < 6; attempt++) {
-        if (attempt > 0) {
-          await new Promise((r) => setTimeout(r, 350 * attempt));
-          if (typeof navigator !== "undefined" && !navigator.onLine) {
-            await waitForOnline(8000);
-          }
-        } else if (typeof navigator !== "undefined" && !navigator.onLine) {
-          await waitForOnline(6000);
-        }
-
-        sessionResult = await startGameSessionWithTimeout(gameKey);
-        if (sessionResult?.ok) break;
-        if (sessionResult?.reason === "not_authenticated") break;
-        if (sessionResult?.reason === "rpc_timeout") {
-          showStatus(
-            "Session setup timed out. Check your connection and tap Continue again.",
-            "error"
-          );
-          break;
-        }
-      }
-
-      if (sessionResult?.ok && sessionResult.seed != null) {
-        const s = sessionResult.seed;
-        window.mmChallengeSeed = typeof s === "bigint" ? s.toString() : s;
-      }
-    } finally {
-      if (slowHintTimer) clearTimeout(slowHintTimer);
-      dismissTransientConnectionStatus();
-    }
-    window.mmVerifyTranscript = [];
-  };
-
-  window.mmBeginVerifiedSession = beginVerifiedSession;
-
-  /**
-   * Call after mmBeginVerifiedSession on Continue. Guests may play without a session; logged-in users
-   * must have a session row + challenge_seed or gameplay uses random data while the DB expects a fixed seed — saves fail.
-   */
-  const ensureVerifiedPlayReady = async (gameKey) => {
-    await init();
-    hydrateActiveSessions();
-    if (!state.session?.user) return true;
-
-    const k = normalizeGameKey(gameKey);
-    if (!k) return false;
-
-    let entry = state.activeGameSessions[k];
-    if (entry?.id && entry.seed != null && entry.seed !== "") return true;
-
-    const hydrateSeedForEntry = async (candidate) => {
-      if (!candidate?.id || !state.client) return false;
-      const { data: row, error: rowErr } = await state.client
-        .from("game_sessions")
-        .select("challenge_seed")
-        .eq("id", candidate.id)
-        .maybeSingle();
-      if (rowErr || !row || row.challenge_seed == null) return false;
-      const raw = row.challenge_seed;
-      const seedStr = typeof raw === "bigint" ? raw.toString() : raw;
-      state.activeGameSessions[k] = {
-        id: candidate.id,
-        startedAtMs: typeof candidate.startedAtMs === "number" ? candidate.startedAtMs : Date.now(),
-        seed: seedStr
-      };
-      persistActiveSessions();
-      window.mmChallengeSeed = seedStr;
-      return true;
-    };
-
-    if (await hydrateSeedForEntry(entry)) return true;
-
-    // A timed-out beginVerifiedSession can leave Continue blocked even though a retry would succeed.
-    // Self-heal by recreating/refreshing the secure session in-place.
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const retry = await startGameSessionWithTimeout(k);
-      if (!retry?.ok) {
-        if (retry?.reason === "not_authenticated") break;
-        continue;
-      }
-      const retryEntry = state.activeGameSessions[k];
-      if (retry.seed != null && retry.seed !== "") {
-        const s = typeof retry.seed === "bigint" ? retry.seed.toString() : retry.seed;
-        window.mmChallengeSeed = s;
-        return true;
-      }
-      if (await hydrateSeedForEntry(retryEntry)) {
-        return true;
-      }
-    }
-
-    showStatus(
-      "Could not start a verified round (missing session or challenge seed). Stay online and tap Continue again.",
-      "error"
-    );
-    return false;
-  };
-
-  window.mmEnsureVerifiedPlayReady = ensureVerifiedPlayReady;
 
   const peekGameSession = (gameKey) => {
     const k = normalizeGameKey(gameKey);
@@ -1294,8 +847,6 @@
     fetchTotalCompletedTests,
     fetchRecentGameScores,
     startGameSession,
-    beginVerifiedSession,
-    ensureVerifiedPlayReady,
     peekGameSession,
     loginWithPassword,
     signUpWithUsername,
@@ -1305,7 +856,6 @@
     getSession: () => state.session,
     getProfile: () => state.profile,
     showStatus,
-    dismissConnectionHints: dismissTransientConnectionStatus,
     setRememberMe,
     isRememberMeEnabled
   };
