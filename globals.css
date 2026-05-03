@@ -915,22 +915,25 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
 .dashboard-tests-table {
     display: flex;
     flex-direction: column;
+    /* One template for header + every row — `auto` breaks alignment because header row sized differently from body. */
+    --dashboard-tests-cols: minmax(11rem, 1.55fr) minmax(13.5rem, 1.25fr) minmax(7.5rem, 1fr) minmax(7.5rem, 1fr);
 }
 
+/* Same template on header + each row so columns line up (avoid `auto`: header vs body sized differently). */
 .dashboard-tests-table-header {
     display: grid;
-    grid-template-columns: minmax(140px, 1.5fr) auto minmax(88px, 0.5fr) minmax(88px, 0.5fr);
-    gap: 0.75rem 0.875rem;
+    grid-template-columns: var(--dashboard-tests-cols);
+    gap: 0.75rem 1rem;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid #303030;
     margin-bottom: 0;
-    align-items: baseline;
+    align-items: center;
 }
 
 .dashboard-tests-table-row {
     display: grid;
-    grid-template-columns: minmax(140px, 1.5fr) auto minmax(88px, 0.5fr) minmax(88px, 0.5fr);
-    gap: 0.75rem 0.875rem;
+    grid-template-columns: var(--dashboard-tests-cols);
+    gap: 0.75rem 1rem;
     padding: 0.875rem 0.6rem;
     margin: 0 -0.6rem;
     padding-left: 0.6rem;
@@ -952,7 +955,10 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
 .dashboard-tests-table-cell {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     font-size: 0.875rem;
+    min-width: 0;
+    width: 100%;
 }
 
 .dashboard-tests-table-cell.header-cell {
@@ -961,6 +967,8 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    justify-content: flex-start;
+    text-align: left;
 }
 
 .dashboard-tests-table-cell.test-name {
@@ -976,27 +984,28 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
 }
 
 .dashboard-tests-table-cell.header-cell.dashboard-score-header {
-    justify-content: flex-end;
-    text-align: right;
-    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
 }
 
 .dashboard-tests-table-cell.score-cell {
-    justify-content: flex-end;
-    text-align: right;
+    justify-content: flex-start;
+    text-align: left;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: flex-start;
     align-self: stretch;
-    width: 100%;
     min-width: 0;
 }
 
 .dashboard-score-display {
     display: inline-flex;
     align-items: baseline;
+    align-self: flex-start;
     flex-wrap: wrap;
-    justify-content: flex-end;
     gap: 0 4px;
+    justify-content: flex-start;
+    width: fit-content;
+    max-width: 100%;
 }
 
 .dashboard-score-num {
@@ -1004,6 +1013,7 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
     font-weight: 700;
     color: #ffffff;
     line-height: 1.1;
+    font-variant-numeric: tabular-nums;
 }
 
 .dashboard-score-suffix {
@@ -1471,32 +1481,35 @@ html.mm-auth-pending .dashboard-main > .dashboard-tests-card {
 
     .dashboard-tests-table-cell.score-cell {
         flex-direction: row;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: center;
+        gap: 0.5rem;
         width: 100%;
     }
 
     .dashboard-tests-table-cell.score-cell .dashboard-score-display,
     .dashboard-tests-table-cell.score-cell .dashboard-score-placeholder {
-        margin-left: auto;
+        margin-left: 0;
     }
 
     .dashboard-tests-table-cell.header-cell.dashboard-score-header {
-        justify-content: flex-end;
+        justify-content: flex-start;
     }
 
     .dashboard-tests-table-cell.score-best::before {
         content: "Best: ";
         font-weight: 600;
         color: #9ca3af;
-        margin-right: auto;
+        margin-right: 0;
+        flex-shrink: 0;
     }
 
     .dashboard-tests-table-cell.score-avg::before {
         content: "Avg: ";
         font-weight: 600;
         color: #9ca3af;
-        margin-right: auto;
+        margin-right: 0;
+        flex-shrink: 0;
     }
 
     .dashboard-recent-grid.dashboard-recent-grid--head {
