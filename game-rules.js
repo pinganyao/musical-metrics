@@ -139,14 +139,6 @@
     const scoreValue = parseScore(scoreText);
     if (scoreValue === null) return;
 
-    const mmAuth = await ensureAuthScript();
-    if (!mmAuth || typeof mmAuth.reportScore !== 'function') {
-      showScoreSaveFailed(
-        'Score not saved: account module did not load in time. Refresh the page and play once more.'
-      );
-      return;
-    }
-
     const melodyGames = ['melody1', 'melody2', 'melody3'];
     const harmonyGames = ['harmony1', 'harmony2', 'harmony3'];
     const extras = {};
@@ -160,6 +152,14 @@
         : [];
     } else if (Array.isArray(window.mmVerifyTranscript) && window.mmVerifyTranscript.length > 0) {
       extras.verifyTranscript = window.mmVerifyTranscript.slice();
+    }
+
+    const mmAuth = await ensureAuthScript();
+    if (!mmAuth || typeof mmAuth.reportScore !== 'function') {
+      showScoreSaveFailed(
+        'Score not saved: account module did not load in time. Refresh the page and play once more.'
+      );
+      return;
     }
 
     try {
