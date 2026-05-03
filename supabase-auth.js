@@ -22,6 +22,131 @@
     activeGameSessions: {}
   };
 
+  const ACTIVE_SESSIONS_KEY = "mm_active_sessions_v1";
+  const PENDING_SCORES_KEY = "mm_pending_score_submits_v1";
+
+  const persistActiveSessions = () => {
+    try {
+      sessionStorage.setItem(ACTIVE_SESSIONS_KEY, JSON.stringify(state.activeGameSessions));
+    } catch (_) {}
+  };
+
+  /** Recover session ids after reload / memory loss so submit_game_score can still run. */
+  const hydrateActiveSessions = () => {
+    try {
+      const raw = sessionStorage.getItem(ACTIVE_SESSIONS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return;
+      for (const [k, v] of Object.entries(parsed)) {
+        if (!v || typeof v !== "object" || !v.id) continue;
+        const cur = state.activeGameSessions[k];
+        if (!cur?.id) {
+          state.activeGameSessions[k] = {
+            id: v.id,
+            startedAtMs: typeof v.startedAtMs === "number" ? v.startedAtMs : Date.now(),
+            seed: v.seed ?? null
+          };
+        }
+      }
+    } catch (_) {}
+  };
+
+  const clearScorePersistence = () => {
+    try {
+      sessionStorage.removeItem(ACTIVE_SESSIONS_KEY);
+      localStorage.removeItem(PENDING_SCORES_KEY);
+    } catch (_) {}
+    state.activeGameSessions = {};
+  };
+
+  const rpcErrorRetryable = (error) => {
+    const msg = ((error && error.message) || "").toLowerCase();
+    if (!msg) return true;
+    if (/invalid transcript|session not found|already used|expired|authentication required|too quickly/i.test(msg))
+      return false;
+    if (/network|fetch|timeout|failed to fetch|502|503|504|429/i.test(msg)) return true;
+    return true;
+  };
+
+  const enqueuePendingScoreSubmit = (gameKey, rpcArgs) => {
+    try {
+      const raw = localStorage.getItem(PENDING_SCORES_KEY);
+      const queue = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(queue)) return;
+      const id =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `ps_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      queue.push({ id, gameKey, createdAt: Date.now(), attempts: 0, rpc: rpcArgs });
+      localStorage.setItem(PENDING_SCORES_KEY, JSON.stringify(queue));
+    } catch (_) {}
+  };
+
+  const flushPendingScoreSubmits = async () => {
+    await init();
+    hydrateActiveSessions();
+    if (!state.client || !state.session?.user) return;
+    let raw;
+    try {
+      raw = localStorage.getItem(PENDING_SCORES_KEY);
+    } catch (_) {
+      return;
+    }
+    if (!raw) return;
+    let queue;
+    try {
+      queue = JSON.parse(raw);
+    } catch (_) {
+      localStorage.removeItem(PENDING_SCORES_KEY);
+      return;
+    }
+    if (!Array.isArray(queue) || !queue.length) return;
+
+    const kept = [];
+    let savedAny = false;
+    for (const item of queue) {
+      if (!item?.rpc) continue;
+      const { error } = await state.client.rpc("submit_game_score", item.rpc);
+      if (!error) {
+        savedAny = true;
+        const gk = item.gameKey;
+        const sid = item.rpc?.p_session_id;
+        if (gk && state.activeGameSessions[gk]?.id === sid) {
+          delete state.activeGameSessions[gk];
+          persistActiveSessions();
+        }
+        continue;
+      }
+      const msg = ((error && error.message) || "").toLowerCase();
+      if (/session not found|expired|already used|invalid transcript|authentication required/i.test(msg)) {
+        continue;
+      }
+      item.attempts = (item.attempts || 0) + 1;
+      if (item.attempts < 80) kept.push(item);
+    }
+    try {
+      if (kept.length) localStorage.setItem(PENDING_SCORES_KEY, JSON.stringify(kept));
+      else localStorage.removeItem(PENDING_SCORES_KEY);
+    } catch (_) {}
+    if (savedAny) {
+      showStatus("Score saved.", "success");
+    }
+  };
+
+  let persistenceHooksBound = false;
+  const bindScorePersistenceHooks = () => {
+    if (persistenceHooksBound || typeof window === "undefined") return;
+    persistenceHooksBound = true;
+    window.addEventListener("online", () => void flushPendingScoreSubmits());
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") void flushPendingScoreSubmits();
+      });
+    }
+    window.setInterval(() => void flushPendingScoreSubmits(), 45000);
+  };
+
   const GAME_NAMES = {
     melody1: "Melody I",
     melody2: "Melody II",
@@ -180,6 +305,7 @@
 
   const performLogout = async () => {
     await init();
+    clearScorePersistence();
     if (!state.client) {
       window.location.reload();
       return;
@@ -457,6 +583,9 @@
         });
 
         state.initialized = true;
+        hydrateActiveSessions();
+        bindScorePersistenceHooks();
+        void flushPendingScoreSubmits();
       } catch (_err) {
         ensureAuthNav();
         updateAuthUi();
@@ -608,7 +737,18 @@
 
   const reportScore = async (gameKey, scoreValue, scoreLabel, extras = {}) => {
     await init();
-    if (!state.client) return { saved: false, reason: "client_unavailable" };
+    hydrateActiveSessions();
+
+    if (!state.client) {
+      showStatus("Score not saved: app did not finish loading. Refresh and try again.", "error");
+      return { saved: false, reason: "client_unavailable" };
+    }
+
+    try {
+      const refreshed = await state.client.auth.getSession();
+      if (refreshed?.data?.session) state.session = refreshed.data.session;
+    } catch (_) {}
+
     if (!state.session?.user) {
       showStatus("Log in to save your score.", "info");
       return { saved: false, reason: "not_authenticated" };
@@ -616,16 +756,27 @@
 
     const numericScore = Number(scoreValue);
     if (!Number.isFinite(numericScore)) {
+      showStatus("Score not saved: could not read the score from the page.", "error");
       return { saved: false, reason: "invalid_score" };
     }
 
     const normalizedGameKey = normalizeGameKey(gameKey);
     if (!normalizedGameKey) {
+      showStatus("Score not saved: unknown game. Refresh and try again.", "error");
       return { saved: false, reason: "invalid_game_key" };
     }
 
-    const gameSession = state.activeGameSessions[normalizedGameKey];
+    hydrateActiveSessions();
+    let gameSession = state.activeGameSessions[normalizedGameKey];
     if (!gameSession?.id) {
+      hydrateActiveSessions();
+      gameSession = state.activeGameSessions[normalizedGameKey];
+    }
+    if (!gameSession?.id) {
+      showStatus(
+        "Score not saved: no active game session. Press Continue before playing (stay online while starting).",
+        "error"
+      );
       return { saved: false, reason: "missing_game_session" };
     }
 
@@ -665,15 +816,39 @@
       rpcArgs.p_melody_transcript = extras.melodyTranscript;
     }
 
-    const { error } = await state.client.rpc("submit_game_score", rpcArgs);
-    if (error) {
-      showStatus(`Score save failed: ${error.message}`, "error");
-      return { saved: false, reason: "insert_failed", error };
+    showStatus("Saving score…", "info");
+
+    let lastError = null;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      if (attempt > 0) {
+        const delayMs = Math.min(400 + attempt * 280, 6500);
+        await new Promise((r) => setTimeout(r, delayMs));
+      }
+
+      const { error } = await state.client.rpc("submit_game_score", rpcArgs);
+
+      if (!error) {
+        delete state.activeGameSessions[normalizedGameKey];
+        persistActiveSessions();
+        showStatus("Score saved.", "success");
+        void flushPendingScoreSubmits();
+        return { saved: true };
+      }
+
+      lastError = error;
+      if (!rpcErrorRetryable(error)) {
+        showStatus(`Score save failed: ${error.message}`, "error");
+        return { saved: false, reason: "insert_failed", error };
+      }
     }
 
-    delete state.activeGameSessions[normalizedGameKey];
-    showStatus("Score saved.", "success");
-    return { saved: true };
+    enqueuePendingScoreSubmit(normalizedGameKey, rpcArgs);
+    showStatus(
+      "Connection was unstable. Your score is saved on this device and will upload automatically — stay online or reopen this site.",
+      "info"
+    );
+    void flushPendingScoreSubmits();
+    return { saved: true, queued: true, error: lastError };
   };
 
   const startGameSession = async (gameKey) => {
@@ -712,6 +887,7 @@
       startedAtMs: Date.now(),
       seed
     };
+    persistActiveSessions();
 
     return { ok: true, seed };
   };

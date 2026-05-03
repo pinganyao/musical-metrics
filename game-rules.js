@@ -1,24 +1,48 @@
 (() => {
-  const ensureAuthScript = () =>
-    new Promise((resolve) => {
-      if (window.MMAuth) {
-        resolve(window.MMAuth);
-        return;
-      }
+  /** Defer scripts can run after this module; poll until MMAuth exists so score save never runs “too early” silently. */
+  const ensureAuthScript = async () => {
+    if (window.MMAuth) return window.MMAuth;
+    const until = Date.now() + 8000;
+    while (!window.MMAuth && Date.now() < until) {
+      await new Promise((r) => setTimeout(r, 40));
+    }
+    if (window.MMAuth) return window.MMAuth;
 
+    return new Promise((resolve) => {
       const existing = document.querySelector('script[data-mm-auth-script="true"]');
       if (existing) {
-        existing.addEventListener("load", () => resolve(window.MMAuth), { once: true });
+        existing.addEventListener(
+          "load",
+          () => resolve(window.MMAuth || null),
+          { once: true }
+        );
+        existing.addEventListener("error", () => resolve(null), { once: true });
         return;
       }
-
       const script = document.createElement("script");
       script.src = "supabase-auth.js";
       script.defer = true;
       script.dataset.mmAuthScript = "true";
-      script.addEventListener("load", () => resolve(window.MMAuth), { once: true });
+      script.addEventListener("load", () => resolve(window.MMAuth || null), { once: true });
+      script.addEventListener("error", () => resolve(null), { once: true });
       document.head.appendChild(script);
     });
+  };
+
+  const showScoreSaveFailed = (message) => {
+    if (window.MMAuth && typeof window.MMAuth.showStatus === "function") {
+      window.MMAuth.showStatus(message, "error");
+      return;
+    }
+    const bar = document.getElementById("mm-status-bar");
+    if (bar) {
+      bar.textContent = message;
+      bar.style.display = "block";
+      bar.style.background = "rgba(74, 121, 255, 0.14)";
+      bar.style.border = "1px solid rgba(255, 208, 66, 0.62)";
+      bar.style.color = "#fff";
+    }
+  };
 
   /** Wait until the browser reports connectivity (e.g. user turns WiFi on after loading offline). */
   const waitForOnline = (timeoutMs) =>
@@ -168,6 +192,7 @@
   })();
   let wasGameOverVisible = false;
   let scoreReportedForCurrentGameOver = false;
+  let scoreReportTail = Promise.resolve();
 
   const isVisible = (element) => {
     if (!element) return false;
@@ -182,7 +207,7 @@
     return Number.isFinite(value) ? value : null;
   };
 
-  const maybeReportScore = async () => {
+  const runMaybeReportScore = async () => {
     if (!scoreEl || !gameOverEl || !gameKey) return;
     const isGameOverVisible = isVisible(gameOverEl);
 
@@ -198,28 +223,47 @@
     if (scoreValue === null) return;
 
     const mmAuth = await ensureAuthScript();
-    if (!mmAuth || typeof mmAuth.reportScore !== 'function') return;
+    if (!mmAuth || typeof mmAuth.reportScore !== "function") {
+      showScoreSaveFailed(
+        "Score not saved: account module did not load in time. Refresh the page and play once more."
+      );
+      return;
+    }
 
     const melodyGames = ["melody1", "melody2", "melody3"];
     const extras = {};
-    if (Array.isArray(window.mmVerifyTranscript) && window.mmVerifyTranscript.length > 0) {
-      extras.verifyTranscript = window.mmVerifyTranscript.slice();
-    } else if (melodyGames.includes(gameKey) && Array.isArray(window.mmMelodyTranscript)) {
+    // Melody games must use mmMelodyTranscript only — never prefer mmVerifyTranscript or RPC gets wrong payload.
+    if (melodyGames.includes(gameKey) && Array.isArray(window.mmMelodyTranscript)) {
       extras.melodyTranscript = window.mmMelodyTranscript.slice();
+    } else if (Array.isArray(window.mmVerifyTranscript) && window.mmVerifyTranscript.length > 0) {
+      extras.verifyTranscript = window.mmVerifyTranscript.slice();
     }
 
-    let result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
-    if (result && !result.saved && result.reason === "insert_failed") {
-      await new Promise((r) => setTimeout(r, 700));
-      result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
-    }
-    if (result && result.saved) {
-      scoreReportedForCurrentGameOver = true;
+    try {
+      let result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
+      if (result && !result.saved && result.reason === "insert_failed") {
+        await new Promise((r) => setTimeout(r, 700));
+        result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
+      }
+      if (result && result.saved) {
+        scoreReportedForCurrentGameOver = true;
+      }
+    } catch (e) {
+      showScoreSaveFailed(
+        `Score not saved: ${e && e.message ? e.message : "network or server error"}. Try again.`
+      );
     }
   };
 
+  const enqueueScoreReport = () => {
+    scoreReportTail = scoreReportTail
+      .then(() => runMaybeReportScore())
+      .catch(() => {});
+  };
+
   const scoreObserver = new MutationObserver(() => {
-    maybeReportScore();
+    enqueueScoreReport();
+    window.setTimeout(() => enqueueScoreReport(), 400);
   });
 
   if (scoreEl) {
@@ -230,7 +274,7 @@
     scoreObserver.observe(gameOverEl, { attributes: true, attributeFilter: ['style', 'class'] });
   }
 
-  maybeReportScore();
+  enqueueScoreReport();
 
   if (window.lucide && typeof window.lucide.createIcons === 'function') {
     window.lucide.createIcons();
