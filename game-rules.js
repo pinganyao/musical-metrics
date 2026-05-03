@@ -20,6 +20,20 @@
       document.head.appendChild(script);
     });
 
+  /** Await before any verified gameplay so challenge_seed is set; keeps client transcript matching the server. */
+  const beginVerifiedSession = async (gameKey) => {
+    const mmAuth = await ensureAuthScript();
+    if (mmAuth && typeof mmAuth.startGameSession === "function") {
+      const sessionResult = await mmAuth.startGameSession(gameKey);
+      if (sessionResult?.ok && sessionResult.seed != null) {
+        const s = sessionResult.seed;
+        window.mmChallengeSeed = typeof s === "bigint" ? s.toString() : s;
+      }
+    }
+    window.mmVerifyTranscript = [];
+  };
+  window.mmBeginVerifiedSession = beginVerifiedSession;
+
   const rulesDiv = document.querySelector('.rules');
   if (!rulesDiv) return;
 
@@ -162,7 +176,11 @@
       extras.melodyTranscript = window.mmMelodyTranscript.slice();
     }
 
-    const result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
+    let result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
+    if (result && !result.saved && result.reason === "insert_failed") {
+      await new Promise((r) => setTimeout(r, 700));
+      result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
+    }
     if (result && result.saved) {
       scoreReportedForCurrentGameOver = true;
     }
@@ -181,20 +199,6 @@
   }
 
   maybeReportScore();
-
-  const continueBtnForSession = document.getElementById('continueBtn');
-  if (continueBtnForSession) {
-    continueBtnForSession.addEventListener('click', async () => {
-      const mmAuth = await ensureAuthScript();
-      if (!mmAuth || typeof mmAuth.startGameSession !== 'function') return;
-      const sessionResult = await mmAuth.startGameSession(gameKey);
-      if (sessionResult?.ok && sessionResult.seed != null) {
-        const s = sessionResult.seed;
-        window.mmChallengeSeed = typeof s === 'bigint' ? s.toString() : s;
-      }
-      window.mmVerifyTranscript = [];
-    });
-  }
 
   if (window.lucide && typeof window.lucide.createIcons === 'function') {
     window.lucide.createIcons();

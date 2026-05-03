@@ -268,6 +268,9 @@
     continueBtn.addEventListener('click', async () => {
       await AudioEngine.resume();
       await AudioEngine.init(audioFiles);
+      if (window.mmBeginVerifiedSession) {
+        await window.mmBeginVerifiedSession('melody2');
+      }
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';
       buttonsContainer.style.display = 'flex';

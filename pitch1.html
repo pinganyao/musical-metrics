@@ -380,6 +380,9 @@
       try {
         await Tone.start();
       } catch (e) {}
+      if (window.mmBeginVerifiedSession) {
+        await window.mmBeginVerifiedSession('pitch1');
+      }
 
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';

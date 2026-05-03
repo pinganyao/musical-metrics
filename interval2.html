@@ -337,6 +337,9 @@
     continueBtn.addEventListener('click', async () => {
       await AudioEngine.resume();
       await AudioEngine.init(audioFiles);
+      if (window.mmBeginVerifiedSession) {
+        await window.mmBeginVerifiedSession('interval2');
+      }
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';
       buttonsContainer.style.display = 'flex';

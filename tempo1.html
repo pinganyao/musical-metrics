@@ -258,7 +258,10 @@
 
     window.addEventListener('load', startGame);
 
-    continueBtn.addEventListener('click', () => {
+    continueBtn.addEventListener('click', async () => {
+      if (window.mmBeginVerifiedSession) {
+        await window.mmBeginVerifiedSession('tempo1');
+      }
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';
       playMetronome();
