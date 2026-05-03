@@ -37,6 +37,20 @@
     pitch1: "Pitch I",
     rhythm1: "Rhythm I"
   };
+  const GAME_MAX_SCORES = {
+    melody1: 1000,
+    melody2: 1000,
+    melody3: 1000,
+    interval1: 10,
+    interval2: 10,
+    harmony1: 10,
+    harmony2: 10,
+    harmony3: 10,
+    tempo1: 100,
+    tempo2: 100,
+    pitch1: 100,
+    rhythm1: 100
+  };
 
   const loadSupabaseLib = () =>
     new Promise((resolve, reject) => {
@@ -675,6 +689,14 @@
     const normalizedGameKey = normalizeGameKey(gameKey);
     if (!normalizedGameKey) {
       return { saved: false, reason: "invalid_game_key" };
+    }
+    const maxScore = GAME_MAX_SCORES[normalizedGameKey];
+    if (!Number.isFinite(maxScore)) {
+      return { saved: false, reason: "invalid_game_key" };
+    }
+    if (numericScore < 0 || numericScore > maxScore) {
+      showStatus(`Score out of range for ${GAME_NAMES[normalizedGameKey] || normalizedGameKey}.`, "error");
+      return { saved: false, reason: "invalid_score_range" };
     }
 
     let countryCode = null;
