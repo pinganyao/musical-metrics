@@ -6,7 +6,9 @@
   };
 
   const SUPABASE_URL = "https://akjqnoftnvnbzycsdipl.supabase.co";
-  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_stGW2I7dATan2pWJLFs55g_vIX8b-pZ";
+  /** Legacy anon (JWT) — use with supabase-js for reliable Auth + PostgREST `apikey` headers. Publishable `sb_*` keys have seen refresh/token requests without `apikey` on some CDN bundles. */
+  const SUPABASE_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFranFub2Z0bnZuYnp5Y3NkaXBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NzI3NjAsImV4cCI6MjA5MzE0ODc2MH0.ADcqC3yXUJfT1wLkk6Ez2f4bblTHhqqvtObFMnIroQE";
   const REMEMBER_ME_KEY = "mm_remember_me";
   const SUPABASE_AUTH_STORAGE_KEY = "sb-akjqnoftnvnbzycsdipl-auth-token";
 
@@ -214,7 +216,7 @@
       }
 
       const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+      script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js";
       script.defer = true;
       script.dataset.mmSupabaseLib = "true";
       script.addEventListener("load", () => resolve(), { once: true });
@@ -606,7 +608,7 @@
           return;
         }
 
-        state.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        state.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
           auth: {
             persistSession: true,
             autoRefreshToken: true,
