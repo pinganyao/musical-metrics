@@ -9,6 +9,8 @@
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_stGW2I7dATan2pWJLFs55g_vIX8b-pZ";
   const REMEMBER_ME_KEY = "mm_remember_me";
   const SUPABASE_AUTH_STORAGE_KEY = "sb-akjqnoftnvnbzycsdipl-auth-token";
+  const PENDING_SCORES_KEY = "mm_pending_scores_v1";
+  const LAST_SIGNED_OUT_SCORE_KEY = "mm_last_signed_out_score_v1";
 
   const state = {
     client: null,
@@ -20,6 +22,8 @@
     authMenuOutsideListenerBound: false,
     logoutClickDelegationBound: false,
     logoutInFlight: null,
+    pendingFlushInFlight: false,
+    pendingFlushBound: false,
     activeGameSessions: {}
   };
 
@@ -167,6 +171,173 @@
 
   const setRememberMe = (enabled) => {
     window.localStorage.setItem(REMEMBER_ME_KEY, enabled ? "true" : "false");
+  };
+
+  const withTimeout = (promise, timeoutMs, timeoutMessage) =>
+    new Promise((resolve, reject) => {
+      const timeoutId = window.setTimeout(() => {
+        reject(new Error(timeoutMessage || "Request timed out."));
+      }, timeoutMs);
+      Promise.resolve(promise)
+        .then((value) => {
+          window.clearTimeout(timeoutId);
+          resolve(value);
+        })
+        .catch((err) => {
+          window.clearTimeout(timeoutId);
+          reject(err);
+        });
+    });
+
+  const callRpcWithRetry = async (rpcCallFactory, attempts = 2, timeoutMs = 6000, timeoutMessage = "Request timed out.") => {
+    let lastError = null;
+    for (let attempt = 0; attempt < attempts; attempt += 1) {
+      try {
+        const result = await withTimeout(rpcCallFactory(), timeoutMs, timeoutMessage);
+        if (!result?.error) {
+          return { ok: true, data: result?.data ?? null };
+        }
+        lastError = result.error;
+      } catch (err) {
+        lastError = err;
+      }
+      if (attempt < attempts - 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, 250 * (attempt + 1)));
+      }
+    }
+    return { ok: false, error: lastError };
+  };
+
+  const readPendingScores = () => {
+    try {
+      const raw = window.localStorage.getItem(PENDING_SCORES_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (_) {
+      return [];
+    }
+  };
+
+  const writePendingScores = (items) => {
+    try {
+      const next = Array.isArray(items) ? items.slice(-50) : [];
+      window.localStorage.setItem(PENDING_SCORES_KEY, JSON.stringify(next));
+    } catch (_) {
+      /* noop */
+    }
+  };
+
+  const readLastSignedOutScore = () => {
+    try {
+      const raw = window.localStorage.getItem(LAST_SIGNED_OUT_SCORE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return null;
+      return parsed;
+    } catch (_) {
+      return null;
+    }
+  };
+
+  const writeLastSignedOutScore = (payload) => {
+    try {
+      if (!payload) {
+        window.localStorage.removeItem(LAST_SIGNED_OUT_SCORE_KEY);
+        return;
+      }
+      window.localStorage.setItem(LAST_SIGNED_OUT_SCORE_KEY, JSON.stringify(payload));
+    } catch (_) {
+      /* noop */
+    }
+  };
+
+  const queuePendingScore = (payload) => {
+    if (!payload || !payload.game_key) return;
+    const existing = readPendingScores();
+    const fingerprint = [
+      payload.game_key,
+      String(payload.score),
+      String(payload.score_label || ""),
+      String(payload.created_at || "")
+    ].join("|");
+    const next = existing.filter((item) => item?.fingerprint !== fingerprint);
+    next.push({ ...payload, fingerprint });
+    writePendingScores(next);
+  };
+
+  const persistDisplayScore = async (payload, options = {}) => {
+    if (!state.client) {
+      return { saved: false, error: new Error("Client unavailable.") };
+    }
+    const rpcResult = await callRpcWithRetry(
+      () =>
+        state.client.rpc("submit_game_score_display", {
+          p_game_key: payload.game_key,
+          p_score: payload.score,
+          p_score_label: payload.score_label,
+          p_country_code: payload.country_code || null
+        }),
+      3,
+      6000,
+      "submit_game_score_display timed out."
+    );
+    if (!rpcResult.ok) {
+      return { saved: false, error: rpcResult.error };
+    }
+    if (!options.silentSuccessToast) {
+      showStatus("Score saved.", "success");
+    }
+    return { saved: true };
+  };
+
+  const flushPendingScores = async (options = {}) => {
+    if (state.pendingFlushInFlight) return;
+    if (!state.client || !state.session?.user) return;
+    const queued = readPendingScores();
+    if (!queued.length) return;
+    state.pendingFlushInFlight = true;
+    const failed = [];
+    let recovered = 0;
+    try {
+      for (const payload of queued) {
+        const result = await persistDisplayScore(payload, { silentSuccessToast: true });
+        if (result.saved) {
+          recovered += 1;
+        } else {
+          failed.push(payload);
+        }
+      }
+      writePendingScores(failed);
+      if (recovered > 0 && !options.silent) {
+        showStatus(`Recovered ${recovered} pending score${recovered === 1 ? "" : "s"}.`, "success");
+      }
+    } finally {
+      state.pendingFlushInFlight = false;
+    }
+  };
+
+  const flushLastSignedOutScore = async (options = {}) => {
+    if (!state.client || !state.session?.user) return;
+    const payload = readLastSignedOutScore();
+    if (!payload) return;
+    const result = await persistDisplayScore(payload, { silentSuccessToast: true });
+    if (!result.saved) return;
+    writeLastSignedOutScore(null);
+    if (!options.silent) {
+      showStatus("Saved your last signed-out result.", "success");
+    }
+  };
+
+  const bindPendingFlushEvents = () => {
+    if (state.pendingFlushBound) return;
+    state.pendingFlushBound = true;
+    window.addEventListener("online", () => {
+      void flushPendingScores({ silent: true });
+    });
+    window.addEventListener("focus", () => {
+      void flushPendingScores({ silent: true });
+    });
   };
 
   const normalizeGameKey = (value) => {
@@ -511,6 +682,9 @@
 
         ensureAuthNav();
         updateAuthUi();
+        bindPendingFlushEvents();
+        void flushPendingScores({ silent: true });
+        void flushLastSignedOutScore({ silent: true });
 
         state.client.auth.onAuthStateChange(async (_event, session) => {
           state.session = session;
@@ -518,6 +692,10 @@
           void syncCountryFromEdge();
           ensureAuthNav();
           updateAuthUi();
+          if (session?.user) {
+            void flushPendingScores({ silent: true });
+            void flushLastSignedOutScore({ silent: false });
+          }
           if (typeof window !== "undefined") {
             window.dispatchEvent(new CustomEvent("mm-auth-changed"));
           }
@@ -676,10 +854,6 @@
   const reportScore = async (gameKey, scoreValue, scoreLabel, extras = {}) => {
     await init();
     if (!state.client) return { saved: false, reason: "client_unavailable" };
-    if (!state.session?.user) {
-      showStatus("Log in to save your score.", "info");
-      return { saved: false, reason: "not_authenticated" };
-    }
 
     const numericScore = Number(scoreValue);
     if (!Number.isFinite(numericScore)) {
@@ -698,10 +872,21 @@
       showStatus(`Score out of range for ${GAME_NAMES[normalizedGameKey] || normalizedGameKey}.`, "error");
       return { saved: false, reason: "invalid_score_range" };
     }
+    if (!state.session?.user) {
+      writeLastSignedOutScore({
+        game_key: normalizedGameKey,
+        score: numericScore,
+        score_label: scoreLabel || String(scoreValue),
+        country_code: null,
+        created_at: new Date().toISOString()
+      });
+      showStatus("Log in to save your score. Your last result was stored for later.", "info");
+      return { saved: false, reason: "not_authenticated", storedForLater: true };
+    }
 
     let countryCode = null;
     try {
-      const geoRes = await fetch("/api/geo");
+      const geoRes = await withTimeout(fetch("/api/geo"), 3000, "Geo lookup timed out.");
       if (geoRes.ok) {
         const geo = await geoRes.json();
         const c = geo && geo.country;
@@ -714,16 +899,16 @@
     }
 
     const fallbackSave = async () => {
-      const { error } = await state.client.rpc("submit_game_score_display", {
-        p_game_key: normalizedGameKey,
-        p_score: numericScore,
-        p_score_label: scoreLabel || String(scoreValue),
-        p_country_code: countryCode
+      const fallbackResult = await persistDisplayScore({
+        game_key: normalizedGameKey,
+        score: numericScore,
+        score_label: scoreLabel || String(scoreValue),
+        country_code: countryCode,
+        created_at: new Date().toISOString()
       });
-      if (error) {
-        return { saved: false, error };
+      if (!fallbackResult.saved) {
+        return { saved: false, error: fallbackResult.error };
       }
-      showStatus("Score saved.", "success");
       return { saved: true, method: "display_fallback" };
     };
 
@@ -759,15 +944,27 @@
       rpcArgs.p_melody_transcript = extras.melodyTranscript;
     }
 
-    const { error } = await state.client.rpc("submit_game_score", rpcArgs);
-    if (error) {
+    const verifiedResult = await callRpcWithRetry(
+      () => state.client.rpc("submit_game_score", rpcArgs),
+      2,
+      6000,
+      "submit_game_score timed out."
+    );
+    if (!verifiedResult.ok) {
       const fallback = await fallbackSave();
       delete state.activeGameSessions[normalizedGameKey];
       if (fallback.saved) {
-        return { saved: true, method: "verified_fallback", primaryError: error };
+        return { saved: true, method: "verified_fallback", primaryError: verifiedResult.error };
       }
-      showStatus(`Score save failed: ${error.message}`, "error");
-      return { saved: false, reason: "insert_failed", error };
+      queuePendingScore({
+        game_key: normalizedGameKey,
+        score: numericScore,
+        score_label: scoreLabel || String(scoreValue),
+        country_code: countryCode,
+        created_at: new Date().toISOString()
+      });
+      showStatus("Score queued locally. Will retry automatically.", "info");
+      return { saved: true, queued: true, reason: "queued_pending_save", error: verifiedResult.error };
     }
 
     delete state.activeGameSessions[normalizedGameKey];
@@ -785,9 +982,21 @@
       return { ok: false, reason: "invalid_game_key" };
     }
 
-    const { data, error } = await state.client.rpc("create_game_session", {
-      p_game_key: normalizedGameKey
-    });
+    let data;
+    let error;
+    try {
+      const result = await withTimeout(
+        state.client.rpc("create_game_session", {
+          p_game_key: normalizedGameKey
+        }),
+        6000,
+        "create_game_session timed out."
+      );
+      data = result.data;
+      error = result.error;
+    } catch (err) {
+      error = err;
+    }
 
     if (error || !data) {
       showStatus(`Could not start secure game session: ${error?.message || "Unknown error"}`, "error");
@@ -956,7 +1165,9 @@
     getProfile: () => state.profile,
     showStatus,
     setRememberMe,
-    isRememberMeEnabled
+    isRememberMeEnabled,
+    retryPendingScores: () => flushPendingScores({ silent: false }),
+    pendingScoresCount: () => readPendingScores().length
   };
 
   ensureAuthNav();

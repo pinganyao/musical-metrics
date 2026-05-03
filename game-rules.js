@@ -1,4 +1,24 @@
 (() => {
+  const waitForMMAuth = (timeoutMs = 4000) =>
+    new Promise((resolve) => {
+      if (window.MMAuth) {
+        resolve(window.MMAuth);
+        return;
+      }
+      const startedAt = Date.now();
+      const timer = window.setInterval(() => {
+        if (window.MMAuth) {
+          window.clearInterval(timer);
+          resolve(window.MMAuth);
+          return;
+        }
+        if (Date.now() - startedAt >= timeoutMs) {
+          window.clearInterval(timer);
+          resolve(null);
+        }
+      }, 50);
+    });
+
   const ensureAuthScript = () =>
     new Promise((resolve) => {
       if (window.MMAuth) {
@@ -8,7 +28,7 @@
 
       const existing = document.querySelector('script[data-mm-auth-script="true"]');
       if (existing) {
-        existing.addEventListener("load", () => resolve(window.MMAuth), { once: true });
+        waitForMMAuth().then(resolve);
         return;
       }
 
@@ -16,7 +36,10 @@
       script.src = "supabase-auth.js";
       script.defer = true;
       script.dataset.mmAuthScript = "true";
-      script.addEventListener("load", () => resolve(window.MMAuth), { once: true });
+      script.addEventListener("load", () => {
+        waitForMMAuth().then(resolve);
+      }, { once: true });
+      script.addEventListener("error", () => resolve(null), { once: true });
       document.head.appendChild(script);
     });
 
@@ -114,6 +137,7 @@
 
   const scoreEl = document.getElementById('finalScore');
   const gameOverEl = document.querySelector('.game-over');
+  const gameOverButtons = gameOverEl ? gameOverEl.querySelector('.game-center-align-large-gap') : null;
   const gameKey = (() => {
     const path = window.location.pathname || '';
     const segments = path.split('/').filter(Boolean);
@@ -122,6 +146,39 @@
   })();
   let wasGameOverVisible = false;
   let scoreReportedForCurrentGameOver = false;
+  let gameOverVisibleAtMs = 0;
+  let scoreReportInFlight = false;
+  let retrySaveBtn = null;
+
+  const ensureRetrySaveButton = () => {
+    if (!(gameOverButtons instanceof HTMLElement)) return null;
+    if (retrySaveBtn instanceof HTMLElement) return retrySaveBtn;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'retrySaveBtn';
+    btn.className = 'control-button';
+    btn.style.display = 'none';
+    btn.textContent = 'Retry score save';
+    btn.addEventListener('click', async () => {
+      const mmAuth = await ensureAuthScript();
+      if (!mmAuth || typeof mmAuth.retryPendingScores !== 'function') return;
+      btn.disabled = true;
+      btn.textContent = 'Retrying...';
+      try {
+        await mmAuth.retryPendingScores();
+        const remaining = typeof mmAuth.pendingScoresCount === 'function' ? mmAuth.pendingScoresCount() : 0;
+        if (!remaining) {
+          btn.style.display = 'none';
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Retry score save';
+      }
+    });
+    gameOverButtons.appendChild(btn);
+    retrySaveBtn = btn;
+    return btn;
+  };
 
   const isVisible = (element) => {
     if (!element) return false;
@@ -138,33 +195,64 @@
 
   const maybeReportScore = async () => {
     if (!scoreEl || !gameOverEl || !gameKey) return;
+    if (scoreReportInFlight) return;
     const isGameOverVisible = isVisible(gameOverEl);
 
     if (isGameOverVisible && !wasGameOverVisible) {
       scoreReportedForCurrentGameOver = false;
+      gameOverVisibleAtMs = Date.now();
     }
     wasGameOverVisible = isGameOverVisible;
 
     if (!isGameOverVisible || scoreReportedForCurrentGameOver) return;
+    if (Date.now() - gameOverVisibleAtMs < 180) {
+      window.setTimeout(() => {
+        maybeReportScore();
+      }, 220);
+      return;
+    }
 
     const scoreText = scoreEl.textContent ? scoreEl.textContent.trim() : '';
     const scoreValue = parseScore(scoreText);
     if (scoreValue === null) return;
 
-    const mmAuth = await ensureAuthScript();
-    if (!mmAuth || typeof mmAuth.reportScore !== 'function') return;
+    scoreReportInFlight = true;
+    try {
+      const mmAuth = await ensureAuthScript();
+      if (!mmAuth || typeof mmAuth.reportScore !== 'function') return;
 
-    const melodyGames = ["melody1", "melody2", "melody3"];
-    const extras = {};
-    if (Array.isArray(window.mmVerifyTranscript) && window.mmVerifyTranscript.length > 0) {
-      extras.verifyTranscript = window.mmVerifyTranscript.slice();
-    } else if (melodyGames.includes(gameKey) && Array.isArray(window.mmMelodyTranscript)) {
-      extras.melodyTranscript = window.mmMelodyTranscript.slice();
-    }
+      const melodyGames = ["melody1", "melody2", "melody3"];
+      const extras = {};
+      if (Array.isArray(window.mmVerifyTranscript) && window.mmVerifyTranscript.length > 0) {
+        extras.verifyTranscript = window.mmVerifyTranscript.slice();
+      } else if (melodyGames.includes(gameKey) && Array.isArray(window.mmMelodyTranscript)) {
+        extras.melodyTranscript = window.mmMelodyTranscript.slice();
+      }
 
-    const result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
-    if (result && result.saved) {
-      scoreReportedForCurrentGameOver = true;
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
+        if (result && result.saved) {
+          scoreReportedForCurrentGameOver = true;
+          if (retrySaveBtn instanceof HTMLElement) {
+            retrySaveBtn.style.display = 'none';
+          }
+          if (result.queued) {
+            const retryBtn = ensureRetrySaveButton();
+            if (retryBtn) retryBtn.style.display = 'inline-block';
+          }
+          break;
+        }
+        if (attempt < 2) {
+          await new Promise((resolve) => window.setTimeout(resolve, 350 * (attempt + 1)));
+        }
+      }
+    } finally {
+      scoreReportInFlight = false;
+      if (isVisible(gameOverEl) && !scoreReportedForCurrentGameOver) {
+        window.setTimeout(() => {
+          maybeReportScore();
+        }, 900);
+      }
     }
   };
 
@@ -184,45 +272,42 @@
 
   const continueBtnForSession = document.getElementById('continueBtn');
   const playAgainBtnForSession = document.getElementById('playAgainBtn');
-  let replayArmed = false;
-  let replaySessionKickoffInFlight = false;
 
   const beginSecureSession = async () => {
-    const mmAuth = await ensureAuthScript();
-    if (!mmAuth || typeof mmAuth.startGameSession !== 'function') return;
-    const sessionResult = await mmAuth.startGameSession(gameKey);
-    if (sessionResult?.ok && sessionResult.seed != null) {
-      const s = sessionResult.seed;
-      window.mmChallengeSeed = typeof s === 'bigint' ? s.toString() : s;
+    try {
+      const mmAuth = await ensureAuthScript();
+      if (!mmAuth || typeof mmAuth.startGameSession !== 'function') return;
+      const sessionResult = await mmAuth.startGameSession(gameKey);
+      if (sessionResult?.ok && sessionResult.seed != null) {
+        const s = sessionResult.seed;
+        window.mmChallengeSeed = typeof s === 'bigint' ? s.toString() : s;
+      }
+      window.mmVerifyTranscript = [];
+    } catch (_) {
+      /* non-blocking: gameplay must continue even if session bootstrap fails */
     }
-    window.mmVerifyTranscript = [];
   };
 
   if (continueBtnForSession) {
-    continueBtnForSession.addEventListener('click', async () => {
-      await beginSecureSession();
+    continueBtnForSession.addEventListener('click', () => {
+      void beginSecureSession();
     });
   }
 
   if (playAgainBtnForSession) {
-    playAgainBtnForSession.addEventListener('click', async (event) => {
-      if (replayArmed) {
-        replayArmed = false;
-        return;
-      }
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      if (replaySessionKickoffInFlight) return;
-      replaySessionKickoffInFlight = true;
-      try {
-        await beginSecureSession();
-      } finally {
-        replaySessionKickoffInFlight = false;
-      }
-      replayArmed = true;
-      playAgainBtnForSession.click();
-    }, true);
+    playAgainBtnForSession.addEventListener('click', () => {
+      void beginSecureSession();
+    });
   }
+
+  void (async () => {
+    const mmAuth = await ensureAuthScript();
+    if (!mmAuth || typeof mmAuth.pendingScoresCount !== 'function') return;
+    if (mmAuth.pendingScoresCount() > 0) {
+      const retryBtn = ensureRetrySaveButton();
+      if (retryBtn) retryBtn.style.display = 'inline-block';
+    }
+  })();
 
   if (window.lucide && typeof window.lucide.createIcons === 'function') {
     window.lucide.createIcons();
