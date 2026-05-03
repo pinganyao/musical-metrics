@@ -162,6 +162,7 @@
   window.addEventListener('online', () => enqueueScoreReport());
   window.addEventListener('mm-try-score-sync', () => enqueueScoreReport());
   window.addEventListener('mm-game-over', () => enqueueScoreReport());
+  window.addEventListener('mm-auth-changed', () => enqueueScoreReport());
 
   const rulesDiv = document.querySelector('.rules');
   const titleEl = document.querySelector('.main-content h1');
