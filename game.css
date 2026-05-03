@@ -1513,9 +1513,33 @@ body {
     background: rgba(5, 7, 13, 0.78);
 }
 
+.header-container {
+    max-width: 74rem;
+}
+
+.logo {
+    letter-spacing: normal;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.nav-link,
+.mobile-menu-link {
+    color: var(--text-1);
+    font-weight: 500;
+}
+
+.nav-link:hover,
+.mobile-menu-link:hover,
+.nav-link.active,
+.mobile-menu-link.active {
+    color: var(--text-0);
+}
+
 .mobile-menu {
     background: var(--surface-strong);
     border-color: var(--border);
+    border-radius: 0 0 12px 12px;
 }
 
 .main-content {
