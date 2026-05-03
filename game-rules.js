@@ -62,6 +62,26 @@
     return styles.display !== 'none' && styles.visibility !== 'hidden' && styles.opacity !== '0';
   };
 
+  /** Game-over panel: do not treat opacity animation as “hidden” or we never submit scores. */
+  const isGameOverPanelShown = (element) => {
+    if (!element) return false;
+    if (typeof element.checkVisibility === 'function') {
+      try {
+        return element.checkVisibility({
+          checkOpacity: false,
+          contentVisibilityAuto: true
+        });
+      } catch (_) {
+        /* fall through */
+      }
+    }
+    const styles = window.getComputedStyle(element);
+    return styles.display !== 'none' && styles.visibility !== 'hidden';
+  };
+
+  /** Games dispatch mm-game-over when the round ends — trust it even if visibility checks lag one frame. */
+  let gameOverJustSignaled = false;
+
   const parseScore = (scoreText) => {
     const match = scoreText.match(/-?\d+(\.\d+)?/);
     if (!match) return null;
@@ -71,7 +91,12 @@
 
   const runMaybeReportScore = async () => {
     if (!scoreEl || !gameOverEl || !gameKey) return;
-    const isGameOverVisible = isVisible(gameOverEl);
+
+    const fromGameOverEvent = gameOverJustSignaled;
+    gameOverJustSignaled = false;
+
+    const isGameOverVisible =
+      isGameOverPanelShown(gameOverEl) || fromGameOverEvent;
 
     if (isGameOverVisible && !wasGameOverVisible) {
       scoreReportedForCurrentGameOver = false;
@@ -161,7 +186,10 @@
 
   window.addEventListener('online', () => enqueueScoreReport());
   window.addEventListener('mm-try-score-sync', () => enqueueScoreReport());
-  window.addEventListener('mm-game-over', () => enqueueScoreReport());
+  window.addEventListener('mm-game-over', () => {
+    gameOverJustSignaled = true;
+    enqueueScoreReport();
+  });
   window.addEventListener('mm-auth-changed', () => enqueueScoreReport());
 
   const rulesDiv = document.querySelector('.rules');
