@@ -377,6 +377,9 @@
             if (window.mmBeginVerifiedSession) {
                 await window.mmBeginVerifiedSession('harmony2');
             }
+            if (window.mmEnsureVerifiedPlayReady && !(await window.mmEnsureVerifiedPlayReady('harmony2'))) {
+                return;
+            }
             try {
                 await AudioEngine.init(audioFiles);
             } catch (_) {

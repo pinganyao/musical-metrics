@@ -383,6 +383,9 @@
       if (window.mmBeginVerifiedSession) {
         await window.mmBeginVerifiedSession('pitch1');
       }
+      if (window.mmEnsureVerifiedPlayReady && !(await window.mmEnsureVerifiedPlayReady('pitch1'))) {
+        return;
+      }
 
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';

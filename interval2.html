@@ -339,6 +339,9 @@
       if (window.mmBeginVerifiedSession) {
         await window.mmBeginVerifiedSession('interval2');
       }
+      if (window.mmEnsureVerifiedPlayReady && !(await window.mmEnsureVerifiedPlayReady('interval2'))) {
+        return;
+      }
       await AudioEngine.init(audioFiles);
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';

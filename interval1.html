@@ -344,6 +344,9 @@
             if (window.mmBeginVerifiedSession) {
                 await window.mmBeginVerifiedSession('interval1');
             }
+            if (window.mmEnsureVerifiedPlayReady && !(await window.mmEnsureVerifiedPlayReady('interval1'))) {
+                return;
+            }
             await AudioEngine.init(audioFiles);
             rulesDiv.style.display = 'none';
             continueBtn.style.display = 'none';

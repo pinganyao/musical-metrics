@@ -289,6 +289,9 @@
       if (window.mmBeginVerifiedSession) {
         await window.mmBeginVerifiedSession('melody3');
       }
+      if (window.mmEnsureVerifiedPlayReady && !(await window.mmEnsureVerifiedPlayReady('melody3'))) {
+        return;
+      }
       try {
         await AudioEngine.init(audioFiles);
       } catch (_) {

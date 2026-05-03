@@ -262,6 +262,9 @@
       if (window.mmBeginVerifiedSession) {
         await window.mmBeginVerifiedSession('tempo1');
       }
+      if (window.mmEnsureVerifiedPlayReady && !(await window.mmEnsureVerifiedPlayReady('tempo1'))) {
+        return;
+      }
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';
       playMetronome();

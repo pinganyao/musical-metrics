@@ -270,6 +270,9 @@
       if (window.mmBeginVerifiedSession) {
         await window.mmBeginVerifiedSession('melody2');
       }
+      if (window.mmEnsureVerifiedPlayReady && !(await window.mmEnsureVerifiedPlayReady('melody2'))) {
+        return;
+      }
       try {
         await AudioEngine.init(audioFiles);
       } catch (_) {

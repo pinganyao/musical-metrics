@@ -333,6 +333,9 @@
       if (window.mmBeginVerifiedSession) {
         await window.mmBeginVerifiedSession('tempo2');
       }
+      if (window.mmEnsureVerifiedPlayReady && !(await window.mmEnsureVerifiedPlayReady('tempo2'))) {
+        return;
+      }
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';
       playMetronome();

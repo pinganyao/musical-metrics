@@ -372,6 +372,9 @@
       if (window.mmBeginVerifiedSession) {
         await window.mmBeginVerifiedSession('rhythm1');
       }
+      if (window.mmEnsureVerifiedPlayReady && !(await window.mmEnsureVerifiedPlayReady('rhythm1'))) {
+        return;
+      }
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';
       playPattern();

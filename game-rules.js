@@ -44,15 +44,6 @@
     }
   };
 
-  const rulesDiv = document.querySelector('.rules');
-  if (!rulesDiv) return;
-
-  const titleEl = document.querySelector('.main-content h1');
-  const titleText = titleEl ? `${titleEl.textContent.trim()} Rules` : 'Game Rules';
-  const rulesText = Array.from(rulesDiv.querySelectorAll('p'))
-    .map((p) => p.textContent.trim())
-    .filter(Boolean);
-
   const scoreEl = document.getElementById('finalScore');
   const gameOverEl = document.querySelector('.game-over');
   const gameKey = (() => {
@@ -152,6 +143,15 @@
   }
 
   enqueueScoreReport();
+
+  const rulesDiv = document.querySelector('.rules');
+  const titleEl = document.querySelector('.main-content h1');
+  const titleText = titleEl ? `${titleEl.textContent.trim()} Rules` : 'Game Rules';
+  const rulesText = rulesDiv
+    ? Array.from(rulesDiv.querySelectorAll('p'))
+        .map((p) => p.textContent.trim())
+        .filter(Boolean)
+    : [];
 
   if (!rulesText.length) return;
 

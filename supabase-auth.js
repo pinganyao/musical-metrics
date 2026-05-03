@@ -871,15 +871,19 @@
     }
 
     let seed = null;
-    const { data: sessionRow, error: sessionFetchError } = await state.client
-      .from("game_sessions")
-      .select("challenge_seed")
-      .eq("id", data)
-      .maybeSingle();
+    for (let fetchAttempt = 0; fetchAttempt < 6; fetchAttempt++) {
+      const { data: sessionRow, error: sessionFetchError } = await state.client
+        .from("game_sessions")
+        .select("challenge_seed")
+        .eq("id", data)
+        .maybeSingle();
 
-    if (!sessionFetchError && sessionRow && sessionRow.challenge_seed != null) {
-      const raw = sessionRow.challenge_seed;
-      seed = typeof raw === "bigint" ? raw.toString() : raw;
+      if (!sessionFetchError && sessionRow && sessionRow.challenge_seed != null) {
+        const raw = sessionRow.challenge_seed;
+        seed = typeof raw === "bigint" ? raw.toString() : raw;
+        break;
+      }
+      await new Promise((r) => setTimeout(r, 60 + fetchAttempt * 90));
     }
 
     state.activeGameSessions[normalizedGameKey] = {
@@ -890,6 +894,23 @@
     persistActiveSessions();
 
     return { ok: true, seed };
+  };
+
+  /** Supabase fetch has no built-in deadline; a stalled TCP leave awaits hanging forever and blocks Continue. */
+  const RPC_CREATE_SESSION_TIMEOUT_MS = 20000;
+
+  const startGameSessionWithTimeout = (gameKey) => {
+    const main = startGameSession(gameKey).then(
+      (r) => r,
+      (err) => ({ ok: false, reason: "rpc_threw", error: err })
+    );
+    const timeout = new Promise((resolve) =>
+      window.setTimeout(
+        () => resolve({ ok: false, reason: "rpc_timeout" }),
+        RPC_CREATE_SESSION_TIMEOUT_MS
+      )
+    );
+    return Promise.race([main, timeout]);
   };
 
   /** Wait until the browser reports connectivity (e.g. user turns Wi-Fi on after loading offline). */
@@ -915,13 +936,15 @@
    */
   const beginVerifiedSession = async (gameKey) => {
     await init();
-    let feedbackTimer = window.setTimeout(() => {
-      showStatus("Starting secure session…", "info");
-    }, 450);
+    let slowHintTimer = null;
     try {
       if (typeof navigator !== "undefined" && !navigator.onLine) {
         showStatus("Waiting for network…", "info");
       }
+
+      slowHintTimer = window.setTimeout(() => {
+        showStatus("Still connecting…", "info");
+      }, 2500);
 
       let sessionResult = null;
       for (let attempt = 0; attempt < 6; attempt++) {
@@ -934,9 +957,16 @@
           await waitForOnline(6000);
         }
 
-        sessionResult = await startGameSession(gameKey);
+        sessionResult = await startGameSessionWithTimeout(gameKey);
         if (sessionResult?.ok) break;
         if (sessionResult?.reason === "not_authenticated") break;
+        if (sessionResult?.reason === "rpc_timeout") {
+          showStatus(
+            "Session setup timed out. Check your connection and tap Continue again.",
+            "error"
+          );
+          break;
+        }
       }
 
       if (sessionResult?.ok && sessionResult.seed != null) {
@@ -944,12 +974,56 @@
         window.mmChallengeSeed = typeof s === "bigint" ? s.toString() : s;
       }
     } finally {
-      clearTimeout(feedbackTimer);
+      if (slowHintTimer) clearTimeout(slowHintTimer);
     }
     window.mmVerifyTranscript = [];
   };
 
   window.mmBeginVerifiedSession = beginVerifiedSession;
+
+  /**
+   * Call after mmBeginVerifiedSession on Continue. Guests may play without a session; logged-in users
+   * must have a session row + challenge_seed or gameplay uses random data while the DB expects a fixed seed — saves fail.
+   */
+  const ensureVerifiedPlayReady = async (gameKey) => {
+    await init();
+    hydrateActiveSessions();
+    if (!state.session?.user) return true;
+
+    const k = normalizeGameKey(gameKey);
+    if (!k) return false;
+
+    let entry = state.activeGameSessions[k];
+    if (entry?.id && entry.seed != null && entry.seed !== "") return true;
+
+    if (entry?.id && state.client) {
+      const { data: row, error: rowErr } = await state.client
+        .from("game_sessions")
+        .select("challenge_seed")
+        .eq("id", entry.id)
+        .maybeSingle();
+      if (!rowErr && row && row.challenge_seed != null) {
+        const raw = row.challenge_seed;
+        const seedStr = typeof raw === "bigint" ? raw.toString() : raw;
+        state.activeGameSessions[k] = {
+          id: entry.id,
+          startedAtMs: typeof entry.startedAtMs === "number" ? entry.startedAtMs : Date.now(),
+          seed: seedStr
+        };
+        persistActiveSessions();
+        window.mmChallengeSeed = seedStr;
+        return true;
+      }
+    }
+
+    showStatus(
+      "Could not start a verified round (missing session or challenge seed). Stay online and tap Continue again.",
+      "error"
+    );
+    return false;
+  };
+
+  window.mmEnsureVerifiedPlayReady = ensureVerifiedPlayReady;
 
   const peekGameSession = (gameKey) => {
     const k = normalizeGameKey(gameKey);
@@ -1083,6 +1157,7 @@
     fetchRecentGameScores,
     startGameSession,
     beginVerifiedSession,
+    ensureVerifiedPlayReady,
     peekGameSession,
     loginWithPassword,
     signUpWithUsername,
