@@ -269,7 +269,11 @@
 
     continueBtn.addEventListener('click', async () => {
       await AudioEngine.resume();
-      await AudioEngine.init(audioFiles);
+      try {
+        await AudioEngine.init(audioFiles);
+      } catch (_) {
+        /* Sample load failure must not skip verified session — scores depend on it. */
+      }
       if (window.mmBeginVerifiedSession) {
         await window.mmBeginVerifiedSession('melody1');
       }

@@ -99,6 +99,106 @@
     .map((p) => p.textContent.trim())
     .filter(Boolean);
 
+  const scoreEl = document.getElementById('finalScore');
+  const gameOverEl = document.querySelector('.game-over');
+  const gameKey = (() => {
+    const path = window.location.pathname || '';
+    const segments = path.split('/').filter(Boolean);
+    const last = segments.length ? segments[segments.length - 1] : path;
+    return last.replace(/\.html$/i, '');
+  })();
+  let wasGameOverVisible = false;
+  let scoreReportedForCurrentGameOver = false;
+  let scoreReportTail = Promise.resolve();
+
+  const isVisible = (element) => {
+    if (!element) return false;
+    const styles = window.getComputedStyle(element);
+    return styles.display !== 'none' && styles.visibility !== 'hidden' && styles.opacity !== '0';
+  };
+
+  const parseScore = (scoreText) => {
+    const match = scoreText.match(/-?\d+(\.\d+)?/);
+    if (!match) return null;
+    const value = Number(match[0]);
+    return Number.isFinite(value) ? value : null;
+  };
+
+  const runMaybeReportScore = async () => {
+    if (!scoreEl || !gameOverEl || !gameKey) return;
+    const isGameOverVisible = isVisible(gameOverEl);
+
+    if (isGameOverVisible && !wasGameOverVisible) {
+      scoreReportedForCurrentGameOver = false;
+    }
+    wasGameOverVisible = isGameOverVisible;
+
+    if (!isGameOverVisible || scoreReportedForCurrentGameOver) return;
+
+    const scoreText = scoreEl.textContent ? scoreEl.textContent.trim() : '';
+    const scoreValue = parseScore(scoreText);
+    if (scoreValue === null) return;
+
+    const mmAuth = await ensureAuthScript();
+    if (!mmAuth || typeof mmAuth.reportScore !== 'function') {
+      showScoreSaveFailed(
+        'Score not saved: account module did not load in time. Refresh the page and play once more.'
+      );
+      return;
+    }
+
+    const melodyGames = ['melody1', 'melody2', 'melody3'];
+    const harmonyGames = ['harmony1', 'harmony2', 'harmony3'];
+    const extras = {};
+    if (melodyGames.includes(gameKey)) {
+      extras.melodyTranscript = Array.isArray(window.mmMelodyTranscript)
+        ? window.mmMelodyTranscript.slice()
+        : [];
+    } else if (harmonyGames.includes(gameKey)) {
+      extras.verifyTranscript = Array.isArray(window.mmVerifyTranscript)
+        ? window.mmVerifyTranscript.slice()
+        : [];
+    } else if (Array.isArray(window.mmVerifyTranscript) && window.mmVerifyTranscript.length > 0) {
+      extras.verifyTranscript = window.mmVerifyTranscript.slice();
+    }
+
+    try {
+      let result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
+      if (result && !result.saved && result.reason === 'insert_failed') {
+        await new Promise((r) => setTimeout(r, 700));
+        result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
+      }
+      if (result && result.saved) {
+        scoreReportedForCurrentGameOver = true;
+      }
+    } catch (e) {
+      showScoreSaveFailed(
+        `Score not saved: ${e && e.message ? e.message : 'network or server error'}. Try again.`
+      );
+    }
+  };
+
+  const enqueueScoreReport = () => {
+    scoreReportTail = scoreReportTail
+      .then(() => runMaybeReportScore())
+      .catch(() => {});
+  };
+
+  const scoreObserver = new MutationObserver(() => {
+    enqueueScoreReport();
+    window.setTimeout(() => enqueueScoreReport(), 400);
+  });
+
+  if (scoreEl) {
+    scoreObserver.observe(scoreEl, { characterData: true, childList: true, subtree: true });
+  }
+
+  if (gameOverEl) {
+    scoreObserver.observe(gameOverEl, { attributes: true, attributeFilter: ['style', 'class'] });
+  }
+
+  enqueueScoreReport();
+
   if (!rulesText.length) return;
 
   const fab = document.createElement('button');
@@ -181,100 +281,6 @@
   observer.observe(rulesDiv, { attributes: true, attributeFilter: ['style', 'class'] });
 
   syncFabVisibility();
-
-  const scoreEl = document.getElementById('finalScore');
-  const gameOverEl = document.querySelector('.game-over');
-  const gameKey = (() => {
-    const path = window.location.pathname || '';
-    const segments = path.split('/').filter(Boolean);
-    const last = segments.length ? segments[segments.length - 1] : path;
-    return last.replace(/\.html$/i, '');
-  })();
-  let wasGameOverVisible = false;
-  let scoreReportedForCurrentGameOver = false;
-  let scoreReportTail = Promise.resolve();
-
-  const isVisible = (element) => {
-    if (!element) return false;
-    const styles = window.getComputedStyle(element);
-    return styles.display !== 'none' && styles.visibility !== 'hidden' && styles.opacity !== '0';
-  };
-
-  const parseScore = (scoreText) => {
-    const match = scoreText.match(/-?\d+(\.\d+)?/);
-    if (!match) return null;
-    const value = Number(match[0]);
-    return Number.isFinite(value) ? value : null;
-  };
-
-  const runMaybeReportScore = async () => {
-    if (!scoreEl || !gameOverEl || !gameKey) return;
-    const isGameOverVisible = isVisible(gameOverEl);
-
-    if (isGameOverVisible && !wasGameOverVisible) {
-      scoreReportedForCurrentGameOver = false;
-    }
-    wasGameOverVisible = isGameOverVisible;
-
-    if (!isGameOverVisible || scoreReportedForCurrentGameOver) return;
-
-    const scoreText = scoreEl.textContent ? scoreEl.textContent.trim() : '';
-    const scoreValue = parseScore(scoreText);
-    if (scoreValue === null) return;
-
-    const mmAuth = await ensureAuthScript();
-    if (!mmAuth || typeof mmAuth.reportScore !== "function") {
-      showScoreSaveFailed(
-        "Score not saved: account module did not load in time. Refresh the page and play once more."
-      );
-      return;
-    }
-
-    const melodyGames = ["melody1", "melody2", "melody3"];
-    const extras = {};
-    // Melody games must use mmMelodyTranscript only — never prefer mmVerifyTranscript or RPC gets wrong payload.
-    if (melodyGames.includes(gameKey) && Array.isArray(window.mmMelodyTranscript)) {
-      extras.melodyTranscript = window.mmMelodyTranscript.slice();
-    } else if (Array.isArray(window.mmVerifyTranscript) && window.mmVerifyTranscript.length > 0) {
-      extras.verifyTranscript = window.mmVerifyTranscript.slice();
-    }
-
-    try {
-      let result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
-      if (result && !result.saved && result.reason === "insert_failed") {
-        await new Promise((r) => setTimeout(r, 700));
-        result = await mmAuth.reportScore(gameKey, scoreValue, scoreText, extras);
-      }
-      if (result && result.saved) {
-        scoreReportedForCurrentGameOver = true;
-      }
-    } catch (e) {
-      showScoreSaveFailed(
-        `Score not saved: ${e && e.message ? e.message : "network or server error"}. Try again.`
-      );
-    }
-  };
-
-  const enqueueScoreReport = () => {
-    scoreReportTail = scoreReportTail
-      .then(() => runMaybeReportScore())
-      .catch(() => {});
-  };
-
-  const scoreObserver = new MutationObserver(() => {
-    enqueueScoreReport();
-    window.setTimeout(() => enqueueScoreReport(), 400);
-  });
-
-  if (scoreEl) {
-    scoreObserver.observe(scoreEl, { characterData: true, childList: true, subtree: true });
-  }
-
-  if (gameOverEl) {
-    scoreObserver.observe(gameOverEl, { attributes: true, attributeFilter: ['style', 'class'] });
-  }
-
-  enqueueScoreReport();
 
   if (window.lucide && typeof window.lucide.createIcons === 'function') {
     window.lucide.createIcons();

@@ -374,7 +374,11 @@
 
         continueBtn.addEventListener('click', async () => {
             await AudioEngine.resume();
-            await AudioEngine.init(audioFiles);
+            try {
+                await AudioEngine.init(audioFiles);
+            } catch (_) {
+                /* Many chord samples; one failed load must not skip verified session. */
+            }
             if (window.mmBeginVerifiedSession) {
                 await window.mmBeginVerifiedSession('harmony2');
             }

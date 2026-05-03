@@ -286,7 +286,11 @@
 
     continueBtn.addEventListener('click', async () => {
       await AudioEngine.resume();
-      await AudioEngine.init(audioFiles);
+      try {
+        await AudioEngine.init(audioFiles);
+      } catch (_) {
+        /* Melody III loads many chromatic samples; one 404 must not block startGameSession. */
+      }
       if (window.mmBeginVerifiedSession) {
         await window.mmBeginVerifiedSession('melody3');
       }
