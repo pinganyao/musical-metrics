@@ -269,13 +269,13 @@
 
     continueBtn.addEventListener('click', async () => {
       await AudioEngine.resume();
+      if (window.mmBeginVerifiedSession) {
+        await window.mmBeginVerifiedSession('melody1');
+      }
       try {
         await AudioEngine.init(audioFiles);
       } catch (_) {
         /* Sample load failure must not skip verified session — scores depend on it. */
-      }
-      if (window.mmBeginVerifiedSession) {
-        await window.mmBeginVerifiedSession('melody1');
       }
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';

@@ -892,6 +892,65 @@
     return { ok: true, seed };
   };
 
+  /** Wait until the browser reports connectivity (e.g. user turns Wi-Fi on after loading offline). */
+  const waitForOnline = (timeoutMs) =>
+    new Promise((resolve) => {
+      if (typeof navigator === "undefined" || navigator.onLine) {
+        resolve();
+        return;
+      }
+      const onDone = () => {
+        clearTimeout(timer);
+        window.removeEventListener("online", onOnline);
+        resolve();
+      };
+      const onOnline = () => onDone();
+      const timer = window.setTimeout(onDone, timeoutMs);
+      window.addEventListener("online", onOnline, { once: true });
+    });
+
+  /**
+   * Run before verified gameplay so challenge_seed matches the server.
+   * Lives here (not only game-rules.js) so it exists as soon as supabase-auth loads — Continue must not await heavy AudioEngine.init first.
+   */
+  const beginVerifiedSession = async (gameKey) => {
+    await init();
+    let feedbackTimer = window.setTimeout(() => {
+      showStatus("Starting secure session…", "info");
+    }, 450);
+    try {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        showStatus("Waiting for network…", "info");
+      }
+
+      let sessionResult = null;
+      for (let attempt = 0; attempt < 6; attempt++) {
+        if (attempt > 0) {
+          await new Promise((r) => setTimeout(r, 350 * attempt));
+          if (typeof navigator !== "undefined" && !navigator.onLine) {
+            await waitForOnline(8000);
+          }
+        } else if (typeof navigator !== "undefined" && !navigator.onLine) {
+          await waitForOnline(6000);
+        }
+
+        sessionResult = await startGameSession(gameKey);
+        if (sessionResult?.ok) break;
+        if (sessionResult?.reason === "not_authenticated") break;
+      }
+
+      if (sessionResult?.ok && sessionResult.seed != null) {
+        const s = sessionResult.seed;
+        window.mmChallengeSeed = typeof s === "bigint" ? s.toString() : s;
+      }
+    } finally {
+      clearTimeout(feedbackTimer);
+    }
+    window.mmVerifyTranscript = [];
+  };
+
+  window.mmBeginVerifiedSession = beginVerifiedSession;
+
   const peekGameSession = (gameKey) => {
     const k = normalizeGameKey(gameKey);
     const s = state.activeGameSessions[k];
@@ -1023,6 +1082,7 @@
     fetchTotalCompletedTests,
     fetchRecentGameScores,
     startGameSession,
+    beginVerifiedSession,
     peekGameSession,
     loginWithPassword,
     signUpWithUsername,

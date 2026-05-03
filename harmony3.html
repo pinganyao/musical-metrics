@@ -438,13 +438,13 @@
 
         continueBtn.addEventListener('click', async () => {
             await AudioEngine.resume();
+            if (window.mmBeginVerifiedSession) {
+                await window.mmBeginVerifiedSession('harmony3');
+            }
             try {
                 await AudioEngine.init(audioFiles);
             } catch (_) {
                 /* Large sample map; any failed fetch must not skip startGameSession. */
-            }
-            if (window.mmBeginVerifiedSession) {
-                await window.mmBeginVerifiedSession('harmony3');
             }
             rulesDiv.style.display = 'none';
             continueBtn.style.display = 'none';

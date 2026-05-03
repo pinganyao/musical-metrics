@@ -296,13 +296,13 @@
 
         continueBtn.addEventListener('click', async () => {
             await AudioEngine.resume();
+            if (window.mmBeginVerifiedSession) {
+                await window.mmBeginVerifiedSession('harmony1');
+            }
             try {
                 await AudioEngine.init(audioFiles);
             } catch (_) {
                 /* Many chord samples; one failed load must not skip verified session. */
-            }
-            if (window.mmBeginVerifiedSession) {
-                await window.mmBeginVerifiedSession('harmony1');
             }
             rulesDiv.style.display = 'none';
             continueBtn.style.display = 'none';
