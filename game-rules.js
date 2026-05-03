@@ -20,11 +20,43 @@
       document.head.appendChild(script);
     });
 
+  /** Wait until the browser reports connectivity (e.g. user turns WiFi on after loading offline). */
+  const waitForOnline = (timeoutMs) =>
+    new Promise((resolve) => {
+      if (typeof navigator === "undefined" || navigator.onLine) {
+        resolve();
+        return;
+      }
+      const onDone = () => {
+        clearTimeout(timer);
+        window.removeEventListener("online", onOnline);
+        resolve();
+      };
+      const onOnline = () => onDone();
+      const timer = window.setTimeout(onDone, timeoutMs);
+      window.addEventListener("online", onOnline, { once: true });
+    });
+
   /** Await before any verified gameplay so challenge_seed is set; keeps client transcript matching the server. */
   const beginVerifiedSession = async (gameKey) => {
     const mmAuth = await ensureAuthScript();
     if (mmAuth && typeof mmAuth.startGameSession === "function") {
-      const sessionResult = await mmAuth.startGameSession(gameKey);
+      let sessionResult = null;
+      for (let attempt = 0; attempt < 6; attempt++) {
+        if (attempt > 0) {
+          await new Promise((r) => setTimeout(r, 350 * attempt));
+          if (typeof navigator !== "undefined" && !navigator.onLine) {
+            await waitForOnline(15000);
+          }
+        } else if (typeof navigator !== "undefined" && !navigator.onLine) {
+          await waitForOnline(15000);
+        }
+
+        sessionResult = await mmAuth.startGameSession(gameKey);
+        if (sessionResult?.ok) break;
+        if (sessionResult?.reason === "not_authenticated") break;
+      }
+
       if (sessionResult?.ok && sessionResult.seed != null) {
         const s = sessionResult.seed;
         window.mmChallengeSeed = typeof s === "bigint" ? s.toString() : s;
