@@ -1205,7 +1205,7 @@
     if (meta.kind === "outOf") {
       return { main, suffix: "/" + meta.max };
     }
-    return { main, suffix: "points" };
+    return { main, suffix: " points" };
   };
 
   const formatScoreLabel = (value, gameKey, options) => {
