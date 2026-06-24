@@ -55,6 +55,34 @@
     pitch1: 100,
     rhythm1: 100
   };
+  const GAME_SCORE_META = {
+    melody1: { kind: "points" },
+    melody2: { kind: "points" },
+    melody3: { kind: "points" },
+    interval1: { kind: "outOf", max: 10 },
+    interval2: { kind: "outOf", max: 10 },
+    harmony1: { kind: "outOf", max: 10 },
+    harmony2: { kind: "outOf", max: 10 },
+    harmony3: { kind: "outOf", max: 10 },
+    tempo1: { kind: "outOf", max: 100 },
+    tempo2: { kind: "outOf", max: 100 },
+    pitch1: { kind: "outOf", max: 100 },
+    rhythm1: { kind: "outOf", max: 100 }
+  };
+  const GAME_PATHS = {
+    melody1: "/melody1",
+    melody2: "/melody2",
+    melody3: "/melody3",
+    interval1: "/interval1",
+    interval2: "/interval2",
+    harmony1: "/harmony1",
+    harmony2: "/harmony2",
+    harmony3: "/harmony3",
+    tempo1: "/tempo1",
+    tempo2: "/tempo2",
+    pitch1: "/pitch1",
+    rhythm1: "/rhythm1"
+  };
 
   const loadSupabaseLib = () =>
     new Promise((resolve, reject) => {
@@ -1147,6 +1175,75 @@
     return data || [];
   };
 
+  const isValidGameKey = (gameKey) => {
+    const key = normalizeGameKey(gameKey);
+    return Boolean(key && GAME_NAMES[key]);
+  };
+
+  const gamePathForKey = (gameKey) => {
+    const key = normalizeGameKey(gameKey);
+    return GAME_PATHS[key] || "/dashboard";
+  };
+
+  const getScoreMetaForGame = (gameKey) => {
+    const key = normalizeGameKey(gameKey);
+    return GAME_SCORE_META[key] || { kind: "points" };
+  };
+
+  const formatScoreParts = (value, gameKey, options) => {
+    const opts = options || {};
+    const forAverage = opts.forAverage === true;
+    const meta = getScoreMetaForGame(gameKey);
+    if (value == null || Number.isNaN(Number(value))) return null;
+    const n = Number(value);
+    const rounded = Math.round(n * 10) / 10;
+    const main = forAverage
+      ? rounded.toFixed(1)
+      : rounded % 1 === 0
+        ? String(Math.round(rounded))
+        : rounded.toFixed(1);
+    if (meta.kind === "outOf") {
+      return { main, suffix: "/" + meta.max };
+    }
+    return { main, suffix: "points" };
+  };
+
+  const formatScoreLabel = (value, gameKey, options) => {
+    const parts = formatScoreParts(value, gameKey, options);
+    if (!parts) return "—";
+    return parts.main + parts.suffix;
+  };
+
+  const parseStatsGameKeyFromPath = () => {
+    if (typeof window === "undefined") return "";
+    const parts = window.location.pathname.split("/").filter(Boolean);
+    if (parts[0] === "stats" && parts[1]) {
+      return normalizeGameKey(parts[1]);
+    }
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get("game");
+    return fromQuery ? normalizeGameKey(fromQuery) : "";
+  };
+
+  const fetchGameScoreHistory = async (gameKey, options = {}) => {
+    await init();
+    if (!state.client || !state.session?.user) return [];
+    const key = normalizeGameKey(gameKey);
+    if (!isValidGameKey(key)) return [];
+    const cap = Math.min(Math.max(1, Number(options.limit) || 200), 500);
+    const { data, error } = await state.client
+      .from("game_scores")
+      .select("id, score, score_label, created_at")
+      .eq("game_key", key)
+      .order("created_at", { ascending: true })
+      .limit(cap);
+    if (error) {
+      showStatus(`Could not load score history: ${error.message}`, "error");
+      return [];
+    }
+    return data || [];
+  };
+
   window.MMAuth = {
     init,
     reportScore,
@@ -1154,6 +1251,13 @@
     fetchHighScoreForGame,
     fetchTotalCompletedTests,
     fetchRecentGameScores,
+    fetchGameScoreHistory,
+    isValidGameKey,
+    gamePathForKey,
+    getScoreMetaForGame,
+    formatScoreParts,
+    formatScoreLabel,
+    parseStatsGameKeyFromPath,
     startGameSession,
     peekGameSession,
     loginWithPassword,

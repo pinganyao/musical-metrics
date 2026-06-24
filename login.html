@@ -372,6 +372,13 @@
       attachClearOnInput(LOGIN_FIELDS, "login-form-summary");
       attachClearOnInput(SIGNUP_FIELDS, "signup-form-summary");
 
+      function safeRedirectPath() {
+        const params = new URLSearchParams(window.location.search);
+        const raw = (params.get("redirect") || "").trim();
+        if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
+        return raw;
+      }
+
       if (window.MMAuth && rememberMeCheckbox) {
         rememberMeCheckbox.checked = window.MMAuth.isRememberMeEnabled();
       }
@@ -401,7 +408,7 @@
           document.getElementById("login-password").value || ""
         );
         if (result.ok) {
-          window.location.href = "/dashboard";
+          window.location.href = safeRedirectPath();
           return;
         }
         applyLoginErrors(result.fieldErrors || {}, result.error || "");

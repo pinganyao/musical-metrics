@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="mm-auth-boot.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, follow">
+    <meta name="description" content="Detailed statistics and performance charts for Musical Metrics ear training games.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Musical Metrics">
+    <meta property="og:title" content="Game Stats — Musical Metrics">
+    <meta property="og:description" content="View your score history and performance trends.">
+    <meta property="og:image" content="https://musicalmetrics.xyz/assets/images/social-logo.png">
+    <title>Game Stats | Musical Metrics</title>
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg?v=2">
+    <link rel="icon" type="image/png" href="assets/images/logo.png?v=2">
+    <link rel="apple-touch-icon" href="assets/images/logo.png?v=2">
+    <link rel="stylesheet" href="globals.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body class="stats-page-body">
+    <header class="header">
+        <div class="header-container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <a href="/" class="logo-link">
+                        <img src="assets/images/music-logo-white.svg" alt="Musical Metrics Logo" class="nav-logo">
+                        <span class="logo">MUSICAL METRICS</span>
+                    </a>
+                </div>
+                <nav class="nav">
+                    <a href="/dashboard" class="nav-link active">DASHBOARD</a>
+                    <a href="/leaderboard" class="nav-link">LEADERBOARD</a>
+                    <a href="/about" class="nav-link">ABOUT</a>
+                </nav>
+                <button class="mobile-menu-toggle" id="mobile-menu-toggle" type="button">
+                    <i data-lucide="menu" class="hamburger-icon"></i>
+                </button>
+                <div class="mobile-menu" id="mobile-menu">
+                    <div class="mobile-menu-links">
+                        <a href="/dashboard" class="mobile-menu-link active">DASHBOARD</a>
+                        <a href="/leaderboard" class="mobile-menu-link">LEADERBOARD</a>
+                        <a href="/about" class="mobile-menu-link">ABOUT</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="stats-main">
+        <nav class="stats-breadcrumb" aria-label="Breadcrumb">
+            <a href="/dashboard" class="stats-breadcrumb-link">Dashboard</a>
+            <span class="stats-breadcrumb-sep" aria-hidden="true">/</span>
+            <span class="stats-breadcrumb-current" id="stats-breadcrumb-game">Stats</span>
+        </nav>
+
+        <div class="stats-hero">
+            <div class="stats-hero-text">
+                <div class="stats-hero-title-row">
+                    <i data-lucide="bar-chart-3" class="stats-hero-icon" id="stats-game-icon" aria-hidden="true"></i>
+                    <h1 class="stats-title" id="stats-game-title">Stats</h1>
+                </div>
+                <p class="stats-lede">Your performance history, trends, and score distribution for this test.</p>
+                <p class="stats-meta" id="stats-last-played" hidden></p>
+            </div>
+            <a href="#" class="stats-play-btn" id="stats-play-btn">
+                <i data-lucide="play" class="stats-play-icon" aria-hidden="true"></i>
+                Play
+            </a>
+        </div>
+
+        <section id="stats-loading" class="stats-state-card">
+            <p class="stats-state-text">Loading your statistics…</p>
+        </section>
+
+        <section id="stats-guest" class="stats-state-card" hidden>
+            <p class="stats-state-text">Log in to view detailed statistics, score history, and performance charts for this test.</p>
+            <a href="/login" class="mm-nav-login-btn" id="stats-guest-login">Log in</a>
+        </section>
+
+        <section id="stats-invalid" class="stats-state-card" hidden>
+            <p class="stats-state-text">This game was not found. Choose a test from your dashboard.</p>
+            <a href="/dashboard" class="stats-secondary-btn">Back to dashboard</a>
+        </section>
+
+        <section id="stats-empty" class="stats-state-card" hidden>
+            <p class="stats-state-text">No saved attempts yet for this test. Play a round to start building your stats.</p>
+            <a href="#" class="stats-play-btn stats-play-btn--inline" id="stats-empty-play">
+                <i data-lucide="play" class="stats-play-icon" aria-hidden="true"></i>
+                Play now
+            </a>
+        </section>
+
+        <div id="stats-content" hidden>
+            <div class="stats-summary-grid" id="stats-summary-cards"></div>
+
+            <div class="stats-charts-grid">
+                <section class="stats-chart-card stats-chart-card--wide">
+                    <div class="stats-chart-header">
+                        <h2 class="stats-chart-title">Score over time</h2>
+                        <p class="stats-chart-subtitle">Each point is one completed test. Green dots mark personal bests.</p>
+                    </div>
+                    <div class="stats-chart-canvas-wrap">
+                        <canvas id="stats-performance-chart" aria-label="Score over time chart"></canvas>
+                    </div>
+                </section>
+
+                <section class="stats-chart-card">
+                    <div class="stats-chart-header">
+                        <h2 class="stats-chart-title">Distribution</h2>
+                        <p class="stats-chart-subtitle">How often you land in each score range.</p>
+                    </div>
+                    <div class="stats-chart-canvas-wrap stats-chart-canvas-wrap--short">
+                        <canvas id="stats-distribution-chart" aria-label="Score distribution chart"></canvas>
+                    </div>
+                </section>
+            </div>
+
+            <section class="stats-history-card">
+                <div class="stats-history-header">
+                    <h2 class="stats-chart-title">Test history</h2>
+                    <p class="stats-chart-subtitle">Most recent attempts first</p>
+                </div>
+                <div id="stats-history-empty" class="stats-history-empty" hidden>No attempts recorded.</div>
+                <div id="stats-history-wrap" class="stats-history-wrap">
+                    <div class="stats-history-grid stats-history-grid--head">
+                        <div class="stats-history-col stats-history-col--num">#</div>
+                        <div class="stats-history-col stats-history-col--date">Date</div>
+                        <div class="stats-history-col stats-history-col--score">Score</div>
+                    </div>
+                    <div id="stats-history-rows"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="assets/images/music-logo-white.svg" alt="Musical Metrics Logo" class="footer-logo-img">
+                    <span class="footer-brand">Musical Metrics</span>
+                </div>
+                <div class="footer-info">
+                    <div class="footer-links">
+                        <a href="https://amtf.gr" target="_blank" rel="noopener noreferrer" class="footer-link">
+                            <img src="assets/images/amtf.png" alt="Athens Music Technology Forum" class="amtf-logo">
+                            <span class="amtf-text">Athens Music Technology Forum</span>
+                        </a>
+                    </div>
+                    <p class="footer-copyright">© 2026 Musical Metrics. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script defer src="supabase-auth.js"></script>
+    <script defer src="stats.js"></script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+</body>
+</html>

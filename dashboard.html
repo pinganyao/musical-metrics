@@ -330,8 +330,12 @@
                         '<button type="button" class="dashboard-action-button play-button" data-play-href="' +
                         game.path +
                         '"><i data-lucide="play" class="action-icon"></i>Play</button>' +
-                        '<button type="button" class="dashboard-action-button stats-button stats-button--disabled" disabled title="Coming soon">' +
-                        '<i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button>' +
+                        (loggedIn
+                            ? '<button type="button" class="dashboard-action-button stats-button" data-stats-href="/stats/' +
+                              game.key +
+                              '"><i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button>'
+                            : '<button type="button" class="dashboard-action-button stats-button stats-button--disabled" disabled title="Log in to view stats">' +
+                              '<i data-lucide="bar-chart-3" class="action-icon"></i>Stats</button>') +
                         "</div>" +
                         '<div class="dashboard-tests-table-cell score-cell score-best">' +
                         scoreDisplayHtml(bestParts) +
@@ -347,6 +351,13 @@
                 host.querySelectorAll("[data-play-href]").forEach(function (btn) {
                     btn.addEventListener("click", function () {
                         const href = btn.getAttribute("data-play-href");
+                        if (href) window.location.href = href;
+                    });
+                });
+
+                host.querySelectorAll("[data-stats-href]").forEach(function (btn) {
+                    btn.addEventListener("click", function () {
+                        const href = btn.getAttribute("data-stats-href");
                         if (href) window.location.href = href;
                     });
                 });
