@@ -448,9 +448,9 @@
                 return;
             }
             try {
-                await AudioEngine.init(audioFiles);
+                await AudioEngine.initWithButton(audioFiles, continueBtn);
             } catch (_) {
-                /* Large sample map; any failed fetch must not skip startGameSession. */
+                return;
             }
             rulesDiv.style.display = 'none';
             continueBtn.style.display = 'none';

@@ -277,9 +277,9 @@
         return;
       }
       try {
-        await AudioEngine.init(audioFiles);
+        await AudioEngine.initWithButton(audioFiles, continueBtn);
       } catch (_) {
-        /* Sample load failure must not skip verified session — scores depend on it. */
+        return;
       }
       rulesDiv.style.display = 'none';
       continueBtn.style.display = 'none';

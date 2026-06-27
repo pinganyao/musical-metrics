@@ -184,6 +184,10 @@
     }, 3500);
   };
 
+  const showComingSoonAlert = (page) => {
+    window.alert(`${page} page is coming soon.`);
+  };
+
   const normalizeUsername = (value) => (value || "").trim();
 
   const isValidUsername = (username) => /^[a-zA-Z0-9_]{3,24}$/.test(username);
@@ -538,12 +542,12 @@
 
         profileBtn?.addEventListener("click", () => {
           closeMenu();
-          showStatus("Profile page is coming soon.", "info");
+          showComingSoonAlert("Profile");
         });
 
         settingsBtn?.addEventListener("click", () => {
           closeMenu();
-          showStatus("Settings page is coming soon.", "info");
+          showComingSoonAlert("Settings");
         });
 
         if (!state.authMenuOutsideListenerBound) {
@@ -567,10 +571,10 @@
           '<a href="/signout" id="mm-auth-logout-button-mobile" class="mobile-menu-link" style="border:0;background:none;cursor:pointer;text-align:left;">SIGN OUT</a>'
         ].join("");
         document.getElementById("mm-auth-profile-button-mobile")?.addEventListener("click", () => {
-          showStatus("Profile page is coming soon.", "info");
+          showComingSoonAlert("Profile");
         });
         document.getElementById("mm-auth-settings-button-mobile")?.addEventListener("click", () => {
-          showStatus("Settings page is coming soon.", "info");
+          showComingSoonAlert("Settings");
         });
       }
       if (window.lucide?.createIcons) window.lucide.createIcons();

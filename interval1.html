@@ -350,7 +350,11 @@
             if (window.mmEnsureVerifiedPlayReady && !(await window.mmEnsureVerifiedPlayReady('interval1'))) {
                 return;
             }
-            await AudioEngine.init(audioFiles);
+            try {
+                await AudioEngine.initWithButton(audioFiles, continueBtn);
+            } catch (_) {
+                return;
+            }
             rulesDiv.style.display = 'none';
             continueBtn.style.display = 'none';
             buttonsContainer.style.display = 'flex';
