@@ -1,4 +1,8 @@
 (function () {
+  // Legacy MP3 filenames (e.g. sounds/C4.mp3) label notes one octave below the
+  // pitch players heard via Web Audio decode + BufferSource playback. Shift up
+  // so smplr matches the original in-game register.
+  const LEGACY_MP3_OCTAVE_OFFSET = 12;
   const SMPLR_URL = 'https://cdn.jsdelivr.net/npm/smplr@0.16.3/dist/index.mjs';
   // Short detached notes: brief hold + release tail (audible length ≈ duration + ampRelease).
   const DEFAULT_NOTE_DURATION = 0.45;
@@ -32,10 +36,13 @@
 
   function parseNoteKey(key, pathHint) {
     const fromPath = parseNoteNameFromPath(pathHint);
-    if (fromPath) return noteNameToMidi(fromPath);
+    if (fromPath) {
+      const midi = noteNameToMidi(fromPath);
+      return midi !== null ? midi + LEGACY_MP3_OCTAVE_OFFSET : null;
+    }
 
     const fromKey = noteNameToMidi(String(key));
-    if (fromKey !== null) return fromKey;
+    if (fromKey !== null) return fromKey + LEGACY_MP3_OCTAVE_OFFSET;
 
     return null;
   }
@@ -226,8 +233,12 @@
         if (midi !== null) return midi;
       }
       const fromPath = parseNoteNameFromPath(keyOrPath);
-      if (fromPath) return noteNameToMidi(fromPath);
-      return noteNameToMidi(key);
+      if (fromPath) {
+        const midi = noteNameToMidi(fromPath);
+        return midi !== null ? midi + LEGACY_MP3_OCTAVE_OFFSET : null;
+      }
+      const fromKey = noteNameToMidi(key);
+      return fromKey !== null ? fromKey + LEGACY_MP3_OCTAVE_OFFSET : null;
     }
 
     stopAll() {
