@@ -1200,6 +1200,12 @@
     return meta?.kind === "outOf" && meta.max === 100 ? 1 : 0;
   };
 
+  const formatScoreNumber = (value, decimals) => {
+    const factor = 10 ** decimals;
+    const rounded = Math.round(Number(value) * factor) / factor;
+    return parseFloat(rounded.toFixed(decimals)).toString();
+  };
+
   const formatScoreParts = (value, gameKey, options) => {
     const opts = options || {};
     const forAverage = opts.forAverage === true;
@@ -1207,15 +1213,13 @@
     if (value == null || Number.isNaN(Number(value))) return null;
     const n = Number(value);
     const decimals = scoreDecimalsForMeta(meta, forAverage);
-    const factor = 10 ** decimals;
-    const rounded = Math.round(n * factor) / factor;
     let main;
     if (decimals > 0) {
-      main = rounded.toFixed(decimals);
+      main = formatScoreNumber(n, decimals);
     } else if (forAverage) {
-      main = rounded.toFixed(1);
+      main = formatScoreNumber(n, 1);
     } else {
-      main = String(Math.round(rounded));
+      main = String(Math.round(n));
     }
     if (meta.kind === "outOf") {
       return { main, suffix: "/" + meta.max };

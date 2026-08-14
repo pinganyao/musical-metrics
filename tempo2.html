@@ -252,9 +252,10 @@
       }
 
       const averageInterval = intervals.reduce((sum, x) => sum + x, 0) / intervals.length;
-      const tapTempo = Math.round(60000 / averageInterval);
+      const tapTempoExact = 60000 / averageInterval;
+      const tapTempo = Math.round(tapTempoExact);
 
-      const tempoDifference = Math.abs(tapTempo - currentTempo);
+      const tempoDifference = Math.abs(tapTempoExact - currentTempo);
       const accuracy = Math.max(0, 100 - tempoDifference);
 
       return { tapTempo, accuracy };
@@ -287,7 +288,7 @@
         const averageScore = roundScores.reduce((sum, s) => sum + s.accuracy, 0) / roundScores.length;
         const finalScore = Math.round(averageScore * 100) / 100;
 
-        document.getElementById('finalScore').textContent = finalScore.toFixed(2);
+        document.getElementById('finalScore').textContent = parseFloat(finalScore.toFixed(2)).toString();
         gameOverDiv.style.display = 'block';
         playAgainBtn.style.display = 'block';
         homeBtn.style.display = 'block';
