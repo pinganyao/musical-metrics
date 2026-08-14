@@ -224,7 +224,7 @@
         const averageScore = roundScores.reduce((sum, score) => sum + score, 0) / roundScores.length;
         const finalScore = Math.round(averageScore * 100) / 100;
 
-        document.getElementById('finalScore').textContent = parseFloat(finalScore.toFixed(2)).toString();
+        document.getElementById('finalScore').textContent = finalScore.toFixed(2);
         gameOverDiv.style.display = 'block';
         playAgainBtn.style.display = 'block';
         homeBtn.style.display = 'block';

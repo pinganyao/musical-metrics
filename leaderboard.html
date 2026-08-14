@@ -141,7 +141,7 @@
                 var d = Number.isFinite(decimals) ? decimals : 1;
                 var factor = Math.pow(10, d);
                 var r = Math.round(x * factor) / factor;
-                return parseFloat(r.toFixed(d)).toString();
+                return r.toFixed(d);
             }
 
             function formatWhen(iso) {

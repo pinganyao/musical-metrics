@@ -1203,7 +1203,7 @@
   const formatScoreNumber = (value, decimals) => {
     const factor = 10 ** decimals;
     const rounded = Math.round(Number(value) * factor) / factor;
-    return parseFloat(rounded.toFixed(decimals)).toString();
+    return rounded.toFixed(decimals);
   };
 
   const formatScoreParts = (value, gameKey, options) => {
