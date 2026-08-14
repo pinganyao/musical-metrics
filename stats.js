@@ -101,13 +101,15 @@
     };
   }
 
-  function rollingAverage(values, windowSize) {
+  function rollingAverage(values, windowSize, decimals) {
+    const d = Number.isFinite(decimals) ? decimals : 1;
+    const factor = 10 ** d;
     const out = [];
     for (let i = 0; i < values.length; i++) {
       const start = Math.max(0, i - windowSize + 1);
       const slice = values.slice(start, i + 1);
       const avg = slice.reduce((a, b) => a + b, 0) / slice.length;
-      out.push(Math.round(avg * 10) / 10);
+      out.push(Math.round(avg * factor) / factor);
     }
     return out;
   }
@@ -204,7 +206,8 @@
     const meta = window.MMAuth.getScoreMetaForGame(gameKey);
     const yMax = meta.kind === "outOf" ? meta.max : undefined;
     const rollWindow = scores.length >= 5 ? 5 : 3;
-    const rolling = scores.length >= 3 ? rollingAverage(scores, rollWindow) : null;
+    const rollDecimals = Number.isFinite(meta.decimals) ? meta.decimals : 1;
+    const rolling = scores.length >= 3 ? rollingAverage(scores, rollWindow, rollDecimals) : null;
 
     const datasets = [
       {

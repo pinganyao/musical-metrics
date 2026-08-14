@@ -64,10 +64,10 @@
     harmony1: { kind: "outOf", max: 10 },
     harmony2: { kind: "outOf", max: 10 },
     harmony3: { kind: "outOf", max: 10 },
-    tempo1: { kind: "outOf", max: 100 },
-    tempo2: { kind: "outOf", max: 100 },
-    pitch1: { kind: "outOf", max: 100 },
-    rhythm1: { kind: "outOf", max: 100 }
+    tempo1: { kind: "outOf", max: 100, decimals: 2 },
+    tempo2: { kind: "outOf", max: 100, decimals: 2 },
+    pitch1: { kind: "outOf", max: 100, decimals: 2 },
+    rhythm1: { kind: "outOf", max: 100, decimals: 2 }
   };
   const GAME_PATHS = {
     melody1: "/melody1",
@@ -1194,18 +1194,29 @@
     return GAME_SCORE_META[key] || { kind: "points" };
   };
 
+  const scoreDecimalsForMeta = (meta, forAverage) => {
+    if (Number.isFinite(meta?.decimals)) return meta.decimals;
+    if (forAverage) return 1;
+    return meta?.kind === "outOf" && meta.max === 100 ? 1 : 0;
+  };
+
   const formatScoreParts = (value, gameKey, options) => {
     const opts = options || {};
     const forAverage = opts.forAverage === true;
     const meta = getScoreMetaForGame(gameKey);
     if (value == null || Number.isNaN(Number(value))) return null;
     const n = Number(value);
-    const rounded = Math.round(n * 10) / 10;
-    const main = forAverage
-      ? rounded.toFixed(1)
-      : rounded % 1 === 0
-        ? String(Math.round(rounded))
-        : rounded.toFixed(1);
+    const decimals = scoreDecimalsForMeta(meta, forAverage);
+    const factor = 10 ** decimals;
+    const rounded = Math.round(n * factor) / factor;
+    let main;
+    if (decimals > 0) {
+      main = rounded.toFixed(decimals);
+    } else if (forAverage) {
+      main = rounded.toFixed(1);
+    } else {
+      main = String(Math.round(rounded));
+    }
     if (meta.kind === "outOf") {
       return { main, suffix: "/" + meta.max };
     }

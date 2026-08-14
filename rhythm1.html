@@ -306,7 +306,7 @@
 
       const avgErr = totalErr / n;
       const maxAllowed = 1.0;
-      const accuracy = Math.max(0, Math.round(100 - (avgErr / maxAllowed) * 100));
+      const accuracy = Math.max(0, 100 - (avgErr / maxAllowed) * 100);
       return { accuracy };
     }
 
@@ -333,9 +333,9 @@
         gameOver = true;
 
         const avg = roundScores.reduce((s, v) => s + v, 0) / roundScores.length;
-        const finalScore = Math.round(avg);
+        const finalScore = Math.round(avg * 100) / 100;
 
-        document.getElementById('finalScore').textContent = finalScore;
+        document.getElementById('finalScore').textContent = finalScore.toFixed(2);
         gameOverDiv.style.display = 'block';
         playAgainBtn.style.display = 'block';
         homeBtn.style.display = 'block';

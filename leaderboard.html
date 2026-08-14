@@ -5,11 +5,11 @@
     <script src="mm-auth-boot.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="index, follow">
-    <meta name="description" content="All-time public leaderboard for Melody I, Melody II, and Melody III on Musical Metrics.">
+    <meta name="description" content="All-time public leaderboards for Melody, Tempo, Pitch, and Rhythm games on Musical Metrics.">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Musical Metrics">
     <meta property="og:title" content="Leaderboard — Musical Metrics">
-    <meta property="og:description" content="Top Melody game scores worldwide.">
+    <meta property="og:description" content="Top scores worldwide across Musical Metrics ear-training games.">
     <meta property="og:image" content="https://musicalmetrics.xyz/assets/images/social-logo.png">
     <meta property="og:url" content="https://musicalmetrics.xyz/leaderboard">
     <meta name="twitter:card" content="summary_large_image">
@@ -56,79 +56,13 @@
         <div class="leaderboard-hero">
             <h1 class="leaderboard-title">Leaderboard</h1>
             <p class="leaderboard-lede">
-                All-time best scores per player for the Melody games.
+                All-time best scores per player across Melody, Tempo, Pitch, and Rhythm games.
             </p>
             <p class="leaderboard-meta" id="leaderboard-updated" aria-live="polite"></p>
         </div>
 
-        <div class="leaderboard-tabs" role="tablist" aria-label="Melody leaderboard">
-            <button type="button" class="leaderboard-tab is-active" role="tab" aria-selected="true" data-game-key="melody1" id="tab-melody1">Melody I</button>
-            <button type="button" class="leaderboard-tab" role="tab" aria-selected="false" data-game-key="melody2" id="tab-melody2">Melody II</button>
-            <button type="button" class="leaderboard-tab" role="tab" aria-selected="false" data-game-key="melody3" id="tab-melody3">Melody III</button>
-        </div>
-
-        <section class="leaderboard-panel is-active" role="tabpanel" id="panel-melody1" aria-labelledby="tab-melody1">
-            <div class="leaderboard-card">
-                <div class="leaderboard-table-wrap">
-                    <table class="leaderboard-table">
-                        <thead>
-                            <tr>
-                                <th class="leaderboard-col-rank">#</th>
-                                <th class="leaderboard-col-flag" aria-label="Country"></th>
-                                <th class="leaderboard-col-user">User</th>
-                                <th class="leaderboard-col-score">Score</th>
-                                <th class="leaderboard-col-date">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderboard-body-melody1"></tbody>
-                    </table>
-                </div>
-                <div id="leaderboard-empty-melody1" class="leaderboard-empty" hidden>No entries yet.</div>
-                <div id="leaderboard-error-melody1" class="leaderboard-error" hidden></div>
-            </div>
-        </section>
-
-        <section class="leaderboard-panel" role="tabpanel" id="panel-melody2" aria-labelledby="tab-melody2">
-            <div class="leaderboard-card">
-                <div class="leaderboard-table-wrap">
-                    <table class="leaderboard-table">
-                        <thead>
-                            <tr>
-                                <th class="leaderboard-col-rank">#</th>
-                                <th class="leaderboard-col-flag" aria-label="Country"></th>
-                                <th class="leaderboard-col-user">User</th>
-                                <th class="leaderboard-col-score">Score</th>
-                                <th class="leaderboard-col-date">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderboard-body-melody2"></tbody>
-                    </table>
-                </div>
-                <div id="leaderboard-empty-melody2" class="leaderboard-empty" hidden>No entries yet.</div>
-                <div id="leaderboard-error-melody2" class="leaderboard-error" hidden></div>
-            </div>
-        </section>
-
-        <section class="leaderboard-panel" role="tabpanel" id="panel-melody3" aria-labelledby="tab-melody3">
-            <div class="leaderboard-card">
-                <div class="leaderboard-table-wrap">
-                    <table class="leaderboard-table">
-                        <thead>
-                            <tr>
-                                <th class="leaderboard-col-rank">#</th>
-                                <th class="leaderboard-col-flag" aria-label="Country"></th>
-                                <th class="leaderboard-col-user">User</th>
-                                <th class="leaderboard-col-score">Score</th>
-                                <th class="leaderboard-col-date">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderboard-body-melody3"></tbody>
-                    </table>
-                </div>
-                <div id="leaderboard-empty-melody3" class="leaderboard-empty" hidden>No entries yet.</div>
-                <div id="leaderboard-error-melody3" class="leaderboard-error" hidden></div>
-            </div>
-        </section>
+        <div class="leaderboard-tabs" id="leaderboard-tabs" role="tablist" aria-label="Game leaderboards"></div>
+        <div id="leaderboard-panels"></div>
     </main>
 
     <footer class="footer">
@@ -201,11 +135,13 @@
                 );
             }
 
-            function formatScore(n) {
+            function formatScore(n, decimals) {
                 var x = Number(n);
                 if (!Number.isFinite(x)) return "—";
-                var r = Math.round(x * 10) / 10;
-                return r.toFixed(1);
+                var d = Number.isFinite(decimals) ? decimals : 1;
+                var factor = Math.pow(10, d);
+                var r = Math.round(x * factor) / factor;
+                return r.toFixed(d);
             }
 
             function formatWhen(iso) {
@@ -222,7 +158,79 @@
                 }
             }
 
-            var gameKeys = ["melody1", "melody2", "melody3"];
+            var LEADERBOARD_GAMES = [
+                { key: "melody1", label: "Melody I", scoreDecimals: 1 },
+                { key: "melody2", label: "Melody II", scoreDecimals: 1 },
+                { key: "melody3", label: "Melody III", scoreDecimals: 1 },
+                { key: "tempo1", label: "Tempo I", scoreDecimals: 2 },
+                { key: "tempo2", label: "Tempo II", scoreDecimals: 2 },
+                { key: "pitch1", label: "Pitch I", scoreDecimals: 2 },
+                { key: "rhythm1", label: "Rhythm I", scoreDecimals: 2 }
+            ];
+
+            var gameKeys = LEADERBOARD_GAMES.map(function (g) {
+                return g.key;
+            });
+
+            var scoreDecimalsByGame = LEADERBOARD_GAMES.reduce(function (acc, g) {
+                acc[g.key] = g.scoreDecimals;
+                return acc;
+            }, {});
+
+            function buildLeaderboardShell() {
+                var tabsEl = document.getElementById("leaderboard-tabs");
+                var panelsEl = document.getElementById("leaderboard-panels");
+                if (!tabsEl || !panelsEl) return;
+
+                tabsEl.innerHTML = LEADERBOARD_GAMES.map(function (game, index) {
+                    return (
+                        '<button type="button" class="leaderboard-tab' +
+                        (index === 0 ? " is-active" : "") +
+                        '" role="tab" aria-selected="' +
+                        (index === 0 ? "true" : "false") +
+                        '" data-game-key="' +
+                        escapeHtml(game.key) +
+                        '" id="tab-' +
+                        escapeHtml(game.key) +
+                        '">' +
+                        escapeHtml(game.label) +
+                        "</button>"
+                    );
+                }).join("");
+
+                panelsEl.innerHTML = LEADERBOARD_GAMES.map(function (game, index) {
+                    return (
+                        '<section class="leaderboard-panel' +
+                        (index === 0 ? " is-active" : "") +
+                        '" role="tabpanel" id="panel-' +
+                        escapeHtml(game.key) +
+                        '" aria-labelledby="tab-' +
+                        escapeHtml(game.key) +
+                        '">' +
+                        '<div class="leaderboard-card">' +
+                        '<div class="leaderboard-table-wrap">' +
+                        '<table class="leaderboard-table">' +
+                        "<thead><tr>" +
+                        '<th class="leaderboard-col-rank">#</th>' +
+                        '<th class="leaderboard-col-flag" aria-label="Country"></th>' +
+                        '<th class="leaderboard-col-user">User</th>' +
+                        '<th class="leaderboard-col-score">Score</th>' +
+                        '<th class="leaderboard-col-date">Date</th>' +
+                        "</tr></thead>" +
+                        '<tbody id="leaderboard-body-' +
+                        escapeHtml(game.key) +
+                        '"></tbody>' +
+                        "</table></div>" +
+                        '<div id="leaderboard-empty-' +
+                        escapeHtml(game.key) +
+                        '" class="leaderboard-empty" hidden>No entries yet.</div>' +
+                        '<div id="leaderboard-error-' +
+                        escapeHtml(game.key) +
+                        '" class="leaderboard-error" hidden></div>' +
+                        "</div></section>"
+                    );
+                }).join("");
+            }
 
             function setLastUpdated() {
                 var el = document.getElementById("leaderboard-updated");
@@ -260,7 +268,7 @@
                     .map(function (row) {
                         var flagHtml = flagCellInnerHtml(row.country_code);
                         var name = escapeHtml(row.username || "—");
-                        var score = formatScore(row.score);
+                        var score = formatScore(row.score, scoreDecimalsByGame[gameKey]);
                         var when = escapeHtml(formatWhen(row.achieved_at));
                         var rk =
                             row.leaderboard_rank != null
@@ -384,16 +392,14 @@
                     tab.setAttribute("aria-selected", active ? "true" : "false");
                 });
                 panels.forEach(function (panel) {
-                    var id = panel.id;
-                    var match =
-                        (gameKey === "melody1" && id === "panel-melody1") ||
-                        (gameKey === "melody2" && id === "panel-melody2") ||
-                        (gameKey === "melody3" && id === "panel-melody3");
-                    panel.classList.toggle("is-active", match);
+                    var active = panel.id === "panel-" + gameKey;
+                    panel.classList.toggle("is-active", active);
                 });
             }
 
             document.addEventListener("DOMContentLoaded", function () {
+                buildLeaderboardShell();
+
                 var mobileMenuToggle = document.getElementById("mobile-menu-toggle");
                 var mobileMenu = document.getElementById("mobile-menu");
                 if (mobileMenuToggle && mobileMenu) {
