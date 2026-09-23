@@ -1,5 +1,10 @@
 {
   "outputDirectory": ".",
+  "crons": [
+    { "path": "/api/keepalive", "schedule": "0 4 * * *" },
+    { "path": "/api/keepalive", "schedule": "0 12 * * *" },
+    { "path": "/api/keepalive", "schedule": "0 20 * * *" }
+  ],
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
     { "source": "/about", "destination": "/about.html" },
