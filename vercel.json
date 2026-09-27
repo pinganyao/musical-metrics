@@ -41,7 +41,6 @@
     { "source": "/verify-email.html", "destination": "/verify-email", "permanent": true },
     { "source": "/dashboard.html", "destination": "/dashboard", "permanent": true },
     { "source": "/leaderboard.html", "destination": "/leaderboard", "permanent": true },
-    { "source": "/stats.html", "destination": "/stats", "permanent": true },
     { "source": "/melody1.html", "destination": "/melody1", "permanent": true },
     { "source": "/melody2.html", "destination": "/melody2", "permanent": true },
     { "source": "/melody3.html", "destination": "/melody3", "permanent": true },
